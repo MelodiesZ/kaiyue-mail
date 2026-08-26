@@ -1,6 +1,7 @@
 import { Account, MailsyncProcess } from 'mailspring-exports';
 
 import { finalizeAndValidateAccount } from '../lib/onboarding-helpers';
+import KaiyueConfig from '../../../src/kaiyue-config';
 
 describe('Account validation', () => {
   it('authenticates with SMTP without sending a test email', async () => {
@@ -25,5 +26,6 @@ describe('Account validation', () => {
 
     expect(validatedAccount).toBe(account);
     expect(account.settings.smtp_verification).toBe('login');
+    expect(account.settings.container_folder).toBe(KaiyueConfig.brand.helperFolderName);
   });
 });

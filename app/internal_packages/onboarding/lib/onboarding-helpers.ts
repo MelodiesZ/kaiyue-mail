@@ -23,6 +23,7 @@ import {
   CODE_CHALLENGE,
 } from './onboarding-constants';
 import { parseStringPromise } from 'xml2js';
+import KaiyueConfig from '../../../src/kaiyue-config';
 
 interface TokenResponse {
   access_token: string;
@@ -418,6 +419,12 @@ export async function finalizeAndValidateAccount(account: Account) {
   // Sending a test message during account setup is surprising to users and leaves
   // a permanent message behind for every linked account.
   account.settings.smtp_verification = 'login';
+
+  // New accounts should provision the branded helper folder. Preserve an explicit
+  // custom folder supplied by the user or provider.
+  if (!account.settings.container_folder || account.settings.container_folder === 'Mailspring') {
+    account.settings.container_folder = KaiyueConfig.brand.helperFolderName;
+  }
 
   // Test connections to IMAP and SMTP
   const proc = new MailsyncProcess(AppEnv.getLoadSettings());
