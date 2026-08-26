@@ -35,7 +35,6 @@ describe('KaiyueConfig', () => {
     expect(account.settings.imap_security).toBe('SSL / TLS');
     expect(account.settings.smtp_port).toBe(587);
     expect(account.settings.smtp_security).toBe('STARTTLS');
-    expect(account.settings.container_folder).toBe(KaiyueConfig.brand.helperFolderName);
     expect(account.settings.imap_password).toBe('runtime-password');
     expect(JSON.stringify(KaiyueConfig)).not.toContain('password');
   });

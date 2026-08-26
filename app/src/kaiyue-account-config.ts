@@ -23,7 +23,7 @@ export function buildKaiyueAccount(emailInput: string, password: string) {
       smtp_password: password,
       smtp_security: KaiyueConfig.mail.smtpSecurity,
       smtp_allow_insecure_ssl: false,
-      container_folder: KaiyueConfig.brand.helperFolderName,
+      container_folder: '',
     },
   });
 }
