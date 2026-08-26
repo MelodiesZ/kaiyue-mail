@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-26T00:00:00+08:00",
+  "title": "Design System: Kaiyue Mail",
+  "extensions": {
+    "colorMeta": {
+      "kaiyue-navy": { "role": "primary", "displayName": "凯越深海蓝", "canonical": "#1A3B70", "tonalRamp": ["#0C1C37", "#10284A", "#14315F", "#1A3B70", "#33598F", "#6280AA", "#A9BAD1", "#EAF1FB"] },
+      "ink": { "role": "neutral", "displayName": "墨色正文", "canonical": "#17233A", "tonalRamp": ["#0B111C", "#111A2B", "#17233A", "#344056", "#58657A", "#8490A1", "#BDC5D0", "#EDF0F4"] },
+      "canvas": { "role": "neutral", "displayName": "冷雾画布", "canonical": "#F6F8FB", "tonalRamp": ["#1E2530", "#343D49", "#566271", "#7E8997", "#A7B0BB", "#CAD1D9", "#E5E9EF", "#F6F8FB"] },
+      "divider": { "role": "neutral", "displayName": "蓝灰分隔线", "canonical": "#DCE3EC", "tonalRamp": ["#1E2937", "#354354", "#526176", "#728197", "#96A4B5", "#B8C3D0", "#DCE3EC", "#F4F6F9"] }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "登录、设置和空状态标题。" },
+      "title": { "displayName": "Title", "purpose": "窗格、邮件主题和弹窗标题。" },
+      "body": { "displayName": "Body", "purpose": "正文、说明和邮件阅读。" },
+      "label": { "displayName": "Label", "purpose": "字段、工具栏和列表元数据。" }
+    },
+    "shadows": [
+      { "name": "overlay", "value": "0 4px 12px rgba(23, 35, 58, 0.14)", "purpose": "菜单、日期选择器和下拉面板。" },
+      { "name": "window", "value": "0 10px 28px rgba(23, 35, 58, 0.18)", "purpose": "模态框与独立写信窗口。" }
+    ],
+    "motion": [
+      { "name": "fast", "value": "150ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "按钮和列表状态反馈。" },
+      { "name": "standard", "value": "200ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "浮层、面板和页面切换。" }
+    ],
+    "breakpoints": [
+      { "name": "compact-window", "value": "900px" },
+      { "name": "narrow-onboarding", "value": "720px" },
+      { "name": "short-window", "value": "640px height" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "每个视图唯一的主操作。",
+      "html": "<button class=\"ds-btn-primary\">登录</button>",
+      "css": ".ds-btn-primary { height: 36px; padding: 0 16px; border: 0; border-radius: 6px; background: #1A3B70; color: #fff; font: 600 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; transition: background-color 150ms cubic-bezier(.22,1,.36,1), box-shadow 150ms cubic-bezier(.22,1,.36,1); } .ds-btn-primary:hover { background: #14315F; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(47,111,237,.24); } .ds-btn-primary:active { background: #10284A; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "次级与取消操作。",
+      "html": "<button class=\"ds-btn-secondary\">添加其他邮箱</button>",
+      "css": ".ds-btn-secondary { height: 36px; padding: 0 16px; border: 1px solid #DCE3EC; border-radius: 6px; background: #fff; color: #17233A; font: 500 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; transition: background-color 150ms cubic-bezier(.22,1,.36,1), border-color 150ms cubic-bezier(.22,1,.36,1); } .ds-btn-secondary:hover { background: #F1F4F8; border-color: #B8C3D0; } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(47,111,237,.24); }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "表单、搜索和设置中的统一文本输入。",
+      "html": "<input class=\"ds-input\" value=\"name@kaiyuedrill.com\" aria-label=\"邮箱\">",
+      "css": ".ds-input { height: 38px; padding: 0 12px; border: 1px solid #DCE3EC; border-radius: 6px; background: #fff; color: #17233A; font: 400 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; transition: border-color 150ms cubic-bezier(.22,1,.36,1), box-shadow 150ms cubic-bezier(.22,1,.36,1); } .ds-input:hover { border-color: #B8C3D0; } .ds-input:focus { outline: none; border-color: #1A3B70; box-shadow: 0 0 0 3px rgba(47,111,237,.18); }"
+    },
+    {
+      "name": "Active Navigation",
+      "kind": "nav",
+      "refersTo": "navigation-active",
+      "description": "侧栏和筛选器的当前选中态。",
+      "html": "<button class=\"ds-nav-active\">收件箱 <span>12</span></button>",
+      "css": ".ds-nav-active { display: flex; align-items: center; justify-content: space-between; width: 220px; padding: 7px 10px; border: 0; border-radius: 6px; background: #EAF1FB; color: #1A3B70; font: 600 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; } .ds-nav-active:hover { background: #DFEAF8; } .ds-nav-active:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(47,111,237,.2); }"
+    },
+    {
+      "name": "Conversation Row",
+      "kind": "custom",
+      "description": "高密度但清楚的邮件摘要行。",
+      "html": "<div class=\"ds-row\"><strong>王经理</strong><time>09:42</time><b>8月生产计划与设备交付安排</b><p>请各部门确认本月设备交付时间…</p></div>",
+      "css": ".ds-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 16px; border: 1px solid #C8D8EF; border-radius: 6px; background: #EAF1FB; color: #17233A; font: 400 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; } .ds-row strong, .ds-row b { font-weight: 600; } .ds-row time, .ds-row p { margin: 0; color: #526176; } .ds-row p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "沉静工作台",
+    "overview": "凯越邮箱像一张整理有序、光线稳定的工作台：用户直接进入邮件任务，界面退到背景，层级、状态和反馈始终准确。整体气质是专业、可靠、轻盈。",
+    "keyCharacteristics": ["原生桌面产品的熟悉结构", "冷调浅色层次与有限深蓝强调", "状态型过渡和明确键盘焦点", "中文优先且窗口缩放不裁切", "平面为主、浮层结构性阴影"],
+    "rules": [
+      { "name": "The One Blue Rule", "body": "主工作区中深蓝占比不得超过约 10%。", "section": "colors" },
+      { "name": "The Quiet Hierarchy Rule", "body": "产品界面使用紧凑固定字号。", "section": "typography" },
+      { "name": "The Flat-by-Default Rule", "body": "阴影只证明真实层级，不负责装饰。", "section": "elevation" }
+    ],
+    "dos": ["Do 保留熟悉的三栏工作流。", "Do 为所有交互实现完整状态。", "Do 在小窗口验证主操作完整可见。"],
+    "donts": ["Don't 沿用灰色渐变工具栏和拥挤小控件。", "Don't 使用玻璃拟态、重阴影或装饰性动画。", "Don't 牺牲信息密度换取空洞的大气。"]
+  }
+}

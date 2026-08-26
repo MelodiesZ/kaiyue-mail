@@ -22,9 +22,7 @@ describe('KaiyueConfig', () => {
   });
 
   it('uses the enterprise domain for outbound Message-IDs', () => {
-    expect(buildKaiyueMessageId(' 9c24a6f5-2fe5 ')).toBe(
-      '9C24A6F5-2FE5@kaiyuedrill.com'
-    );
+    expect(buildKaiyueMessageId(' 9c24a6f5-2fe5 ')).toBe('9C24A6F5-2FE5@kaiyuedrill.com');
   });
 
   it('builds the verified Mailcow connection settings without persisting a test secret', () => {
