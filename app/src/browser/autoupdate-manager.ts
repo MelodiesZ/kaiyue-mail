@@ -1,11 +1,12 @@
 /* eslint global-require: 0*/
-import { dialog, nativeImage } from 'electron';
+import { app, dialog, nativeImage } from 'electron';
 import { EventEmitter } from 'events';
 import path from 'path';
 import os from 'os';
 import fs from 'fs';
 import { localized } from '../intl';
 import KaiyueConfig from '../kaiyue-config';
+import { AutoUpdateProvider, resolveAutoUpdateFeed } from './autoupdate-feed';
 
 let autoUpdater = null;
 
@@ -36,13 +37,22 @@ export default class AutoUpdateManager extends EventEmitter {
     this.specMode = specMode;
     this.preferredChannel = preferredChannel;
 
-    if (!KaiyueConfig.updater.enabled || !KaiyueConfig.updater.feedUrl) {
+    if (
+      this.specMode ||
+      !app.isPackaged ||
+      !KaiyueConfig.updater.enabled ||
+      !KaiyueConfig.updater.feedUrl
+    ) {
       this.feedURL = '';
       this.setState(UnsupportedState);
       return;
     }
 
     this.updateFeedURL();
+    if (!this.feedURL) {
+      this.setState(UnsupportedState);
+      return;
+    }
     this.config.onDidChange('identity.id', this.updateFeedURL);
 
     setTimeout(() => this.setupAutoUpdater(), 0);
@@ -70,18 +80,20 @@ export default class AutoUpdateManager extends EventEmitter {
       }
     }
 
-    const baseURL = KaiyueConfig.updater.feedUrl.replace(/\/$/, '');
-    this.feedURL = `${baseURL}/check/${params.platform}/${params.arch}/${params.version}/${params.id}/${params.channel}`;
+    this.feedURL =
+      resolveAutoUpdateFeed({
+        provider: KaiyueConfig.updater.provider as AutoUpdateProvider,
+        repository: KaiyueConfig.updater.repository,
+        feedUrl: KaiyueConfig.updater.feedUrl,
+        ...params,
+      }) || '';
     if (autoUpdater) {
-      autoUpdater.setFeedURL(this.feedURL);
+      this.setAutoUpdaterFeedURL();
     }
   };
 
   setupAutoUpdater() {
-    if (process.platform === 'win32') {
-      const Impl = require('./autoupdate-impl-win32').default;
-      autoUpdater = new Impl();
-    } else if (process.platform === 'linux') {
+    if (process.platform === 'linux') {
       const Impl = require('./autoupdate-impl-base').default;
       autoUpdater = new Impl();
     } else {
@@ -94,7 +106,7 @@ export default class AutoUpdateManager extends EventEmitter {
       this.setState(ErrorState);
     });
 
-    autoUpdater.setFeedURL(this.feedURL);
+    this.setAutoUpdaterFeedURL();
 
     autoUpdater.on('checking-for-update', () => {
       this.setState(CheckingState);
@@ -137,6 +149,15 @@ export default class AutoUpdateManager extends EventEmitter {
       },
       1000 * 60 * 30
     );
+  }
+
+  setAutoUpdaterFeedURL() {
+    if (!autoUpdater || !this.feedURL) return;
+    if (process.platform === 'darwin' || process.platform === 'win32') {
+      autoUpdater.setFeedURL({ url: this.feedURL });
+    } else {
+      autoUpdater.setFeedURL(this.feedURL);
+    }
   }
 
   emitUpdateAvailableEvent() {

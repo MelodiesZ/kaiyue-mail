@@ -6,7 +6,7 @@
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Foundry376/Mailspring.git"
+    "url": "git+https://github.com/MelodiesZ/kaiyue-mail.git"
   },
   "engines": {
     "node": ">=16.17",
@@ -79,9 +79,11 @@
     "lint:check": "eslint -c .eslintrc \"app/src/**/*.{ts,tsx}\" \"app/internal_packages/**/*.{ts,tsx}\"",
     "typecheck": "./node_modules/.bin/tsc -p app/tsconfig.json --noEmit",
     "test": "node scripts/test.js --test",
+    "test:release": "node --test scripts/check-release-version.test.js",
     "test-window": "node scripts/test.js --test=window",
     "test:e2e": "npx playwright test --config playwright/playwright.config.ts",
     "verify:windows-package": "node app/build/verify-windows-package.js",
+    "release:check": "node scripts/check-release-version.js",
     "tsc-watch": "tsc -w -p ./app --noEmit",
     "build": "node app/build/build.js"
   },

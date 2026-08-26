@@ -23,7 +23,7 @@ npm run verify:windows-package
 node app/build/create-signed-windows-installer.js
 ```
 
-应用目录为 `app/dist/Kaiyue Mail-win32-x64`，Squirrel 安装器为 `app/dist/KaiyueMailSetup.exe`。生产发布前必须使用公司代码签名证书对主程序和安装器签名。仓库中的 `Build Kaiyue Mail for Windows` GitHub Actions 工作流会在 Windows 2022 构建机上执行相同检查并上传安装器。
+应用目录为 `app/dist/Kaiyue Mail-win32-x64`，Squirrel 安装器为 `app/dist/KaiyueMailSetup.exe`。生产发布前必须使用公司代码签名证书对主程序和安装器签名。手工上传 GitHub Release 的流程和资产命名要求见 [RELEASING.md](RELEASING.md)。
 
 ### 在 macOS 上交叉构建 Windows 便携版
 

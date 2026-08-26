@@ -28,6 +28,8 @@ export const KaiyueConfig = Object.freeze({
     enabled: env.KAIYUE_UPDATE_ENABLED
       ? env.KAIYUE_UPDATE_ENABLED === 'true'
       : defaults.updater.enabled,
+    provider: env.KAIYUE_UPDATE_PROVIDER || defaults.updater.provider,
+    repository: env.KAIYUE_UPDATE_REPOSITORY || defaults.updater.repository,
     feedUrl: env.KAIYUE_UPDATE_FEED_URL || defaults.updater.feedUrl,
   }),
   upstream: Object.freeze(defaults.upstream),

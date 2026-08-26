@@ -2,6 +2,7 @@ import { localized, React } from 'mailspring-exports';
 import { ipcRenderer, shell } from 'electron';
 import { Notification } from 'mailspring-component-kit';
 import { Disposable } from 'event-kit';
+import KaiyueConfig from '../../../../src/kaiyue-config';
 
 interface UpdateNotificationState {
   updateAvailable: boolean;
@@ -48,7 +49,7 @@ export default class UpdateNotification extends React.Component<
   };
 
   _onViewChangelog = () => {
-    shell.openExternal('https://github.com/Foundry376/Mailspring/releases/latest');
+    shell.openExternal(`https://github.com/${KaiyueConfig.updater.repository}/releases/latest`);
   };
 
   render() {

@@ -42,8 +42,10 @@
     "helpUrl": ""
   },
   "updater": {
-    "enabled": false,
-    "feedUrl": ""
+    "enabled": true,
+    "provider": "github",
+    "repository": "MelodiesZ/kaiyue-mail",
+    "feedUrl": "https://update.electronjs.org"
   },
   "upstream": {
     "name": "Mailspring",
