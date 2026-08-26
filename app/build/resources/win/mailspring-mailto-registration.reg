@@ -1,0 +1,70 @@
+Windows Registry Editor Version 5.00
+
+[{{HKEY_ROOT}}\SOFTWARE\Classes\kaiyuemail]
+@="URL:Kaiyue Mail Protocol"
+"URL Protocol"=""
+
+[{{HKEY_ROOT}}\SOFTWARE\Classes\kaiyuemail\DefaultIcon]
+@="{{PATH_TO_APP_FOLDER}}\\Kaiyue Mail.exe,0"
+
+[{{HKEY_ROOT}}\SOFTWARE\Classes\kaiyuemail\shell\open\command]
+@="{{PROTOCOL_OPEN_COMMAND}}"
+
+[{{HKEY_ROOT}}\SOFTWARE\Classes\KaiyueMail.Url.mailto]
+"FriendlyTypeName"="Kaiyue Mail URL"
+
+[{{HKEY_ROOT}}\SOFTWARE\Classes\KaiyueMail.Url.mailto\shell]
+
+[{{HKEY_ROOT}}\SOFTWARE\Classes\KaiyueMail.Url.mailto\shell\open]
+
+[{{HKEY_ROOT}}\SOFTWARE\Classes\KaiyueMail.Url.mailto\shell\open\command]
+@="{{PROTOCOL_OPEN_COMMAND}}"
+
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail]
+@="Kaiyue Mail"
+"LocalizedString"="@{{PATH_TO_ROOT_FOLDER}}\\Update.exe,-123"
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\DefaultIcon]
+@="{{PATH_TO_APP_FOLDER}}\\Kaiyue Mail.exe,1"
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Capabilities]
+"ApplicationName"="Kaiyue Mail"
+"ApplicationDescription"="Secure enterprise email client for Mengyin Kaiyue Construction Machinery Co., Ltd."
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Capabilities\StartMenu]
+"Mail"="Kaiyue Mail"
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Capabilities\URLAssociations]
+"mailto"="KaiyueMail.Url.mailto"
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Protocols]
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Protocols\mailto]
+@="URL:MailTo Protocol"
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Protocols\mailto\DefaultIcon]
+@="{{PATH_TO_APP_FOLDER}}\\Kaiyue Mail.exe,1"
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Protocols\mailto\shell]
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Protocols\mailto\shell\open]
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Protocols\mailto\shell\open\command]
+@="{{PROTOCOL_OPEN_COMMAND}}"
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\shell]
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\shell\open]
+
+[{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\shell\open\command]
+@="{{APP_OPEN_COMMAND}}"
+
+[{{HKEY_ROOT}}\SOFTWARE\RegisteredApplications]
+"KaiyueMail"="Software\\Clients\\Mail\\KaiyueMail\\Capabilities"
+
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache]
+"{{PATH_TO_ROOT_FOLDER}}\\Update.exe"="Kaiyue Mail"
+"{{PATH_TO_ROOT_FOLDER}}\\Update.exe.FriendlyAppName"="Kaiyue Mail"
+"{{PATH_TO_ROOT_FOLDER}}\\Update.exe.ApplicationCompany"="Mengyin Kaiyue Construction Machinery Co., Ltd."

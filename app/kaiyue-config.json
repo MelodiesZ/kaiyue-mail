@@ -1,0 +1,53 @@
+{
+  "brand": {
+    "name": "Kaiyue Mail",
+    "nameChinese": "凯越邮箱",
+    "helperFolderName": "凯越",
+    "company": "蒙阴县凯越工程机械有限公司",
+    "companyEnglish": "Mengyin Kaiyue Construction Machinery Co., Ltd.",
+    "primaryColor": "#1A3B70",
+    "applicationId": "com.kaiyue.mail",
+    "protocol": "kaiyuemail"
+  },
+  "mail": {
+    "domain": "kaiyuedrill.com",
+    "host": "mail.kaiyuedrill.com",
+    "imapPort": 993,
+    "imapSecurity": "SSL / TLS",
+    "smtpPort": 587,
+    "smtpSecurity": "STARTTLS"
+  },
+  "features": {
+    "requireMailspringIdentity": false,
+    "showCommercialPromotions": false,
+    "allowOtherMailProviders": true,
+    "disabledInternalPackages": [
+      "activity",
+      "composer-grammar-check",
+      "link-tracking",
+      "open-tracking",
+      "participant-profile",
+      "thread-sharing",
+      "translation"
+    ]
+  },
+  "privacy": {
+    "enableOfficialTelemetry": false,
+    "enableOfficialCrashReporting": false,
+    "crashReportUrl": ""
+  },
+  "services": {
+    "officialIdentityApiEnabled": false,
+    "identityApiBaseUrl": "",
+    "helpUrl": ""
+  },
+  "updater": {
+    "enabled": false,
+    "feedUrl": ""
+  },
+  "upstream": {
+    "name": "Mailspring",
+    "version": "1.23.0",
+    "mailsyncRevision": "bf90a0425fb8e4161a1b07df7e64253e34fd9d3a"
+  }
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id><%= name %></id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <name><%= productName %></name>
+  <summary><%= description %></summary>
+  <description>
+    <p>
+      Kaiyue Mail is the independent desktop mail client for Mengyin Kaiyue Construction
+      Machinery Co., Ltd. It connects directly to standards-compliant IMAP and SMTP servers,
+      with a verified preset for kaiyuedrill.com.
+    </p>
+    <p>
+      The application is based on the GPL-licensed Mailspring project and retains its core mail,
+      unified inbox, search, snooze, templates, rules and calendar capabilities. Upstream identity,
+      billing, tracking, telemetry and update services are disabled in this distribution.
+    </p>
+  </description>
+
+  <url type="homepage">https://mail.kaiyuedrill.com/</url>
+  <launchable type="desktop-id"><%= desktopName %></launchable>
+
+  <developer id="com.kaiyue.mail">
+    <name>Mengyin Kaiyue Construction Machinery Co., Ltd.</name>
+  </developer>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#1A3B70</color>
+    <color type="primary" scheme_preference="dark">#1A3B70</color>
+  </branding>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="1.0.0" date="2026-08-26" />
+  </releases>
+</component>

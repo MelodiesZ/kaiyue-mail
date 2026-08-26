@@ -1,0 +1,52 @@
+name: Build Kaiyue Mail for Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build application
+        run: npm run build -- --skip-installers
+        env:
+          KAIYUE_SOURCE_REVISION: ${{ github.sha }}
+
+      - name: Verify Windows runtime and native notifications
+        run: npm run verify:windows-package
+
+      - name: Create portable Windows archive
+        shell: pwsh
+        run: Compress-Archive -Path 'app/dist/Kaiyue Mail-win32-x64/*' -DestinationPath 'app/dist/KaiyueMail-Windows-x64.zip' -CompressionLevel Optimal
+
+      - name: Create Windows installer
+        run: node app/build/create-signed-windows-installer.js
+
+      - name: Upload unsigned Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: KaiyueMail-Windows-x64-${{ github.run_number }}
+          if-no-files-found: error
+          path: |
+            app/dist/KaiyueMailSetup.exe
+            app/dist/KaiyueMail-Windows-x64.zip
+            app/dist/*.nupkg
+            app/dist/RELEASES
