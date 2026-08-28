@@ -161,6 +161,7 @@ module.exports = {
     {
       id: 'Developer',
       label: localized('Developer'),
+      visible: false,
       submenu: [
         {
           label: localized('Run with Debug Flags'),

@@ -253,6 +253,7 @@ export default class ApplicationMenu {
           },
           {
             label: localized('Toggle Dev Tools'),
+            visible: false,
             accelerator: 'CmdOrCtrl+Alt+I',
             click: () =>
               BrowserWindow.getFocusedWindow() &&

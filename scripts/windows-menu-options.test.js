@@ -15,3 +15,23 @@ test('Windows options menu omits theme management entries', () => {
   assert.doesNotMatch(menuSource, /localized\('Install Theme'\)/);
   assert.doesNotMatch(menuSource, /window:launch-theme-picker/);
 });
+
+test('Windows options menu hides developer options', () => {
+  const menuSource = fs.readFileSync(
+    path.join(repositoryRoot, 'app', 'menus', 'win32.js'),
+    'utf8'
+  );
+  const defaultMenuSource = fs.readFileSync(
+    path.join(repositoryRoot, 'app', 'src', 'browser', 'application-menu.ts'),
+    'utf8'
+  );
+
+  assert.match(
+    menuSource,
+    /id: 'Developer',\s*label: localized\('Developer'\),\s*visible: false,/
+  );
+  assert.match(
+    defaultMenuSource,
+    /label: localized\('Toggle Dev Tools'\),\s*visible: false,/
+  );
+});
