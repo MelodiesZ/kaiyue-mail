@@ -77,7 +77,7 @@ export default class UpdateNotification extends React.Component<
     Actions.openModal({
       component: <UpdateDialog details={details} />,
       width: 520,
-      height: 430,
+      height: 520,
     });
   };
 

@@ -133,6 +133,52 @@ test('checks for a newer version before downloading and reports download progres
   ]);
 });
 
+test('reports transferred bytes before a large installer reaches one percent', async (t) => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
+  t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));
+  const firstChunk = Buffer.alloc(64 * 1024, 1);
+  const remainingChunk = Buffer.alloc(10 * 1024 * 1024 - firstChunk.length, 2);
+  const installer = Buffer.concat([firstChunk, remainingChunk]);
+  let releaseRemainingChunk;
+  const remainingChunkGate = new Promise((resolve) => {
+    releaseRemainingChunk = resolve;
+  });
+  let firstChunkProcessed;
+  const firstChunkProcessedPromise = new Promise((resolve) => {
+    firstChunkProcessed = resolve;
+  });
+  const engine = new NsisUpdateEngine({
+    tempRoot,
+    requestStream: async () =>
+      Readable.from(
+        (async function* installerStream() {
+          yield firstChunk;
+          firstChunkProcessed();
+          await remainingChunkGate;
+          yield remainingChunk;
+        })()
+      ),
+    verifyAuthenticode: async () => true,
+  });
+  const progress = [];
+  engine.on('download-progress', (detail) => progress.push(detail));
+  const manifest = {
+    version: '1.0.2',
+    url: 'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.0.2/KaiyueMail-win32-x64-1.0.2.exe',
+    sha256: crypto.createHash('sha256').update(installer).digest('hex'),
+    size: installer.length,
+    notes: '',
+  };
+
+  const downloadPromise = engine.download(manifest);
+  await firstChunkProcessedPromise;
+
+  assert.equal(progress.some((detail) => detail.percent === 0 && detail.transferred > 0), true);
+
+  releaseRemainingChunk();
+  await downloadPromise;
+});
+
 test('launches only an unchanged prepared installer as a detached silent update', async (t) => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
   t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));

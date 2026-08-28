@@ -142,10 +142,26 @@
   box-shadow: none;
 }
 
+.modal:has(> .kaiyue-update-dialog) {
+  overflow: hidden !important;
+
+  > .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    margin: 0;
+  }
+}
+
 .kaiyue-update-dialog {
   position: relative;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
-  min-height: 100%;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   padding: 34px 36px 28px;
   color: @text-color;
   background: @background-primary;
@@ -193,6 +209,8 @@
   }
 
   .update-dialog-notes {
+    flex: 0 1 auto;
+    min-height: 0;
     margin-top: 22px;
     padding: 16px 18px;
     background: @background-secondary;
@@ -217,6 +235,7 @@
   }
 
   .update-dialog-download {
+    flex: none;
     margin-top: 22px;
   }
 
@@ -248,6 +267,11 @@
     transition: width 180ms ease-out;
   }
 
+  .update-dialog-progress-track.indeterminate .update-dialog-progress-fill {
+    width: 34% !important;
+    animation: kaiyue-update-connecting 1.15s ease-in-out infinite;
+  }
+
   .update-dialog-status {
     display: flex;
     flex-direction: column;
@@ -269,17 +293,25 @@
   }
 
   .update-dialog-actions {
-    position: absolute;
-    right: 36px;
-    bottom: 28px;
     display: flex;
+    flex: none;
     justify-content: flex-end;
     gap: 10px;
+    margin-top: 20px;
 
     .btn {
       min-width: 96px;
       height: 36px;
       margin: 0;
     }
+  }
+}
+
+@keyframes kaiyue-update-connecting {
+  from {
+    transform: translateX(-115%);
+  }
+  to {
+    transform: translateX(295%);
   }
 }

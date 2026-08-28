@@ -244,10 +244,26 @@ class NsisUpdateEngine extends EventEmitter {
     const hash = crypto.createHash('sha256');
     let size = 0;
     let lastReportedPercent = -1;
-    const reportProgress = () => {
+    let lastReportedBytes = -1;
+    let lastReportedAt = 0;
+    const reportProgress = (force = false) => {
       const percent = Math.min(100, Math.floor((size / manifest.size) * 100));
-      if (percent === lastReportedPercent) return;
+      const now = Date.now();
+      const receivedFirstBytes = lastReportedBytes === 0 && size > 0;
+      const advancedEnough = size - lastReportedBytes >= 256 * 1024;
+      const waitedLongEnough = size > lastReportedBytes && now - lastReportedAt >= 250;
+      if (
+        !force &&
+        percent === lastReportedPercent &&
+        !receivedFirstBytes &&
+        !advancedEnough &&
+        !waitedLongEnough
+      ) {
+        return;
+      }
       lastReportedPercent = percent;
+      lastReportedBytes = size;
+      lastReportedAt = now;
       this.emit('download-progress', {
         percent,
         transferred: size,
@@ -268,7 +284,7 @@ class NsisUpdateEngine extends EventEmitter {
     });
 
     try {
-      reportProgress();
+      reportProgress(true);
       await pipeline(
         await this.requestStream(manifest.url),
         verifier,

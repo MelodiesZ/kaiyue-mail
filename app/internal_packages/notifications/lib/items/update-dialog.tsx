@@ -122,6 +122,7 @@ export default class UpdateDialog extends React.Component<UpdateDialogProps, Upd
     const isDownloading = state === 'downloading';
     const isReady = state === 'update-ready';
     const isError = state === 'error';
+    const hasStartedDownloading = isDownloading && downloadProgress.transferred > 0;
     const title = isDownloading
       ? '正在下载更新'
       : isReady
@@ -150,13 +151,18 @@ export default class UpdateDialog extends React.Component<UpdateDialogProps, Upd
         {isDownloading && (
           <div className="update-dialog-download">
             <div className="update-dialog-progress-copy">
-              <span>正在安全下载并校验安装包</span>
+              <span>
+                {hasStartedDownloading ? '正在下载并同步校验安装包' : '正在连接下载服务器…'}
+              </span>
               <strong>{Math.round(progress)}%</strong>
             </div>
             <div
-              className="update-dialog-progress-track"
+              className={`update-dialog-progress-track ${
+                hasStartedDownloading ? '' : 'indeterminate'
+              }`}
               role="progressbar"
               aria-label="更新下载进度"
+              aria-busy={!hasStartedDownloading}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={Math.round(progress)}
@@ -164,8 +170,12 @@ export default class UpdateDialog extends React.Component<UpdateDialogProps, Upd
               <div className="update-dialog-progress-fill" style={{ width: `${progress}%` }} />
             </div>
             <div className="update-dialog-progress-size">
-              {formatUpdateBytes(downloadProgress.transferred)} /{' '}
-              {formatUpdateBytes(downloadProgress.total)}
+              <span>
+                {hasStartedDownloading
+                  ? `已下载 ${formatUpdateBytes(downloadProgress.transferred)}`
+                  : '正在建立安全连接'}
+              </span>
+              <span>共 {formatUpdateBytes(downloadProgress.total)}</span>
             </div>
           </div>
         )}

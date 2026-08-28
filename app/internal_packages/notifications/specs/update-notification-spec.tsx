@@ -7,6 +7,7 @@ let stubUpdaterState = null;
 let stubUpdaterReleaseVersion = null;
 let stubUpdaterReleaseNotes = null;
 let ipcSendArgs = null;
+let updateDialogStyles = null;
 
 const patched = proxyquire('../lib/items/update-notification', {
   electron: {
@@ -40,6 +41,7 @@ describe('UpdateNotification', function describeBlock() {
   afterEach(() => {
     cleanup();
     Actions.closeModal();
+    if (updateDialogStyles) updateDialogStyles.dispose();
   });
 
   beforeEach(() => {
@@ -47,6 +49,12 @@ describe('UpdateNotification', function describeBlock() {
     stubUpdaterReleaseVersion = undefined;
     stubUpdaterReleaseNotes = undefined;
     ipcSendArgs = null;
+    const stylesheetPath = require('path').resolve(__dirname, '../styles/styles.less');
+    const stylesheet = AppEnv.themes.cssContentsOfStylesheet(stylesheetPath);
+    updateDialogStyles = AppEnv.styles.addStyleSheet(stylesheet, {
+      sourcePath: stylesheetPath,
+      priority: 0,
+    });
   });
 
   describe('mounting', () => {
@@ -139,6 +147,31 @@ describe('UpdateNotification', function describeBlock() {
       });
 
       expect(document.querySelector('.kaiyue-update-dialog').textContent).toContain('更新已准备好');
+    });
+
+    it('should keep the downloading actions inside the modal without overflow', () => {
+      stubUpdaterState = 'update-available';
+      stubUpdaterReleaseVersion = '1.0.5';
+      render(<UpdateNotification />);
+
+      AppEnv.updateStateChanged({
+        state: 'downloading',
+        releaseVersion: '1.0.5',
+        releaseNotes:
+          'Windows 托盘图标改为高对比度凯越邮箱图标；后台收到新邮件时托盘图标会闪烁，打开客户端后停止提醒。\n\n重要：本版本轮换了内部代码签名证书。从 v1.0.4 升级前，请先下载 KaiyueMail-Internal-Trust-1.0.5.zip，并以管理员身份运行其中的 Install-KaiyueMailInternalRoot.cmd；此操作仅需执行一次。',
+        downloadProgress: { percent: 0, transferred: 64 * 1024, total: 200 * 1024 * 1024 },
+      });
+
+      const modal = document.querySelector('.modal') as HTMLElement;
+      const dialog = document.querySelector('.kaiyue-update-dialog') as HTMLElement;
+      const download = document.querySelector('.update-dialog-download') as HTMLElement;
+      const actions = document.querySelector('.update-dialog-actions') as HTMLElement;
+      const actionButton = actions.querySelector('.btn') as HTMLElement;
+      const downloadBounds = download.getBoundingClientRect();
+      const actionBounds = actionButton.getBoundingClientRect();
+      expect(modal.scrollHeight <= modal.clientHeight).toEqual(true);
+      expect(actionBounds.top >= downloadBounds.bottom + 16).toEqual(true);
+      expect(actionBounds.bottom <= dialog.getBoundingClientRect().bottom + 1).toEqual(true);
     });
   });
 });
