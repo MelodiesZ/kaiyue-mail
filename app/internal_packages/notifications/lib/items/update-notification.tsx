@@ -1,4 +1,4 @@
-import { Actions, localized, React } from 'mailspring-exports';
+import { Actions, localized, ModalStore, React } from 'mailspring-exports';
 import { ipcRenderer, shell } from 'electron';
 import { Notification } from 'mailspring-component-kit';
 import { CompositeDisposable } from 'event-kit';
@@ -18,6 +18,9 @@ export default class UpdateNotification extends React.Component<
   static displayName = 'UpdateNotification';
 
   disposable?: CompositeDisposable;
+  modalUnlisten?: () => void;
+  pendingDialogDetails?: UpdateDetails;
+  updateDialogIsOpen = false;
 
   constructor(props) {
     super(props);
@@ -35,6 +38,14 @@ export default class UpdateNotification extends React.Component<
         this.setState(this.getStateFromStores());
       })
     );
+    this.modalUnlisten = ModalStore.listen(() => {
+      if (ModalStore.isModalOpen()) return;
+      this.updateDialogIsOpen = false;
+      if (!this.pendingDialogDetails) return;
+      const details = this.pendingDialogDetails;
+      this.pendingDialogDetails = undefined;
+      setTimeout(() => this._showUpdateDialog(details), 0);
+    });
     if (['update-available', 'update-ready'].includes(this.state.updateState)) {
       this._showUpdateDialog(this.state.details);
     }
@@ -42,6 +53,7 @@ export default class UpdateNotification extends React.Component<
 
   componentWillUnmount() {
     if (this.disposable) this.disposable.dispose();
+    if (this.modalUnlisten) this.modalUnlisten();
   }
 
   getStateFromStores() {
@@ -56,6 +68,12 @@ export default class UpdateNotification extends React.Component<
   }
 
   _showUpdateDialog = (details: UpdateDetails) => {
+    if (this.updateDialogIsOpen) return;
+    if (ModalStore.isModalOpen()) {
+      this.pendingDialogDetails = details;
+      return;
+    }
+    this.updateDialogIsOpen = true;
     Actions.openModal({
       component: <UpdateDialog details={details} />,
       width: 520,

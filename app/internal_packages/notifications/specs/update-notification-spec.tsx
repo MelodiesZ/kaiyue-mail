@@ -1,4 +1,5 @@
 import { render, fireEvent, cleanup } from '@testing-library/react';
+import { Actions } from 'mailspring-exports';
 import proxyquire from 'proxyquire';
 import React from 'react';
 
@@ -36,7 +37,10 @@ const patched = proxyquire('../lib/items/update-notification', {
 const UpdateNotification = patched.default;
 
 describe('UpdateNotification', function describeBlock() {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    Actions.closeModal();
+  });
 
   beforeEach(() => {
     stubUpdaterState = 'idle';
@@ -107,6 +111,34 @@ describe('UpdateNotification', function describeBlock() {
       expect(document.querySelector('.kaiyue-update-dialog').textContent).toContain(
         '新增更新说明与下载进度'
       );
+    });
+
+    it('should update the dialog from download progress through ready-to-install', () => {
+      stubUpdaterState = 'update-available';
+      stubUpdaterReleaseVersion = '1.0.4';
+      render(<UpdateNotification />);
+
+      AppEnv.updateStateChanged({
+        state: 'downloading',
+        releaseVersion: '1.0.4',
+        releaseNotes: '新增更新说明与下载进度',
+        downloadProgress: { percent: 42, transferred: 42, total: 100 },
+      });
+
+      const progress = document.querySelector('[role="progressbar"]') as HTMLElement;
+      expect(progress.getAttribute('aria-valuenow')).toEqual('42');
+      expect(
+        (progress.querySelector('.update-dialog-progress-fill') as HTMLElement).style.width
+      ).toEqual('42%');
+
+      AppEnv.updateStateChanged({
+        state: 'update-ready',
+        releaseVersion: '1.0.4',
+        releaseNotes: '新增更新说明与下载进度',
+        downloadProgress: { percent: 100, transferred: 100, total: 100 },
+      });
+
+      expect(document.querySelector('.kaiyue-update-dialog').textContent).toContain('更新已准备好');
     });
   });
 });
