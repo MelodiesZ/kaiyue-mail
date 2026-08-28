@@ -21,6 +21,8 @@ node_modules
 ##### Certs for building
 certs
 **/*.p12
+**/*.pfx
+**/*.pvk
 **/*.cer
 **/build/resources/certs
 

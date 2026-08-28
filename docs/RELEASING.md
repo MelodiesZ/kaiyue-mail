@@ -6,7 +6,7 @@
 
 - 更新用 GitHub 仓库必须公开。如果源码仓库必须保持私有，应建立一个只存放 Release 安装包的公开仓库，并修改 `app/kaiyue-config.json` 中的 `updater.repository`。
 - macOS 包必须使用 Apple Developer ID 签名并完成公证；ad-hoc 签名只适合本地测试。
-- Windows 生产安装包应使用公司代码签名证书签名。
+- Windows 公开分发安装包应使用受公众信任的公司代码签名证书。仅公司内部使用时可按 [Windows 内部代码签名与在线更新](WINDOWS-INTERNAL-SIGNING.md) 使用企业自签信任链。
 - 发布前获取最新标签：`git fetch --tags`。
 
 ## 1. 提升版本号

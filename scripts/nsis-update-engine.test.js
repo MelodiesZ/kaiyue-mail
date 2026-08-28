@@ -165,6 +165,17 @@ test('trusts only a valid Authenticode signature from an allowed company publish
   );
   assert.equal(
     isTrustedAuthenticodeSignature(
+      {
+        status: 'Valid',
+        subject:
+          'CN="Mengyin Kaiyue Construction Machinery Co., Ltd.", O="Mengyin Kaiyue Construction Machinery Co., Ltd."',
+      },
+      allowed
+    ),
+    true
+  );
+  assert.equal(
+    isTrustedAuthenticodeSignature(
       { status: 'Valid', subject: 'CN=Unrelated Software Vendor, C=US' },
       allowed
     ),

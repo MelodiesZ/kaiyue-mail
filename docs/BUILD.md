@@ -13,6 +13,8 @@
 
 ## Windows
 
+公司内部电脑可使用企业自签根证书和一键签名发布流程，详见 [Windows 内部代码签名与在线更新](WINDOWS-INTERNAL-SIGNING.md)。公开分发仍应使用受公众信任的 OV/EV 代码签名证书。
+
 推荐在 Windows x64 构建机上执行：
 
 ```powershell
@@ -21,7 +23,7 @@ npm run typecheck
 npm run build -- --skip-installers
 npm run verify:windows-package
 npm run build:windows-installer
-# 使用公司代码签名证书签名主程序和 app/dist/KaiyueMailSetup.exe
+# 使用公司代码签名证书或内部代码签名证书，签名主程序和 app/dist/KaiyueMailSetup.exe
 npm run release:windows-assets
 npm run release:verify-windows-assets
 ```
