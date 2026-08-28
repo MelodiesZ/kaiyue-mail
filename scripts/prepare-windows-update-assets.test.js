@@ -19,6 +19,7 @@ test('creates a versioned installer, checksum, and latest-release manifest', (t)
     outputDir,
     version: '1.2.3',
     repository: 'MelodiesZ/kaiyue-mail',
+    downloadBaseUrl: 'https://download.kaiyue-ai.com',
     notes: '凯越邮箱 1.2.3 安全更新',
   });
 
@@ -32,7 +33,10 @@ test('creates a versioned installer, checksum, and latest-release manifest', (t)
   assert.deepEqual(JSON.parse(fs.readFileSync(result.manifestPath, 'utf8')), {
     schemaVersion: 1,
     version: '1.2.3',
-    url: 'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.2.3/KaiyueMail-win32-x64-1.2.3.exe',
+    url: 'https://download.kaiyue-ai.com/v1.2.3/KaiyueMail-win32-x64-1.2.3.exe',
+    fallbackUrls: [
+      'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.2.3/KaiyueMail-win32-x64-1.2.3.exe',
+    ],
     sha256: expectedHash,
     size: contents.length,
     notes: '凯越邮箱 1.2.3 安全更新',
@@ -42,6 +46,7 @@ test('creates a versioned installer, checksum, and latest-release manifest', (t)
       manifestPath: result.manifestPath,
       expectedVersion: '1.2.3',
       expectedRepository: 'MelodiesZ/kaiyue-mail',
+      expectedDownloadBaseUrl: 'https://download.kaiyue-ai.com',
     }).sha256,
     expectedHash
   );
@@ -57,6 +62,7 @@ test('rejects an installer changed after its update manifest was generated', (t)
     outputDir,
     version: '1.2.3',
     repository: 'MelodiesZ/kaiyue-mail',
+    downloadBaseUrl: 'https://download.kaiyue-ai.com',
   });
   fs.appendFileSync(result.installerPath, 'tampered');
 
@@ -66,6 +72,7 @@ test('rejects an installer changed after its update manifest was generated', (t)
         manifestPath: result.manifestPath,
         expectedVersion: '1.2.3',
         expectedRepository: 'MelodiesZ/kaiyue-mail',
+        expectedDownloadBaseUrl: 'https://download.kaiyue-ai.com',
       }),
     /size does not match|SHA-256 does not match/
   );

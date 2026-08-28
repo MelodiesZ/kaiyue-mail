@@ -47,7 +47,8 @@
     "enabled": true,
     "provider": "github",
     "repository": "MelodiesZ/kaiyue-mail",
-    "feedUrl": "https://update.electronjs.org"
+    "feedUrl": "https://update.electronjs.org",
+    "downloadBaseUrl": "https://download.kaiyue-ai.com"
   },
   "upstream": {
     "name": "Mailspring",

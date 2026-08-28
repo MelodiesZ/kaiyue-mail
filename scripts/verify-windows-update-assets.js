@@ -52,6 +52,7 @@ function verifyWindowsUpdateAssets({
   manifestPath,
   expectedVersion,
   expectedRepository,
+  expectedDownloadBaseUrl,
   allowedPublishers = [],
   requireSignature = false,
 }) {
@@ -63,8 +64,23 @@ function verifyWindowsUpdateAssets({
     );
   }
   const installerName = `KaiyueMail-win32-x64-${expectedVersion}.exe`;
-  const expectedURL = `https://github.com/${expectedRepository}/releases/download/v${expectedVersion}/${installerName}`;
+  const githubURL = `https://github.com/${expectedRepository}/releases/download/v${expectedVersion}/${installerName}`;
+  let expectedURL = githubURL;
+  if (expectedDownloadBaseUrl) {
+    const parsedDownloadBaseURL = new URL(expectedDownloadBaseUrl);
+    if (parsedDownloadBaseURL.protocol !== 'https:') {
+      throw new Error('Windows update download base URL must use HTTPS.');
+    }
+    expectedURL = new URL(
+      `v${expectedVersion}/${installerName}`,
+      `${parsedDownloadBaseURL.href.replace(/\/$/, '')}/`
+    ).href;
+  }
   if (manifest.url !== expectedURL) throw new Error('Windows update installer URL is invalid.');
+  const expectedFallbackURLs = expectedDownloadBaseUrl ? [githubURL] : undefined;
+  if (JSON.stringify(manifest.fallbackUrls) !== JSON.stringify(expectedFallbackURLs)) {
+    throw new Error('Windows update fallback URLs are invalid.');
+  }
   if (!/^[a-f\d]{64}$/.test(`${manifest.sha256 || ''}`)) {
     throw new Error('Windows update manifest SHA-256 is invalid.');
   }
@@ -96,6 +112,7 @@ function run() {
     manifestPath: path.join(repositoryRoot, 'app', 'dist', 'kaiyue-update-win32-x64.json'),
     expectedVersion: rootPackage.version,
     expectedRepository: config.updater.repository,
+    expectedDownloadBaseUrl: config.updater.downloadBaseUrl,
     allowedPublishers: [config.brand.company, config.brand.companyEnglish],
     requireSignature: process.argv.includes('--require-signature'),
   });

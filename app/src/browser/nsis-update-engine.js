@@ -52,16 +52,35 @@ function requireHttps(value, label) {
   return parsed;
 }
 
+function normalizeInstallerURLs(version, primaryURL, fallbackURLs = []) {
+  if (!Array.isArray(fallbackURLs) || fallbackURLs.length > 3) {
+    throw new Error('Update manifest fallback URLs are invalid.');
+  }
+  const expectedName = `KaiyueMail-win32-x64-${version}.exe`;
+  const seen = new Set();
+  const urls = [primaryURL, ...fallbackURLs].map((value, index) => {
+    const installerURL = requireHttps(
+      value,
+      index === 0 ? 'Update installer URL' : 'Update fallback URL'
+    );
+    if (path.basename(installerURL.pathname) !== expectedName) {
+      throw new Error(`Update installer must be named ${expectedName}.`);
+    }
+    if (seen.has(installerURL.href)) {
+      throw new Error('Update manifest contains a duplicate installer URL.');
+    }
+    seen.add(installerURL.href);
+    return installerURL.href;
+  });
+  return urls;
+}
+
 function normalizeManifest(value) {
   if (!value || value.schemaVersion !== 1) {
     throw new Error('The update manifest schema is unsupported.');
   }
   compareVersions(value.version, value.version);
-  const installerURL = requireHttps(value.url, 'Update installer URL');
-  const expectedName = `KaiyueMail-win32-x64-${value.version}.exe`;
-  if (path.basename(installerURL.pathname) !== expectedName) {
-    throw new Error(`Update installer must be named ${expectedName}.`);
-  }
+  const installerURLs = normalizeInstallerURLs(value.version, value.url, value.fallbackUrls || []);
   if (!/^[a-f\d]{64}$/i.test(`${value.sha256 || ''}`)) {
     throw new Error('Update manifest SHA-256 is invalid.');
   }
@@ -70,7 +89,8 @@ function normalizeManifest(value) {
   }
   return {
     version: value.version,
-    url: installerURL.href,
+    url: installerURLs[0],
+    fallbackUrls: installerURLs.slice(1),
     sha256: value.sha256.toLowerCase(),
     size: value.size,
     notes: typeof value.notes === 'string' ? value.notes : '',
@@ -338,10 +358,35 @@ class NsisUpdateEngine extends EventEmitter {
       throw new Error('A checked NSIS update manifest is required.');
     }
 
+    const installerURLs = normalizeInstallerURLs(
+      manifest.version,
+      manifest.url,
+      manifest.fallbackUrls || []
+    );
+    let lastError;
+    for (let index = 0; index < installerURLs.length; index += 1) {
+      try {
+        return await this.downloadFromURL(manifest, installerURLs[index]);
+      } catch (error) {
+        lastError = error;
+        const nextURL = installerURLs[index + 1];
+        if (nextURL) {
+          this.emit('download-retry', {
+            failedURL: installerURLs[index],
+            nextURL,
+            error: error.message,
+          });
+        }
+      }
+    }
+    throw lastError;
+  }
+
+  async downloadFromURL(manifest, downloadURL) {
     const updateDirectory = fs.mkdtempSync(path.join(this.tempRoot, 'KaiyueMailUpdate-'));
     const partialPath = path.join(
       updateDirectory,
-      `${path.basename(new URL(manifest.url).pathname)}.part`
+      `${path.basename(new URL(downloadURL).pathname)}.part`
     );
     const installerPath = partialPath.slice(0, -5);
     const hash = crypto.createHash('sha256');
@@ -389,7 +434,7 @@ class NsisUpdateEngine extends EventEmitter {
     try {
       reportProgress(true);
       await pipeline(
-        await this.requestStream(manifest.url),
+        await this.requestStream(downloadURL),
         verifier,
         fs.createWriteStream(partialPath, { flags: 'wx' })
       );

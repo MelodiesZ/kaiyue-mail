@@ -9,6 +9,7 @@ function prepareWindowsUpdateAssets({
   outputDir,
   version,
   repository,
+  downloadBaseUrl,
   notes = '',
 }) {
   if (!/^\d+\.\d+\.\d+$/.test(`${version || ''}`)) {
@@ -33,10 +34,23 @@ function prepareWindowsUpdateAssets({
   fs.writeFileSync(checksumPath, `${sha256}  ${installerName}\n`);
 
   const manifestPath = path.join(outputDir, 'kaiyue-update-win32-x64.json');
+  const githubURL = `https://github.com/${repository}/releases/download/v${version}/${installerName}`;
+  let mirrorURL;
+  if (downloadBaseUrl) {
+    const parsedDownloadBaseURL = new URL(downloadBaseUrl);
+    if (parsedDownloadBaseURL.protocol !== 'https:') {
+      throw new Error('Windows update download base URL must use HTTPS.');
+    }
+    mirrorURL = new URL(
+      `v${version}/${installerName}`,
+      `${parsedDownloadBaseURL.href.replace(/\/$/, '')}/`
+    ).href;
+  }
   const manifest = {
     schemaVersion: 1,
     version,
-    url: `https://github.com/${repository}/releases/download/v${version}/${installerName}`,
+    url: mirrorURL || githubURL,
+    ...(mirrorURL ? { fallbackUrls: [githubURL] } : {}),
     sha256,
     size: contents.length,
     notes,
@@ -62,6 +76,7 @@ function run() {
     outputDir: path.join(appDir, 'dist'),
     version: rootPackage.version,
     repository: config.updater.repository,
+    downloadBaseUrl: config.updater.downloadBaseUrl,
     notes,
   });
   console.log(`Windows update installer: ${result.installerPath}`);

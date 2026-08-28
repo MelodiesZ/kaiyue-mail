@@ -17,6 +17,7 @@ export default class AutoupdateImplWin32 extends AutoupdateImplBase {
   availableUpdate?: {
     version: string;
     url: string;
+    fallbackUrls?: string[];
     notes: string;
     sha256: string;
     size: number;

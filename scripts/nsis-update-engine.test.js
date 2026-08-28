@@ -162,6 +162,45 @@ test('prepares a newer installer only after hash, size, and signature validation
   assert.deepEqual(signatures, [result.filePath]);
 });
 
+test('falls back to GitHub when the primary update mirror cannot download the installer', async (t) => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
+  t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));
+  const installer = Buffer.from('signed-kaiyue-installer');
+  const mirrorURL = 'https://download.kaiyue-ai.com/v1.0.6/KaiyueMail-win32-x64-1.0.6.exe';
+  const githubURL =
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.0.6/KaiyueMail-win32-x64-1.0.6.exe';
+  const requested = [];
+  const engine = new NsisUpdateEngine({
+    tempRoot,
+    requestStream: async (requestUrl) => {
+      requested.push(requestUrl);
+      if (requestUrl === mirrorURL) throw new Error('mirror unavailable');
+      if (requestUrl === githubURL) return Readable.from([installer]);
+      return jsonStream({
+        schemaVersion: 1,
+        version: '1.0.6',
+        url: mirrorURL,
+        fallbackUrls: [githubURL],
+        sha256: crypto.createHash('sha256').update(installer).digest('hex'),
+        size: installer.length,
+      });
+    },
+    verifyAuthenticode: async () => true,
+  });
+
+  const result = await engine.prepare(
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json',
+    '1.0.5'
+  );
+
+  assert.deepEqual(fs.readFileSync(result.filePath), installer);
+  assert.deepEqual(requested, [
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json',
+    mirrorURL,
+    githubURL,
+  ]);
+});
+
 test('checks for a newer version before downloading and reports download progress', async (t) => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
   t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));

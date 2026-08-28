@@ -53,6 +53,17 @@ npm run release:verify-windows-assets
 
 必须将版本化 NSIS 安装包、`.sha256` 和固定名称的 `kaiyue-update-win32-x64.json` 一起上传。客户端通过 GitHub 的 `releases/latest/download/` 路径读取该清单。如果早期版本曾用 Squirrel 安装，过渡期每个 Release 仍必须上传由 `electron-winstaller` 生成的 `RELEASES`、`*-full.nupkg` 和 Setup，否则这部分用户无法迁移。
 
+### Windows 国内下载镜像
+
+`app/kaiyue-config.json` 的 `updater.downloadBaseUrl` 指向凯越自有下载站。生成的清单以该地址为主下载地址，并保留 GitHub Release 作为失败回退。发布前必须：
+
+1. 将签名后的版本化 EXE 和 `.sha256` 上传到下载站的 `v<version>/` 目录，例如 `/www/wwwroot/kaiyue-mail/v1.0.6/`。
+2. 在服务器重新计算 SHA-256，并确认与本地 `.sha256` 完全一致。
+3. 确认镜像 URL 使用受信任的 HTTPS 证书，`HEAD` 返回正确的 `Content-Length`，Range 请求返回 `206 Partial Content`。
+4. 镜像验证通过后再上传并发布 GitHub 清单。不要发布指向尚未生效或证书错误的镜像清单。
+
+镜像只改变下载来源，不改变安全边界。客户端仍会验证清单声明的文件大小、SHA-256 和 Authenticode 发布者签名。
+
 ## 4. 手工发布
 
 1. 提交版本号、发布说明和相关代码。
