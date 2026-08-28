@@ -24,6 +24,7 @@ Current / Intended Behavior:
 */
 class SystemTrayIconStore {
   _windowBackgrounded = false;
+  _lastUnread: number | null = null;
   _unsubscribers: (() => void)[];
   _onNativeThemeUpdated = () => this._updateIcon();
 
@@ -49,6 +50,9 @@ class SystemTrayIconStore {
   }
 
   deactivate() {
+    if (platform === 'win32') {
+      ipcRenderer.send('stop-system-tray-new-mail-flash');
+    }
     this._unsubscribers.forEach((unsub) => unsub());
   }
 
@@ -61,6 +65,9 @@ class SystemTrayIconStore {
   _onWindowFocus = () => {
     // Make sure that as long as the window is focused we never use the alt icon
     this._windowBackgrounded = false;
+    if (platform === 'win32') {
+      ipcRenderer.send('stop-system-tray-new-mail-flash');
+    }
     this._updateIcon();
   };
 
@@ -138,8 +145,12 @@ class SystemTrayIconStore {
 
   _updateIcon = () => {
     const unread = BadgeStore.unread();
-    const unreadString = (+unread).toLocaleString();
+    const unreadCount = +unread || 0;
+    const unreadString = unreadCount.toLocaleString();
     const isInboxZero = BadgeStore.total() === 0;
+    const receivedNewMail =
+      this._windowBackgrounded && this._lastUnread !== null && unreadCount > this._lastUnread;
+    this._lastUnread = unreadCount;
 
     const newMessagesIconStyle = AppEnv.config.get('core.workspace.trayIconStyle') || 'blue';
 
@@ -154,6 +165,9 @@ class SystemTrayIconStore {
       }
     }
     ipcRenderer.send('update-system-tray', iconPath, unreadString);
+    if (platform === 'win32' && receivedNewMail) {
+      ipcRenderer.send('flash-system-tray-new-mail');
+    }
   };
 }
 

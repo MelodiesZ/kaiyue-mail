@@ -591,6 +591,14 @@ export default class Application extends EventEmitter {
       this.systemTrayManager.updateTraySettings(iconPath, unreadString);
     });
 
+    ipcMain.on('flash-system-tray-new-mail', () => {
+      this.systemTrayManager.flashForNewMail();
+    });
+
+    ipcMain.on('stop-system-tray-new-mail-flash', () => {
+      this.systemTrayManager.stopNewMailFlash();
+    });
+
     ipcMain.on('set-badge-value', (event, value) => {
       if (app.dock && app.dock.setBadge) {
         app.dock.setBadge(value);

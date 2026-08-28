@@ -101,4 +101,33 @@ describe('SystemTrayIconStore', function systemTrayIconStore() {
       expect(path).toBe(this.iconStore.inboxFullUnreadIcon());
     });
   });
+
+  describe('Windows new mail flashing', () => {
+    it('flashes only when the unread count increases while backgrounded', () => {
+      spyOn(BadgeStore, 'total').andReturn(10);
+      const unreadSpy = spyOn(BadgeStore, 'unread').andReturn(2);
+
+      this.iconStore._updateIcon();
+      this.iconStore._onWindowBackgrounded();
+      unreadSpy.andReturn(3);
+      this.iconStore._updateIcon();
+
+      if (process.platform === 'win32') {
+        expect(ipcRenderer.send).toHaveBeenCalledWith('flash-system-tray-new-mail');
+      }
+    });
+
+    it('does not flash during the initial unread count sync', () => {
+      spyOn(BadgeStore, 'total').andReturn(10);
+      spyOn(BadgeStore, 'unread').andReturn(3);
+      this.iconStore._windowBackgrounded = true;
+
+      this.iconStore._updateIcon();
+
+      const flashCalls = (ipcRenderer.send as jasmine.Spy).calls.filter(
+        (call) => call.args[0] === 'flash-system-tray-new-mail'
+      );
+      expect(flashCalls.length).toBe(0);
+    });
+  });
 });

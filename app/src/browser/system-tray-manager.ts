@@ -1,5 +1,5 @@
 import path from 'path';
-import { Tray, Menu, nativeImage, nativeTheme } from 'electron';
+import { app as electronApp, Tray, Menu, nativeImage, nativeTheme } from 'electron';
 import { localized } from '../intl';
 import Application from './application';
 import { KaiyueConfig } from '../kaiyue-config';
@@ -48,6 +48,8 @@ class SystemTrayManager {
   _iconPath = null;
   _unreadString = null;
   _tray = null;
+  _newMailFlashTimer: ReturnType<typeof setInterval> | null = null;
+  _newMailFlashVisible = false;
   _platform: string = null;
   _application: Application;
 
@@ -55,6 +57,8 @@ class SystemTrayManager {
     this._platform = platform;
     this._application = application;
     this.initTray();
+
+    electronApp.on('browser-window-focus', this.stopNewMailFlash);
 
     this._application.config.onDidChange('core.workspace.systemTray', ({ newValue }) => {
       if (newValue === false) {
@@ -133,7 +137,51 @@ class SystemTrayManager {
     }
   }
 
+  _newMailIconPath() {
+    return path.join(
+      this._application.resourcePath,
+      'internal_packages',
+      'system-tray',
+      'assets',
+      'win32',
+      'MenuItem-Inbox-Full-NewItems.png'
+    );
+  }
+
+  flashForNewMail() {
+    if (this._platform !== 'win32' || !this._tray) return;
+
+    const mainWindow = this._application.getMainWindow();
+    if (mainWindow && mainWindow.isFocused()) return;
+
+    this.stopNewMailFlash();
+    this._newMailFlashVisible = true;
+    this._tray.setImage(_getIcon(this._newMailIconPath()));
+    this._newMailFlashTimer = setInterval(() => {
+      if (!this._tray) {
+        this.stopNewMailFlash();
+        return;
+      }
+
+      this._newMailFlashVisible = !this._newMailFlashVisible;
+      const iconPath = this._newMailFlashVisible ? this._newMailIconPath() : this._iconPath;
+      this._tray.setImage(_getIcon(iconPath));
+    }, 500);
+  }
+
+  stopNewMailFlash = () => {
+    if (this._newMailFlashTimer) {
+      clearInterval(this._newMailFlashTimer);
+      this._newMailFlashTimer = null;
+    }
+    this._newMailFlashVisible = false;
+    if (this._tray && this._iconPath) {
+      this._tray.setImage(_getIcon(this._iconPath));
+    }
+  };
+
   destroyTray() {
+    this.stopNewMailFlash();
     // Due to https://github.com/electron/electron/issues/17622
     // we cannot destroy the tray icon on linux.
     if (this._tray && process.platform !== 'linux') {
