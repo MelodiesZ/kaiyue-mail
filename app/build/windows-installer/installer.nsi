@@ -38,6 +38,9 @@ RequestExecutionLevel user
 !define MAIL_CLIENT_KEY "Software\Clients\Mail\${MAIL_CLIENT_ID}"
 !define MAILTO_PROGID "KaiyueMail.Url.mailto"
 !define MAILTO_PROGID_KEY "Software\Classes\${MAILTO_PROGID}"
+!define INTERNAL_ROOT_CERTIFICATE "KaiyueMail-Internal-Root-CA.cer"
+!define INTERNAL_ROOT_INSTALL_SCRIPT "Install-KaiyueMailInternalRoot.ps1"
+!define INTERNAL_ROOT_SHA256 "1A242D335668C4A06C912C40E173CA7AFC2AEEFE861C3167AE03C91F7D7C4D66"
 
 Name "${PRODUCT_NAME}"
 Caption "${PRODUCT_NAME} 安装程序"
@@ -196,6 +199,20 @@ FunctionEnd
 Section "安装凯越邮箱" SEC_MAIN
   SetShellVarContext current
   SetRegView 64
+
+  ; Establish update trust only for the Windows user running the installer. The
+  ; PowerShell helper pins the public certificate by SHA-256 and is idempotent.
+  InitPluginsDir
+  File /oname=$PLUGINSDIR\${INTERNAL_ROOT_CERTIFICATE} "certificates\${INTERNAL_ROOT_CERTIFICATE}"
+  File /oname=$PLUGINSDIR\${INTERNAL_ROOT_INSTALL_SCRIPT} "..\..\..\scripts\windows\${INTERNAL_ROOT_INSTALL_SCRIPT}"
+  nsExec::ExecToStack '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\${INTERNAL_ROOT_INSTALL_SCRIPT}" -CertificatePath "$PLUGINSDIR\${INTERNAL_ROOT_CERTIFICATE}" -ExpectedFileSha256 "${INTERNAL_ROOT_SHA256}" -NonInteractive'
+  Pop $0
+  Pop $1
+  ${If} $0 != 0
+    MessageBox MB_ICONSTOP|MB_OK "无法安装凯越邮箱内部更新信任证书，安装已取消。$\r$\n$\r$\n请联系公司 IT 运维人员。"
+    SetErrorLevel 1
+    Quit
+  ${EndIf}
 
   ${If} $IsUpdate == 1
     Call WaitForParentProcess

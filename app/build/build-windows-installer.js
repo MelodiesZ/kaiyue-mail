@@ -1,6 +1,7 @@
 /* eslint global-require: 0 */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 
 const rootDir = path.resolve(__dirname, '..', '..');
@@ -25,6 +26,13 @@ const canonicalProductIcon = path.join(
   'kaiyue-mail-icon.png'
 );
 const installerProductIcon = path.join(installerDir, 'assets', 'kaiyue-mail-icon.png');
+const internalRootCertificate = path.join(
+  installerDir,
+  'certificates',
+  'KaiyueMail-Internal-Root-CA.cer'
+);
+const expectedInternalRootSha256 =
+  '1a242d335668c4a06c912c40e173ca7afc2aeefe861c3167ae03c91f7d7c4d66';
 const required = [
   path.join(packageDir, 'Kaiyue Mail.exe'),
   path.join(packageDir, 'resources', 'app.asar'),
@@ -35,6 +43,8 @@ const required = [
   path.join(installerDir, 'assets', 'installer-sidebar-background-v2.prompt.md'),
   path.join(installerDir, 'assets', 'installer-sidebar.bmp'),
   path.join(installerDir, 'assets', 'installer-header.bmp'),
+  internalRootCertificate,
+  path.join(rootDir, 'scripts', 'windows', 'Install-KaiyueMailInternalRoot.ps1'),
 ];
 
 for (const file of required) {
@@ -45,6 +55,16 @@ for (const file of required) {
 
 if (!fs.readFileSync(canonicalProductIcon).equals(fs.readFileSync(installerProductIcon))) {
   throw new Error('Windows installer artwork is not using the canonical Kaiyue Mail icon.');
+}
+
+const actualInternalRootSha256 = crypto
+  .createHash('sha256')
+  .update(fs.readFileSync(internalRootCertificate))
+  .digest('hex');
+if (actualInternalRootSha256 !== expectedInternalRootSha256) {
+  throw new Error(
+    `Windows installer internal root certificate does not match the pinned certificate: ${actualInternalRootSha256}`
+  );
 }
 
 execFileSync(process.execPath, [path.join(__dirname, 'verify-windows-package.js'), packageDir], {

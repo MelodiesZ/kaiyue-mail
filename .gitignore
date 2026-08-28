@@ -24,6 +24,7 @@ certs
 **/*.pfx
 **/*.pvk
 **/*.cer
+!app/build/windows-installer/certificates/KaiyueMail-Internal-Root-CA.cer
 **/build/resources/certs
 **/Private-KEEP-SECRET/
 **/.signing-password*
