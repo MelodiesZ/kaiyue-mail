@@ -40,7 +40,9 @@ RequestExecutionLevel user
 !define MAILTO_PROGID_KEY "Software\Classes\${MAILTO_PROGID}"
 !define INTERNAL_ROOT_CERTIFICATE "KaiyueMail-Internal-Root-CA.cer"
 !define INTERNAL_ROOT_INSTALL_SCRIPT "Install-KaiyueMailInternalRoot.ps1"
-!define INTERNAL_ROOT_SHA256 "1A242D335668C4A06C912C40E173CA7AFC2AEEFE861C3167AE03C91F7D7C4D66"
+!ifndef INTERNAL_ROOT_SHA256
+  !error "INTERNAL_ROOT_SHA256 must pin the internal root certificate"
+!endif
 
 Name "${PRODUCT_NAME}"
 Caption "${PRODUCT_NAME} 安装程序"

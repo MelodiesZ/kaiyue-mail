@@ -10,6 +10,7 @@ const {
   NsisUpdateEngine,
   createElectronNetRequestStream,
   isTrustedAuthenticodeSignature,
+  verifyAuthenticode,
 } = require('../app/src/browser/nsis-update-engine');
 
 function jsonStream(value) {
@@ -521,4 +522,79 @@ test('trusts only a valid Authenticode signature from an allowed company publish
     ),
     false
   );
+});
+
+test('installs the pinned internal root and retries an untrusted company signature', async () => {
+  const allowed = ['Mengyin Kaiyue Construction Machinery Co., Ltd.'];
+  const companySubject =
+    'CN=Mengyin Kaiyue Construction Machinery Co., Ltd., O=Mengyin Kaiyue Construction Machinery Co., Ltd.';
+  const signatures = [
+    {
+      status: 'UnknownError',
+      statusMessage:
+        'A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider.',
+      subject: companySubject,
+    },
+    { status: 'Valid', statusMessage: 'Signature verified.', subject: companySubject },
+  ];
+  const events = [];
+
+  const trusted = await verifyAuthenticode('KaiyueMailSetup.exe', allowed, {
+    inspectAuthenticode: async () => {
+      events.push('inspect');
+      return signatures.shift();
+    },
+    installInternalRoot: async () => {
+      events.push('install-root');
+      return true;
+    },
+  });
+
+  assert.equal(trusted, true);
+  assert.deepEqual(events, ['inspect', 'install-root', 'inspect']);
+});
+
+test('does not install internal trust for an unrelated publisher', async () => {
+  const events = [];
+  const trusted = await verifyAuthenticode(
+    'UnrelatedSetup.exe',
+    ['Mengyin Kaiyue Construction Machinery Co., Ltd.'],
+    {
+      inspectAuthenticode: async () => ({
+        status: 'NotTrusted',
+        statusMessage: 'The certificate is not trusted.',
+        subject: 'CN=Unrelated Software Vendor, O=Unrelated Software Vendor',
+      }),
+      installInternalRoot: async () => {
+        events.push('install-root');
+        return true;
+      },
+    }
+  );
+
+  assert.equal(trusted, false);
+  assert.deepEqual(events, []);
+});
+
+test('does not install internal trust for a damaged company-signed installer', async () => {
+  const events = [];
+  const trusted = await verifyAuthenticode(
+    'DamagedKaiyueMailSetup.exe',
+    ['Mengyin Kaiyue Construction Machinery Co., Ltd.'],
+    {
+      inspectAuthenticode: async () => ({
+        status: 'HashMismatch',
+        statusMessage: 'The contents of the file do not match its signature.',
+        subject:
+          'CN=Mengyin Kaiyue Construction Machinery Co., Ltd., O=Mengyin Kaiyue Construction Machinery Co., Ltd.',
+      }),
+      installInternalRoot: async () => {
+        events.push('install-root');
+        return true;
+      },
+    }
+  );
+
+  assert.equal(trusted, false);
+  assert.deepEqual(events, []);
 });

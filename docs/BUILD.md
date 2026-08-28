@@ -52,7 +52,7 @@ npm run artwork:windows-installer
 
 不要直接用截图替换 BMP，也不要把文字交给生成模型渲染；生成图只作为无文字背景，正式 Logo 和公司信息始终由 SVG 输出。Windows 包校验会检查位图尺寸、色深、规范图标和安装选项页的统一背景色，防止模糊素材或白色文字块再次进入发布包。
 
-客户端会自动识别安装方式：旧 Squirrel 安装保持 Electron `autoUpdater`，NSIS 或便携版使用 GitHub Release 中的最新更新清单。NSIS 路径会在下载后核对大小、SHA-256、Authenticode 状态和公司发布者，在安装前还会再次校验文件，然后以 `/S /UPDATE /PARENT_PID=<pid>` 启动安装器。安装器会等待客户端退出，将新版本完整解压到临时目录后再切换；切换失败会恢复原版本。它同时保留原安装目录与桌面快捷方式偏好，更新完成后自动重启凯越邮箱。
+客户端会自动识别安装方式：旧 Squirrel 安装保持 Electron `autoUpdater`，NSIS 或便携版使用 GitHub Release 中的最新更新清单。NSIS 路径会在下载后核对大小、SHA-256、Authenticode 状态和公司发布者；如果仅缺少固定内部根信任，更新器会校验并安装应用 `resources` 中 SHA-256 固定的公共根证书到 `CurrentUser\Root`，然后重新验签一次。安装前还会再次校验文件，然后以 `/S /UPDATE /PARENT_PID=<pid>` 启动安装器。安装器会等待客户端退出，将新版本完整解压到临时目录后再切换；切换失败会恢复原版本。它同时保留原安装目录与桌面快捷方式偏好，更新完成后自动重启凯越邮箱。
 
 ### 在 macOS 上交叉构建 Windows 便携版
 

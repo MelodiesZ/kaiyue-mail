@@ -12,6 +12,9 @@ const installerScript = path.join(installerDir, 'installer.nsi');
 const outputFile = path.join(appDir, 'dist', 'KaiyueMailSetup.exe');
 const packageJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
 const kaiyueConfig = JSON.parse(fs.readFileSync(path.join(appDir, 'kaiyue-config.json'), 'utf8'));
+const internalTrustConfig = JSON.parse(
+  fs.readFileSync(path.join(appDir, 'internal-trust.json'), 'utf8')
+);
 const productVersion = packageJson.version;
 const versionParts = productVersion.split('.');
 if (!/^\d+\.\d+\.\d+$/.test(productVersion)) {
@@ -29,10 +32,9 @@ const installerProductIcon = path.join(installerDir, 'assets', 'kaiyue-mail-icon
 const internalRootCertificate = path.join(
   installerDir,
   'certificates',
-  'KaiyueMail-Internal-Root-CA.cer'
+  internalTrustConfig.certificateFileName
 );
-const expectedInternalRootSha256 =
-  '1a242d335668c4a06c912c40e173ca7afc2aeefe861c3167ae03c91f7d7c4d66';
+const expectedInternalRootSha256 = internalTrustConfig.certificateSha256.toLowerCase();
 const required = [
   path.join(packageDir, 'Kaiyue Mail.exe'),
   path.join(packageDir, 'resources', 'app.asar'),
@@ -44,7 +46,7 @@ const required = [
   path.join(installerDir, 'assets', 'installer-sidebar.bmp'),
   path.join(installerDir, 'assets', 'installer-header.bmp'),
   internalRootCertificate,
-  path.join(rootDir, 'scripts', 'windows', 'Install-KaiyueMailInternalRoot.ps1'),
+  path.join(rootDir, 'scripts', 'windows', internalTrustConfig.installScriptFileName),
 ];
 
 for (const file of required) {
@@ -98,6 +100,7 @@ execFileSync(
     `-DPRODUCT_VERSION_QUAD=${productVersionQuad}`,
     `-DPRODUCT_PUBLISHER=${kaiyueConfig.brand.company}`,
     `-DPRODUCT_POSITIONING=${kaiyueConfig.brand.positioning}`,
+    `-DINTERNAL_ROOT_SHA256=${expectedInternalRootSha256.toUpperCase()}`,
     installerScript,
   ],
   { cwd: installerDir, stdio: 'inherit' }

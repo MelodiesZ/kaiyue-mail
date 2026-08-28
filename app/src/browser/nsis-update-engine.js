@@ -8,8 +8,12 @@ const path = require('path');
 const { PassThrough, Transform } = require('stream');
 const { pipeline } = require('stream/promises');
 const kaiyueConfig = require('../../kaiyue-config.json');
+const internalTrustConfig = require('../../internal-trust.json');
 
 const STABLE_VERSION = /^(\d+)\.(\d+)\.(\d+)$/;
+const INTERNAL_ROOT_CERTIFICATE = internalTrustConfig.certificateFileName;
+const INTERNAL_ROOT_INSTALL_SCRIPT = internalTrustConfig.installScriptFileName;
+const INTERNAL_ROOT_SHA256 = internalTrustConfig.certificateSha256.toUpperCase();
 
 class NonRetryableUpdateError extends Error {
   constructor(code, message) {
@@ -251,8 +255,8 @@ const defaultAllowedPublishers = [
   kaiyueConfig.brand.companyEnglish,
 ].filter(Boolean);
 
-function isTrustedAuthenticodeSignature(signature, allowedPublishers) {
-  if (!signature || `${signature.status || ''}`.toLowerCase() !== 'valid') return false;
+function hasAllowedAuthenticodePublisher(signature, allowedPublishers) {
+  if (!signature) return false;
   const subjectValues = [];
   const subject = `${signature.subject || ''}`;
   const fieldPattern =
@@ -267,23 +271,35 @@ function isTrustedAuthenticodeSignature(signature, allowedPublishers) {
   return trustedPublishers.some((publisher) => subjectValues.includes(publisher));
 }
 
-function verifyAuthenticode(installerPath, allowedPublishers = defaultAllowedPublishers) {
+function isTrustedAuthenticodeSignature(signature, allowedPublishers) {
+  return (
+    signature &&
+    `${signature.status || ''}`.toLowerCase() === 'valid' &&
+    hasAllowedAuthenticodePublisher(signature, allowedPublishers)
+  );
+}
+
+function windowsPowerShellPath() {
   const systemRoot = process.env.SystemRoot || 'C:\\Windows';
-  const powershell = path.join(
+  return path.join(
     systemRoot,
     'System32',
     'WindowsPowerShell',
     'v1.0',
     'powershell.exe'
   );
+}
+
+function inspectAuthenticode(installerPath) {
   const script = [
     '$signature = Get-AuthenticodeSignature -LiteralPath $args[0]',
-    '$result = [PSCustomObject]@{ status = [string]$signature.Status; subject = [string]$signature.SignerCertificate.Subject }',
+    '$subject = if ($null -ne $signature.SignerCertificate) { [string]$signature.SignerCertificate.Subject } else { "" }',
+    '$result = [PSCustomObject]@{ status = [string]$signature.Status; statusMessage = [string]$signature.StatusMessage; subject = $subject }',
     '$result | ConvertTo-Json -Compress',
   ].join('; ');
   return new Promise((resolve) => {
     childProcess.execFile(
-      powershell,
+      windowsPowerShellPath(),
       [
         '-NoProfile',
         '-NonInteractive',
@@ -296,17 +312,69 @@ function verifyAuthenticode(installerPath, allowedPublishers = defaultAllowedPub
       { windowsHide: true, timeout: 30000 },
       (error, stdout) => {
         if (error) {
-          resolve(false);
+          resolve(null);
           return;
         }
         try {
-          resolve(isTrustedAuthenticodeSignature(JSON.parse(stdout), allowedPublishers));
+          resolve(JSON.parse(stdout));
         } catch {
-          resolve(false);
+          resolve(null);
         }
       }
     );
   });
+}
+
+function installInternalRoot(resourcesPath = process.resourcesPath) {
+  if (!resourcesPath) return Promise.resolve(false);
+  const certificatePath = path.join(resourcesPath, INTERNAL_ROOT_CERTIFICATE);
+  const installScriptPath = path.join(resourcesPath, INTERNAL_ROOT_INSTALL_SCRIPT);
+  if (!fs.existsSync(certificatePath) || !fs.existsSync(installScriptPath)) {
+    return Promise.resolve(false);
+  }
+  return new Promise((resolve) => {
+    childProcess.execFile(
+      windowsPowerShellPath(),
+      [
+        '-NoLogo',
+        '-NoProfile',
+        '-NonInteractive',
+        '-ExecutionPolicy',
+        'Bypass',
+        '-File',
+        installScriptPath,
+        '-CertificatePath',
+        certificatePath,
+        '-ExpectedFileSha256',
+        INTERNAL_ROOT_SHA256,
+        '-NonInteractive',
+      ],
+      { windowsHide: true, timeout: 30000 },
+      (error) => resolve(!error)
+    );
+  });
+}
+
+function canBootstrapInternalTrust(signature, allowedPublishers) {
+  const status = `${signature?.status || ''}`.toLowerCase();
+  return (
+    (status === 'unknownerror' || status === 'nottrusted') &&
+    hasAllowedAuthenticodePublisher(signature, allowedPublishers)
+  );
+}
+
+async function verifyAuthenticode(
+  installerPath,
+  allowedPublishers = defaultAllowedPublishers,
+  dependencies = {}
+) {
+  const inspect = dependencies.inspectAuthenticode || inspectAuthenticode;
+  const installRoot = dependencies.installInternalRoot || installInternalRoot;
+  const signature = await inspect(installerPath);
+  if (isTrustedAuthenticodeSignature(signature, allowedPublishers)) return true;
+  if (!canBootstrapInternalTrust(signature, allowedPublishers)) return false;
+  if (!(await installRoot())) return false;
+  return isTrustedAuthenticodeSignature(await inspect(installerPath), allowedPublishers);
 }
 
 function spawnDetached(executable, args) {

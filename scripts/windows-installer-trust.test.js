@@ -6,10 +6,13 @@ const test = require('node:test');
 
 const repositoryRoot = path.resolve(__dirname, '..');
 const installerDirectory = path.join(repositoryRoot, 'app', 'build', 'windows-installer');
+const internalTrustConfig = JSON.parse(
+  fs.readFileSync(path.join(repositoryRoot, 'app', 'internal-trust.json'), 'utf8')
+);
 const certificatePath = path.join(
   installerDirectory,
   'certificates',
-  'KaiyueMail-Internal-Root-CA.cer'
+  internalTrustConfig.certificateFileName
 );
 const expectedSha256 = '1a242d335668c4a06c912c40e173ca7afc2aeefe861c3167ae03c91f7d7c4d66';
 
@@ -47,7 +50,17 @@ test('installer build rejects a replaced internal root certificate', () => {
     path.join(repositoryRoot, 'app', 'build', 'build-windows-installer.js'),
     'utf8'
   );
-  assert.match(buildSource, /1a242d335668c4a06c912c40e173ca7afc2aeefe861c3167ae03c91f7d7c4d66/i);
+  const appBuildSource = fs.readFileSync(
+    path.join(repositoryRoot, 'app', 'build', 'build.js'),
+    'utf8'
+  );
+  assert.equal(internalTrustConfig.certificateSha256, expectedSha256);
+  assert.match(buildSource, /internalTrustConfig\.certificateSha256/);
   assert.match(buildSource, /createHash\('sha256'\)/);
+  assert.match(buildSource, /-DINTERNAL_ROOT_SHA256/);
   assert.match(buildSource, /internal root certificate/i);
+  assert.match(appBuildSource, /extraResource/);
+  assert.match(appBuildSource, /windowsInternalTrustResources/);
+  assert.match(appBuildSource, /internalTrustConfig\.certificateFileName/);
+  assert.match(appBuildSource, /internalTrustConfig\.installScriptFileName/);
 });
