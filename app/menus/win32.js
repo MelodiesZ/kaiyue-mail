@@ -225,8 +225,6 @@ module.exports = {
       command: 'application:add-account',
       args: { source: 'Menu' },
     },
-    { label: localized('Change Theme') + '...', command: 'window:launch-theme-picker' },
-    { label: localized('Install Theme') + '...', command: 'window:install-package' },
     { type: 'separator' },
     { label: 'VERSION', enabled: false },
     {
