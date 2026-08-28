@@ -41,18 +41,68 @@ async function setThemeAndLayout(theme: string, layout: string) {
   await executeInRenderer(
     electronApp,
     `(function() {
-      AppEnv.config.set('core.theme', '${theme}');
-      var WorkspaceStore = require('mailspring-exports').WorkspaceStore;
-      WorkspaceStore._onSelectLayoutMode('${layout}');
+      return new Promise(function(resolve, reject) {
+        var WorkspaceStore = require('mailspring-exports').WorkspaceStore;
+        var applyLayoutAndResolve = function() {
+          WorkspaceStore._onSelectLayoutMode('${layout}');
+          requestAnimationFrame(function() {
+            requestAnimationFrame(resolve);
+          });
+        };
+
+        if (
+          AppEnv.config.get('core.theme') === '${theme}' &&
+          document.body.classList.contains('theme-${theme}')
+        ) {
+          applyLayoutAndResolve();
+          return;
+        }
+
+        var timeout = setTimeout(function() {
+          disposable.dispose();
+          reject(new Error('Theme ${theme} did not finish compiling'));
+        }, 15000);
+        var disposable = AppEnv.themes.onDidChangeActiveThemes(function() {
+          clearTimeout(timeout);
+          disposable.dispose();
+          applyLayoutAndResolve();
+        });
+        AppEnv.config.set('core.theme', '${theme}');
+      });
     })()`
   );
-
-  // Theme change triggers LESS recompilation for all stylesheets — wait for it
-  await mainWindow.waitForTimeout(3_000);
 
   // Verify the theme class was applied to <body>
   const bodyClass = await mainWindow.locator('body').getAttribute('class');
   expect(bodyClass).toContain(`theme-${theme}`);
+  await expect(mainWindow.locator('.account-sidebar')).toBeVisible({ timeout: 10_000 });
+  await expect(mainWindow.locator('.thread-list .list-item').first()).toBeVisible({
+    timeout: 10_000,
+  });
+}
+
+async function focusMainWindow() {
+  await mainWindow.bringToFront();
+  await electronApp.evaluate(({ app, BrowserWindow }) => {
+    app.focus({ steal: true });
+    const win = BrowserWindow.getAllWindows().find((candidate) =>
+      candidate.webContents.getURL().includes('windowType%22%3A%22default')
+    );
+    win?.show();
+    win?.focus();
+  });
+  await expect
+    .poll(
+      () =>
+        electronApp.evaluate(({ BrowserWindow }) => {
+          const win = BrowserWindow.getAllWindows().find((candidate) =>
+            candidate.webContents.getURL().includes('windowType%22%3A%22default')
+          );
+          return win?.isFocused() || false;
+        }),
+      { timeout: 5_000 }
+    )
+    .toBe(true);
 }
 
 for (const theme of themes) {
@@ -68,7 +118,12 @@ for (const theme of themes) {
       // - split / splitVertical: sidebar + thread list + reading pane
       // - list: navigates into thread detail (full-screen reading pane)
       await openThread(mainWindow, 0);
-      await mainWindow.waitForTimeout(500);
+      await expect(mainWindow.locator('#message-list .message-item-wrap').first()).toBeVisible({
+        timeout: 10_000,
+      });
+      await focusMainWindow();
+      await mainWindow.mouse.move(1400, 860);
+      await mainWindow.waitForTimeout(250);
 
       await expect(mainWindow).toHaveScreenshot(`${theme}-${layout}.png`, {
         maxDiffPixelRatio: 0.01,

@@ -1,4 +1,3 @@
-import { ipcRenderer } from 'electron';
 import React from 'react';
 import { localized, Account } from 'mailspring-exports';
 import CreatePageForForm from './decorators/create-page-for-form';
@@ -57,10 +56,6 @@ class AccountIMAPSettingsForm extends React.Component<AccountIMAPSettingsFormPro
 
     return { errorMessage, errorFieldNames, populated: true };
   };
-
-  componentDidMount() {
-    ipcRenderer.send('resize-window', { width: 900, height: 660 });
-  }
 
   renderPortDropdown(protocol) {
     if (!['imap', 'smtp'].includes(protocol)) {
@@ -133,11 +128,7 @@ class AccountIMAPSettingsForm extends React.Component<AccountIMAPSettingsFormPro
               {localized('Custom Port')}
             </label>
             <input
-              style={{
-                width: 80,
-                marginLeft: 6,
-                height: 23,
-              }}
+              className="imap-custom-port"
               id={`settings.${field}_custom`}
               tabIndex={0}
               value={settings[field]}
@@ -186,7 +177,7 @@ class AccountIMAPSettingsForm extends React.Component<AccountIMAPSettingsFormPro
             </option>
           </select>
         </span>
-        <span style={{ paddingLeft: '20px', paddingTop: '10px' }}>
+        <span className="imap-insecure-option">
           <input
             type="checkbox"
             id={`settings.${protocol}_allow_insecure_ssl`}
@@ -206,14 +197,14 @@ class AccountIMAPSettingsForm extends React.Component<AccountIMAPSettingsFormPro
   renderFieldsForType(type) {
     return (
       <div>
-        <FormField field={`settings.${type}_host`} title={localized('Server')} {...this.props} />
-        <div style={{ textAlign: 'left' }}>
+        <FormField field={`settings.${type}_host`} title={localized('服务器')} {...this.props} />
+        <div className="imap-server-options">
           {this.renderPortDropdown(type)}
           {this.renderSecurityDropdown(type)}
         </div>
         <FormField
           field={`settings.${type}_username`}
-          title={localized('Username')}
+          title={localized('用户名')}
           {...this.props}
         />
         <FormField
@@ -225,7 +216,7 @@ class AccountIMAPSettingsForm extends React.Component<AccountIMAPSettingsFormPro
         {type === 'imap' && (
           <FormField
             field={`settings.container_folder`}
-            title={localized('Custom Container Folder')}
+            title={localized('自定义容器文件夹')}
             {...this.props}
           />
         )}

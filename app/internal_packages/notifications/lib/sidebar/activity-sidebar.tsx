@@ -106,12 +106,13 @@ export default class ActivitySidebar extends React.Component<
           {sendTasks.length ? <SyncbackActivity tasks={sendTasks} /> : null}
           {exportTasks.length ? <ExportActivity tasks={exportTasks} /> : null}
           {nonSendTasks.length || syncSummary.phrase ? (
-            <div
-              className="item"
-              onClick={() => (expanded ? this._onCollapse() : this._onExpand())}
-            >
-              <div
+            <div className="item">
+              <button
+                type="button"
                 className="inner clickable"
+                aria-expanded={expanded}
+                aria-label={expanded ? localized('收起同步详情') : localized('展开同步详情')}
+                onClick={() => (expanded ? this._onCollapse() : this._onExpand())}
                 style={{ whiteSpace: 'nowrap', display: 'flex', flexDirection: 'row' }}
               >
                 <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', flex: 1 }}>
@@ -121,11 +122,11 @@ export default class ActivitySidebar extends React.Component<
                   <span className={`ellipsis3`}>.</span>
                 </div>
                 {this.state.expanded && (
-                  <a onClick={this._onCollapse} style={{ paddingLeft: 5 }}>
+                  <span className="sync-activity-toggle-label" style={{ paddingLeft: 5 }}>
                     {localized('Hide')}
-                  </a>
+                  </span>
                 )}
-              </div>
+              </button>
 
               {this.state.expanded && (
                 <div>

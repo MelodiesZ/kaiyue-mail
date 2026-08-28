@@ -1,10 +1,5 @@
 import { test, expect, ElectronApplication, Page } from '@playwright/test';
-import {
-  launchApp,
-  closeApp,
-  threads,
-  openThread,
-} from '../helpers';
+import { launchApp, closeApp, threads, openThread } from '../helpers';
 
 let electronApp: ElectronApplication;
 let mainWindow: Page;
@@ -39,7 +34,7 @@ async function findThreadPopout(
         // ignore
       }
     }
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
   }
   return null;
 }
@@ -74,7 +69,7 @@ test('clicking popout button opens thread in a separate window', async () => {
   await mainWindow.waitForTimeout(500);
 
   // Click the popout button in the message list header
-  const popoutButton = mainWindow.locator('[aria-label="Popout thread"]');
+  const popoutButton = mainWindow.getByRole('button', { name: '弹出会话' });
   await expect(popoutButton).toBeVisible({ timeout: 3_000 });
   await popoutButton.click();
 

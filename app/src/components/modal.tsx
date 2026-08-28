@@ -87,16 +87,21 @@ class Modal extends React.Component<ModalProps, ModalState> {
         onClick={() => Actions.closeModal()}
       >
         <div className="modal" style={modalStyle} onClick={(event) => event.stopPropagation()}>
-          <RetinaImg
+          <button
+            type="button"
             className="modal-close"
-            style={{ width: '14', WebkitFilter: 'none', zIndex: 1, position: 'relative' }}
-            name="modal-close.png"
-            mode={RetinaImg.Mode.ContentDark}
+            aria-label="关闭"
             onClick={(event) => {
               event.stopPropagation();
               Actions.closeModal();
             }}
-          />
+          >
+            <RetinaImg
+              style={{ width: '14', WebkitFilter: 'none' }}
+              name="modal-close.png"
+              mode={RetinaImg.Mode.ContentDark}
+            />
+          </button>
           {children}
         </div>
       </div>

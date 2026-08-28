@@ -103,7 +103,7 @@
 }
 
 .RichEditor-toolbar {
-  font-family: 'Helvetica', sans-serif;
+  font-family: @font-family-sans-serif;
   font-size: 14px;
   user-select: none;
   position: relative;
@@ -237,7 +237,7 @@ body.platform-win32 {
 
 .action-bar-cover-gen() {
   .action-bar-cover {
-    background-image: linear-gradient(to right, fade(@action-bar-bg, 0) 0%, @action-bar-bg 10%);
+    background: @action-bar-bg;
   }
 }
 
@@ -363,10 +363,11 @@ body.platform-win32 {
       }
 
       .action-bar-cover {
-        transition: left 200ms ease-out;
+        transition: transform 200ms ease-out;
         position: absolute;
         top: 0;
         left: 0;
+        transform: translateX(0);
         width: 100%;
         height: 100%;
         z-index: 2;
@@ -378,7 +379,7 @@ body.platform-win32 {
         }
 
         .action-bar-cover {
-          left: 100%;
+          transform: translateX(100%);
         }
       }
     }
@@ -645,9 +646,7 @@ body.platform-win32 {
       }
 
       .show-more-fade {
-        background: linear-gradient(to right,
-            fade(@blurred-primary-color, 0%) 0%,
-            fade(@blurred-primary-color, 100%) 40%);
+        background: @blurred-primary-color;
       }
 
       .composer-action-bar-wrap {
@@ -667,9 +666,7 @@ body.platform-win32 {
       background-color: @background-primary;
 
       .show-more-fade {
-        background: linear-gradient(to right,
-            fade(@background-primary, 0%) 0%,
-            fade(@background-primary, 100%) 40%);
+        background: @background-primary;
       }
 
       .composer-action-bar-wrap {
@@ -781,6 +778,259 @@ body.platform-win32 {
 
   .tokenizing-field-input {
     margin-left: 2.8em;
+  }
+}
+
+// Kaiyue composer: a continuous writing surface with a stable action footer.
+.composer-inner-wrap {
+  color: @text-color;
+  background: @background-primary;
+
+  .composer-centered {
+    padding-top: 8px;
+  }
+
+  .composer-header-actions {
+    padding-top: 8px;
+    padding-right: 18px;
+
+    .action {
+      margin-left: 2px;
+      padding: 7px 8px;
+      border-radius: @border-radius-base;
+      color: @text-color-subtle;
+      transition: color 150ms cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 150ms cubic-bezier(0.22, 1, 0.36, 1);
+
+      &:hover {
+        color: @accent-primary;
+        background: @background-secondary;
+      }
+    }
+  }
+
+  .composer-field-label {
+    padding-top: 12px;
+    color: @text-color-subtle;
+    font-size: @font-size-small;
+    font-weight: @font-weight-medium;
+  }
+
+  .composer-subject {
+    &:after {
+      left: 18px;
+      width: calc(~'100% - 36px');
+      background: @border-color-divider;
+    }
+
+    input {
+      min-height: 44px;
+      padding: 11px 18px 10px;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      font-size: @font-size-large;
+      font-weight: @font-weight-medium;
+
+      &:focus {
+        border: 0;
+        box-shadow: none;
+      }
+    }
+  }
+
+  .composer-participant-field {
+    min-height: 44px;
+
+    &:after {
+      left: 18px;
+      width: calc(~'100% - 36px');
+      background: @border-color-divider;
+    }
+
+    .tokenizing-field-wrap,
+    &.from-field {
+      padding-right: 18px;
+      padding-left: 18px;
+    }
+
+    .content-container {
+      width: calc(~'100% - 36px');
+      margin-left: 18px;
+    }
+  }
+
+  .RichEditor-root {
+    padding-right: 18px;
+    padding-left: 18px;
+
+    .RichEditor-content {
+      padding-top: 16px;
+      color: @text-color;
+      font-size: @font-size-base;
+      line-height: 1.6;
+    }
+  }
+
+  .composer-editor-plaintext textarea {
+    padding: 16px 18px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .composer-action-bar-wrap,
+  &.composer-full-window .composer-action-bar-wrap {
+    border-top: 1px solid @border-color-divider;
+    border-radius: 0;
+    background: @background-off-primary;
+    box-shadow: none;
+
+    .composer-action-bar-content {
+      min-height: 56px;
+      padding: 9px 16px;
+      align-items: center;
+    }
+
+    .btn.btn-toolbar:not(.btn-emphasis) {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 0;
+      border-radius: @border-radius-base;
+
+      &:hover {
+        background: #e8edf3;
+      }
+    }
+
+    .btn-send {
+      display: inline-flex;
+      min-height: 0;
+      height: auto;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .btn-send .primary-item,
+    .btn-send .secondary-picker,
+    .btn-send .only-item,
+    .btn.btn-emphasis {
+      min-height: 36px;
+      height: 36px;
+      padding: 0 18px;
+      border-color: @accent-primary;
+      border-radius: @border-radius-base;
+      box-shadow: none;
+      color: #fff;
+      background: @accent-primary;
+      font-weight: @font-weight-semi-bold;
+      line-height: 34px;
+
+      &:hover {
+        border-color: #14315f;
+        background: #14315f;
+      }
+    }
+
+    .btn-send .primary-item {
+      border-radius: @border-radius-base 0 0 @border-radius-base;
+    }
+
+    .btn-send .secondary-picker {
+      padding-right: 8px;
+      padding-left: 8px;
+      border-left-color: rgba(255, 255, 255, 0.28);
+      border-radius: 0 @border-radius-base @border-radius-base 0;
+    }
+  }
+
+  .composer-drop-cover {
+    border: 2px dashed @accent-primary;
+    border-radius: @border-radius-large;
+    color: @accent-primary;
+    background: rgba(234, 241, 251, 0.94);
+
+    .centered {
+      color: @accent-primary;
+    }
+  }
+}
+
+.RichEditor-toolbar {
+  font-family: @font-family;
+
+  .floating-container {
+    min-height: 36px;
+    border-bottom-color: @border-color-divider;
+  }
+
+  .inner {
+    min-height: 36px;
+    padding: 2px 8px;
+    background: @background-primary;
+  }
+
+  button {
+    height: 30px;
+    padding: 4px 6px;
+    border-radius: @border-radius-small;
+    color: @text-color-subtle;
+    transition: color 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 150ms cubic-bezier(0.22, 1, 0.36, 1);
+
+    &:hover {
+      color: @text-color;
+      background: @background-secondary;
+    }
+
+    &.active {
+      color: @accent-primary;
+      background: #eaf1fb;
+    }
+  }
+
+  .dropdown {
+    overflow: hidden;
+    border: 1px solid @border-color-divider;
+    border-radius: @border-radius-large;
+    box-shadow: @standard-shadow;
+  }
+}
+
+#message-list .message-item-wrap {
+  .message-item-white-wrap.composer-outer-wrap,
+  .message-item-white-wrap.composer-outer-wrap.focused {
+    border-top: 1px solid @border-color-divider;
+    background: @background-primary;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .composer-inner-wrap {
+    .composer-header-actions {
+      padding-right: 10px;
+    }
+
+    .composer-participant-field .tokenizing-field-wrap,
+    .composer-participant-field.from-field,
+    .RichEditor-root {
+      padding-right: 12px;
+      padding-left: 12px;
+    }
+
+    .composer-subject input {
+      padding-right: 12px;
+      padding-left: 12px;
+    }
+
+    .composer-action-bar-wrap .composer-action-bar-content {
+      padding-right: 10px;
+      padding-left: 10px;
+    }
   }
 }
 

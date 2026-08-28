@@ -96,10 +96,10 @@ class ThreadList extends React.Component<
     let columns, itemHeight;
     if (this.state.style === 'wide') {
       columns = ThreadListColumns.Wide;
-      itemHeight = DOMUtils.getWorkspaceCssNumberProperty('thread-list-item-height-wide', 36);
+      itemHeight = DOMUtils.getWorkspaceCssNumberProperty('thread-list-item-height-wide', 42);
     } else {
       columns = ThreadListColumns.Narrow;
-      itemHeight = DOMUtils.getWorkspaceCssNumberProperty('thread-list-item-height-narrow', 85);
+      itemHeight = DOMUtils.getWorkspaceCssNumberProperty('thread-list-item-height-narrow', 88);
     }
 
     return (

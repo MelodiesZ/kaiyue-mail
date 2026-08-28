@@ -11,6 +11,7 @@ import {
   installTaskCapture,
   clearCapturedTasks,
   getCapturedTasks,
+  executeInRenderer,
 } from '../helpers';
 
 // Popout compose tests (c key, compose button) work without mailsync
@@ -62,6 +63,31 @@ test('clicking compose button opens composer', async () => {
   await expect(composerPage!.locator('.composer-inner-wrap').first()).toBeVisible();
 });
 
+test('send split button uses one unified surface without a wrapper shadow', async () => {
+  await mainWindow.locator('.item-compose').click();
+
+  const composerPage = await findComposer(electronApp);
+  expect(composerPage).not.toBeNull();
+
+  const sendButton = composerPage!.locator('.composer-inner-wrap .btn-send').first();
+  const primary = sendButton.locator('.primary-item');
+  const secondary = sendButton.locator('.secondary-picker');
+  await expect(sendButton).toBeVisible();
+  await expect(sendButton).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect(sendButton).toHaveCSS('box-shadow', 'none');
+  await expect(sendButton).toHaveCSS('padding-left', '0px');
+  await expect(primary).toHaveCSS('box-shadow', 'none');
+  await expect(secondary).toHaveCSS('box-shadow', 'none');
+  await expect(primary).toHaveCSS('background-color', 'rgb(0, 122, 255)');
+  await expect(secondary).toHaveCSS('background-color', 'rgb(0, 122, 255)');
+
+  const primaryBox = await primary.boundingBox();
+  const secondaryBox = await secondary.boundingBox();
+  expect(primaryBox).not.toBeNull();
+  expect(secondaryBox).not.toBeNull();
+  expect(secondaryBox!.height).toBe(primaryBox!.height);
+});
+
 // --- Inline reply compose ---
 
 test('reply composer has correct structure', async () => {
@@ -98,6 +124,84 @@ test('can type in composer body', async () => {
   await composerPage!.keyboard.press('Meta+Escape');
 });
 
+test('plain x is inserted in composer body without triggering an app shortcut', async () => {
+  await openThread(mainWindow, 0);
+  await mainWindow.keyboard.press('r');
+
+  const composerPage = await findComposer(electronApp);
+  expect(composerPage).not.toBeNull();
+
+  const composer = composerPage!.locator('.composer-inner-wrap').last();
+  await expect(composer).toBeVisible({ timeout: 5_000 });
+
+  const bodyEditable = composer.locator('[contenteditable="true"]').first();
+  await bodyEditable.click();
+  await clearCapturedTasks(electronApp);
+  await composerPage!.keyboard.type('abx xyz x');
+
+  await expect(bodyEditable).toContainText('abx xyz x');
+  await expect(composer).toBeVisible();
+  expect(await getCapturedTasks(composerPage!)).toHaveLength(0);
+
+  await composerPage!.keyboard.press('Meta+Escape');
+});
+
+test('x is still treated as text when Windows IME retargets the key event', async () => {
+  await openThread(mainWindow, 0);
+  await mainWindow.keyboard.press('r');
+
+  const composerPage = await findComposer(electronApp);
+  expect(composerPage).not.toBeNull();
+  const bodyEditable = composerPage!
+    .locator('.composer-inner-wrap')
+    .last()
+    .locator('[contenteditable="true"]')
+    .first();
+  await bodyEditable.click();
+
+  const shortcutTriggered = await executeInRenderer(
+    electronApp,
+    `(function() {
+      var Mousetrap = require('mousetrap');
+      var retargetedElement = document.createElement('div');
+      document.body.appendChild(retargetedElement);
+      var trap = new Mousetrap(retargetedElement);
+      var triggered = false;
+      trap.bind('x', function() { triggered = true; });
+      retargetedElement.dispatchEvent(new KeyboardEvent('keypress', {
+        key: 'x', code: 'KeyX', keyCode: 120, charCode: 120, which: 120, bubbles: true
+      }));
+      trap.reset();
+      retargetedElement.remove();
+      return triggered;
+    })()`
+  );
+
+  expect(shortcutTriggered).toBe(false);
+  await composerPage!.keyboard.press('Meta+Escape');
+});
+
+test('new message keeps one signature and a valid sender while typing x', async () => {
+  await mainWindow.locator('#sheet-container').click();
+  await mainWindow.keyboard.press('c');
+
+  const composerPage = await findComposer(electronApp);
+  expect(composerPage).not.toBeNull();
+  const composer = composerPage!.locator('.composer-inner-wrap').first();
+  await expect(composer).toBeVisible({ timeout: 5_000 });
+
+  const fromField = composer.locator('.from-field');
+  await expect(fromField).not.toContainText('null');
+  const bodyEditable = composer.locator('[contenteditable="true"]').first();
+  await bodyEditable.click();
+  await composerPage!.keyboard.type("kai'yue xiao ji x");
+
+  await expect(bodyEditable).toContainText("kai'yue xiao ji x");
+  expect(await composer.locator('signature').count()).toBeLessThanOrEqual(1);
+
+  await composerPage!.keyboard.press('Meta+Escape');
+});
+
 test('Cmd+Shift+C shows CC field', async () => {
   await openThread(mainWindow, 0);
   await mainWindow.keyboard.press('r');
@@ -109,12 +213,12 @@ test('Cmd+Shift+C shows CC field', async () => {
   await expect(composer).toBeVisible({ timeout: 5_000 });
 
   await composerPage!.keyboard.press('Meta+Shift+c');
-  await expect(composer.locator('.composer-participant-field:has-text("Cc")')).toBeVisible({
+  await expect(composer.locator('.composer-participant-field:has-text("抄送")')).toBeVisible({
     timeout: 3_000,
   });
 
   await composerPage!.keyboard.press('Meta+Shift+b');
-  await expect(composer.locator('.composer-participant-field:has-text("Bcc")')).toBeVisible({
+  await expect(composer.locator('.composer-participant-field:has-text("密送")')).toBeVisible({
     timeout: 3_000,
   });
 
@@ -400,10 +504,10 @@ test('link toolbar button opens link picker dropdown with URL input', async () =
   await urlInput.fill('https://example.com');
   await expect(urlInput).toHaveValue('https://example.com');
 
-  // The Add button should be visible
+  // The localized Add button should be visible
   const addButton = linkDropdown.locator('button');
   await expect(addButton).toBeVisible();
-  await expect(addButton).toContainText('Add');
+  await expect(addButton).toContainText('添加');
 
   // Press Enter to confirm and close the dropdown
   await composerPage!.keyboard.press('Enter');
@@ -645,7 +749,9 @@ test('Tab key cycles through template variables and typing replaces them', async
           composer = page.locator('.composer-inner-wrap').first();
           break;
         }
-      } catch { /* window may be loading */ }
+      } catch {
+        /* window may be loading */
+      }
     }
     if (composerPage) break;
 
@@ -655,7 +761,7 @@ test('Tab key cycles through template variables and typing replaces them', async
       composer = mainWindow.locator('.composer-inner-wrap').last();
       break;
     }
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
   }
   expect(composerPage).not.toBeNull();
   await expect(composer).toBeVisible({ timeout: 5_000 });

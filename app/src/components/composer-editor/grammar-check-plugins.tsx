@@ -60,7 +60,7 @@ export function cleanupDraft(draftId: string) {
 export function clearAllGrammarDecorations() {
   latestEditorByDraft.forEach((editor) => {
     try {
-      const decorations = editor.value.get('decorations') as any;
+      const decorations = (editor.value as any).get('decorations') as any;
       if (!decorations || !decorations.size) return;
       const remaining = decorations.filter((d: any) => d.mark.type !== GRAMMAR_ERROR_MARK);
       if (remaining.size !== decorations.size) {
@@ -275,7 +275,7 @@ function applyGrammarDecorations(editor: Editor, draftId: string) {
   });
 
   // Compare with existing decorations to avoid unnecessary re-renders
-  const previous = value.get('decorations') as any;
+  const previous = (value as any).get('decorations') as any;
   if (previous && previous.size === decorations.length) {
     const table: { [key: string]: boolean } = {};
     previous.forEach((d: any) => {
@@ -306,7 +306,7 @@ function applyReplacement(editor: Editor, replacement: string) {
   const anchorKey = selection.anchor.key;
 
   // Find the grammar-error decoration that contains the cursor
-  const decorations = value.get('decorations') as any;
+  const decorations = (value as any).get('decorations') as any;
   if (!decorations) return;
 
   let targetDecoration: any = null;
@@ -435,7 +435,7 @@ function FloatingCorrectionPopover({ editor, value }: ComposerEditorPluginTopLev
   // Grammar errors are stored as decorations, NOT as document marks.
   // value.activeMarks only returns marks on text nodes in the document model
   // and will never contain decoration marks — we must check value.decorations.
-  const decorations = value.get('decorations') as any;
+  const decorations = (value as any).get('decorations') as any;
   if (!decorations || !decorations.size) return null;
 
   const cursorPoint = { key: value.selection.anchor.key, offset: value.selection.anchor.offset };

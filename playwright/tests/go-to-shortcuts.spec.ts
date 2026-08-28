@@ -27,7 +27,7 @@ test('g i navigates to Inbox', async () => {
   await mainWindow.waitForTimeout(1_000);
 
   // Verify the Inbox sidebar item is selected
-  const inboxItem = mainWindow.locator('.account-sidebar .item.selected .name:has-text("Inbox")');
+  const inboxItem = mainWindow.locator('.account-sidebar .item.selected .name:has-text("收件箱")');
   await expect(inboxItem).toBeVisible({ timeout: 3_000 });
 });
 
@@ -40,7 +40,9 @@ test('g t navigates to Sent', async () => {
   await mainWindow.keyboard.press('t');
   await mainWindow.waitForTimeout(1_000);
 
-  const sentItem = mainWindow.locator('.account-sidebar .item.selected .name:has-text("Sent")');
+  const sentItem = mainWindow.locator(
+    '.account-sidebar .item.selected .name:has-text("已发送邮件")'
+  );
   await expect(sentItem).toBeVisible({ timeout: 3_000 });
 });
 
@@ -53,7 +55,7 @@ test('g d navigates to Drafts', async () => {
   await mainWindow.keyboard.press('d');
   await mainWindow.waitForTimeout(1_000);
 
-  const draftsItem = mainWindow.locator('.account-sidebar .item.selected .name:has-text("Drafts")');
+  const draftsItem = mainWindow.locator('.account-sidebar .item.selected .name:has-text("草稿")');
   await expect(draftsItem).toBeVisible({ timeout: 3_000 });
 
   // Return to inbox for next tests

@@ -2,10 +2,10 @@
 
 @keyframes indicator-animation {
   0% {
-    background-position-x: 200px;
+    opacity: 0.35;
   }
   100% {
-    background-position-x: 760px;
+    opacity: 1;
   }
 }
 
@@ -43,7 +43,8 @@
     color: mix(@color-warning, @text-color-subtle, 20%);
     padding: @padding-base-vertical @padding-base-horizontal;
     background: mix(@color-warning, @background-primary, 10%);
-    border-left: 4px solid mix(@color-warning, @border-color-divider, 20%);
+    border: 1px solid mix(@color-warning, @border-color-divider, 20%);
+    border-radius: @border-radius-base;
     margin: 0 20px;
     margin-top: 20px;
   }
@@ -53,6 +54,17 @@
     text-align: center;
     max-width: 500px;
     margin: 50px auto;
+
+    .text-link {
+      appearance: none;
+      padding: 0;
+      border: 0;
+      color: @text-color-link;
+      background: transparent;
+      font: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+    }
   }
 
   .copy-to-clipboard {
@@ -95,16 +107,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     img {
-      background-image: linear-gradient(
-        105deg,
-        @background-primary 0%,
-        @background-primary 15%,
-        @accent-primary 45%,
-        @background-primary 49%,
-        @background-primary 100%
-      );
-      background-position-x: 200px;
-      background-size: 590px;
+      background-color: @accent-primary;
     }
   }
 
@@ -207,12 +210,7 @@
       border-left: 1px solid mix(@text-color-very-subtle, @background-primary, 50%);
     }
     .layer.text-overlay {
-      background: linear-gradient(
-          to right,
-          fadeout(@background-primary, 0%) 15%,
-          fadeout(@background-primary, 100%) 100%
-        )
-        /*rtl:ignore */;
+      background: transparent;
       font-size: 60px;
       display: flex;
       align-items: flex-end;

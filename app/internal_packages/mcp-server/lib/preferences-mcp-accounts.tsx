@@ -94,9 +94,10 @@ export default class PreferencesMcpAccounts extends React.Component<Props, State
 
     return (
       <div key={account.id} className="mcp-account-item">
-        <div className="mcp-account-header" onClick={() => this._toggleExpanded(account.id)}>
+        <div className="mcp-account-header">
           <input
             type="checkbox"
+            aria-label={localized('允许 MCP 访问 %@', account.label || account.emailAddress)}
             checked={enabled}
             ref={(el) => {
               if (el) el.indeterminate = enabled && hasExclusions;
@@ -106,15 +107,18 @@ export default class PreferencesMcpAccounts extends React.Component<Props, State
               this._toggleAccount(account.id);
             }}
           />
-          <DisclosureTriangle
-            visible
-            collapsed={!expanded}
-            onCollapseToggled={() => this._toggleExpanded(account.id)}
-          />
-          <span className="mcp-account-name">{account.label || account.emailAddress}</span>
-          {account.label && account.label !== account.emailAddress && (
-            <span className="mcp-account-email">{account.emailAddress}</span>
-          )}
+          <button
+            type="button"
+            className="mcp-account-disclosure"
+            aria-expanded={expanded}
+            onClick={() => this._toggleExpanded(account.id)}
+          >
+            <DisclosureTriangle visible collapsed={!expanded} onCollapseToggled={() => {}} />
+            <span className="mcp-account-name">{account.label || account.emailAddress}</span>
+            {account.label && account.label !== account.emailAddress && (
+              <span className="mcp-account-email">{account.emailAddress}</span>
+            )}
+          </button>
         </div>
         {expanded && enabled && (
           <div className="mcp-folder-list">

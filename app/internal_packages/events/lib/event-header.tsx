@@ -163,9 +163,14 @@ export class EventHeader extends React.Component<EventHeaderProps, EventHeaderSt
     return (
       <div className="event-wrapper">
         <div className="event-header">
-          <div className="event-download" onClick={() => Actions.fetchAndOpenFile(this.props.file)}>
+          <button
+            type="button"
+            className="event-download"
+            aria-label={localized('下载日历邀请')}
+            onClick={() => Actions.fetchAndOpenFile(this.props.file)}
+          >
             <RetinaImg name="icon-attachment-download.png" mode={RetinaImg.Mode.ContentIsMask} />
-          </div>
+          </button>
           <RetinaImg name="icon-RSVP-calendar-mini@2x.png" mode={RetinaImg.Mode.ContentPreserve} />
           <span className="event-title-text">{localized('Event')}: </span>
           <span className="event-title">{icsEvent.summary}</span>
@@ -248,9 +253,11 @@ export class EventHeader extends React.Component<EventHeaderProps, EventHeaderSt
     return (
       <div className="event-actions">
         {actions.map(([actionStatus, actionLabel]) => (
-          <div
+          <button
+            type="button"
             key={actionStatus}
             className={`btn btn-large btn-rsvp ${status === actionStatus ? actionStatus : ''}`}
+            disabled={Boolean(inflight)}
             onClick={() => this._onRSVP(actionStatus)}
           >
             {actionStatus === status || actionStatus !== inflight ? (
@@ -262,7 +269,7 @@ export class EventHeader extends React.Component<EventHeaderProps, EventHeaderSt
                 mode={RetinaImg.Mode.ContentPreserve}
               />
             )}
-          </div>
+          </button>
         ))}
       </div>
     );

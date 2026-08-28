@@ -1,6 +1,6 @@
 import { localized, React } from 'mailspring-exports';
-import { RetinaImg } from 'mailspring-component-kit';
 import * as OnboardingActions from './onboarding-actions';
+import KaiyueConfig from '../../../src/kaiyue-config';
 
 export default class WelcomePage extends React.Component {
   static displayName = 'WelcomePage';
@@ -13,20 +13,17 @@ export default class WelcomePage extends React.Component {
     return (
       <div className="page welcome">
         <div className="steps-container">
-          <div>
-            <p className="hero-text" style={{ fontSize: 46, marginTop: 257 }}>
-              {localized('Welcome to Mailspring')}
-            </p>
-            <RetinaImg
-              className="icons"
-              url="mailspring://onboarding/assets/icons-bg@2x.png"
-              mode={RetinaImg.Mode.ContentPreserve}
-            />
+          <div className="welcome-brand">
+            <span className="welcome-mark" aria-hidden="true">
+              K
+            </span>
+            <h1 className="hero-text">{localized('欢迎使用凯越邮箱')}</h1>
+            <p className="sub-text">{KaiyueConfig.brand.company}</p>
           </div>
         </div>
         <div className="footer">
           <button key="next" className="btn btn-large btn-continue" onClick={this._onContinue}>
-            {localized('Get Started')}
+            {localized('开始使用')}
           </button>
         </div>
       </div>

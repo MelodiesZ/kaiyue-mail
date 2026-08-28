@@ -117,9 +117,9 @@ export class MonthViewDayCell extends React.Component<MonthViewDayCellProps> {
             />
           ))}
           {overflowCount > 0 && (
-            <div className="month-view-overflow" onClick={this._onDayNumberClick}>
+            <button type="button" className="month-view-overflow" onClick={this._onDayNumberClick}>
               {localized('+%@ more', overflowCount)}
-            </div>
+            </button>
           )}
         </div>
       </div>

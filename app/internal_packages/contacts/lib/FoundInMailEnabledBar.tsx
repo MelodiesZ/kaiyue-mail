@@ -45,9 +45,9 @@ class FoundInMailEnabledBarWithData extends React.Component<FoundInMailEnabledBa
             `Contacts you've emailed appear here and Mailspring can suggest them when composing new messages.`
           )}
         </div>
-        <div className="btn" onClick={this._onToggle}>
+        <button type="button" className="btn" onClick={this._onToggle}>
           {disabled ? localized(`Enable`) : localized(`Disable`)}
-        </div>
+        </button>
       </div>
     );
   }

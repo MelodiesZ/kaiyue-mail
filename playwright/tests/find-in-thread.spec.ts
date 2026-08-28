@@ -26,11 +26,11 @@ test('Cmd+F opens find bar, typing searches, Escape closes it', async () => {
   await expect(findBar).toBeVisible({ timeout: 3_000 });
 
   // The input should be focused and ready for typing
-  const input = findBar.locator('input[placeholder="Find in thread"]');
+  const input = findBar.locator('input[placeholder="在会话中查找"]');
   await expect(input).toBeVisible();
 
   // Type a search term (must be >= 2 characters for CHAR_THRESHOLD)
-  await input.fill('the');
+  await input.fill('KY-2500');
   await mainWindow.waitForTimeout(1_000);
 
   // Verify matches were found — the selection-progress div shows "X of Y"
@@ -57,13 +57,10 @@ test('find bar next/previous buttons navigate between matches', async () => {
   const findBar = mainWindow.locator('.find-in-thread.enabled');
   await expect(findBar).toBeVisible({ timeout: 3_000 });
 
-  const input = findBar.locator('input[placeholder="Find in thread"]');
+  const input = findBar.locator('input[placeholder="在会话中查找"]');
 
   // Use a single common letter pair to maximize matches for navigation testing
-  await input.fill('e');
-  await mainWindow.waitForTimeout(500);
-  // 'e' alone is below CHAR_THRESHOLD (2), so try 'en' or similar
-  await input.fill('en');
+  await input.fill('KY-2500');
   await mainWindow.waitForTimeout(1_000);
 
   const progress = findBar.locator('.selection-progress');
@@ -76,7 +73,7 @@ test('find bar next/previous buttons navigate between matches', async () => {
 
     if (total > 1) {
       // Click next button — index should advance
-      const nextBtn = findBar.locator('button[aria-label="Next result"]');
+      const nextBtn = findBar.locator('button[aria-label="下一个结果"]');
       await nextBtn.click();
       await mainWindow.waitForTimeout(300);
 
@@ -85,7 +82,7 @@ test('find bar next/previous buttons navigate between matches', async () => {
       expect(afterNext).not.toBe(progressText);
 
       // Click previous button — should go back
-      const prevBtn = findBar.locator('button[aria-label="Previous result"]');
+      const prevBtn = findBar.locator('button[aria-label="上一个结果"]');
       await prevBtn.click();
       await mainWindow.waitForTimeout(300);
 
@@ -94,7 +91,7 @@ test('find bar next/previous buttons navigate between matches', async () => {
     } else {
       // Only 1 match — next wraps around, counter stays the same. Just verify
       // the buttons are present and clickable without error.
-      const nextBtn = findBar.locator('button[aria-label="Next result"]');
+      const nextBtn = findBar.locator('button[aria-label="下一个结果"]');
       await nextBtn.click();
       await mainWindow.waitForTimeout(300);
       const afterNext = await progress.textContent();

@@ -48,7 +48,7 @@ export default class OpenIdentityPageButton extends React.Component<
     });
     if (this.state.loading) {
       return (
-        <div className={`${cls} btn-disabled`}>
+        <button type="button" className={`${cls} btn-disabled`} disabled>
           <RetinaImg
             name="sending-spinner.gif"
             width={15}
@@ -56,24 +56,24 @@ export default class OpenIdentityPageButton extends React.Component<
             mode={RetinaImg.Mode.ContentPreserve}
           />
           &nbsp;{this.props.label}&hellip;
-        </div>
+        </button>
       );
     }
     if (this.props.img) {
       return (
-        <div className={cls} onClick={this._onClick}>
+        <button type="button" className={cls} onClick={this._onClick}>
           <RetinaImg
             name={this.props.img}
             mode={this.props.isCTA ? RetinaImg.Mode.ContentIsMask : RetinaImg.Mode.ContentPreserve}
           />
           &nbsp;&nbsp;{this.props.label}
-        </div>
+        </button>
       );
     }
     return (
-      <div className={cls} onClick={this._onClick}>
+      <button type="button" className={cls} onClick={this._onClick}>
         {this.props.label}
-      </div>
+      </button>
     );
   }
 }

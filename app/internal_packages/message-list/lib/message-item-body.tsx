@@ -8,6 +8,7 @@ import {
   QuotedHTMLTransformer,
   AttachmentStore,
   Message,
+  localized,
 } from 'mailspring-exports';
 import { InjectedComponentSet, RetinaImg } from 'mailspring-component-kit';
 
@@ -32,9 +33,16 @@ class ConditionalQuotedTextControl extends React.Component<{ body: string; onCli
       return null;
     }
     return (
-      <a className="quoted-text-control" onClick={this.props.onClick}>
-        <span className="dots">&bull;&bull;&bull;</span>
-      </a>
+      <button
+        type="button"
+        className="quoted-text-control"
+        aria-label={localized('显示引用内容')}
+        onClick={this.props.onClick}
+      >
+        <span aria-hidden="true" className="dots">
+          &bull;&bull;&bull;
+        </span>
+      </button>
     );
   }
 }
@@ -202,7 +210,11 @@ export default class MessageItemBody extends React.Component<
           body={this.props.message.body || ''}
           onClick={this._onToggleQuotedText}
         />
-        {this.state.clipped && <a onClick={this._onShowClipped}>[Message Clipped - Show All]</a>}
+        {this.state.clipped && (
+          <button type="button" className="show-clipped-message" onClick={this._onShowClipped}>
+            {localized('邮件内容已截断，显示全部')}
+          </button>
+        )}
       </span>
     );
   }

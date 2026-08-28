@@ -6,19 +6,43 @@
 .theme-picker {
   text-align: center;
   cursor: default;
+  padding: 2px 4px 8px;
+
   h4 {
-    font-size: 14.5px;
-    margin-top: -10px;
-    margin-bottom: 5px;
+    margin: 0 0 4px;
+    color: #17233a !important;
+    font-size: 16px;
+    font-weight: 650;
   }
   .scroll-region-content {
     background: none;
   }
+
+  .theme-picker__description {
+    color: #657085;
+    font-size: 12px;
+  }
+
+  .theme-picker__scroll {
+    height: 392px;
+    margin: 14px 2px 0;
+    border-top: 1px solid #dce3ec;
+  }
+
+  .theme-picker__options {
+    align-content: flex-start;
+    justify-content: center;
+    padding: 6px 0 10px;
+  }
   .clickable-theme-option {
-    width: 115px;
-    height: 70px;
-    margin: 2px;
-    top: -20px;
+    width: 116px;
+    height: 72px;
+    margin: 4px;
+    top: 0;
+    overflow: hidden;
+    border: 1px solid #dce3ec;
+    border-radius: 8px;
+    background: #fff;
     iframe {
       pointer-events: none;
       position: relative;
@@ -45,17 +69,18 @@
         align-items: center;
         gap: 4px;
         font-size: 11px;
-        color: #111;
+        color: #657085;
         cursor: default;
       }
 
       select {
         width: 100%;
+        min-height: 34px;
         font-size: @font-size-smaller;
         background:white;
         border: 1px solid #ccc;
-        border-radius: 2px;
-        color: #111;
+        border-radius: 6px;
+        color: #17233a;
       }
     }
   }
@@ -65,6 +90,7 @@
     text-align: center;
     margin-top: 5px;
     a {
+      color: #1a3b70;
       text-decoration: none;
       cursor: default;
     }
@@ -77,7 +103,7 @@
       margin: 12px;
     }
     .clickable-theme-option {
-      top: -10px;
+      top: 0;
     }
   }
 }

@@ -175,7 +175,7 @@ const ContactsPerspectivesWithData: React.FunctionComponent<ContactsPerspectives
       <OutlineViewItem
         item={{
           id: 'bla',
-          name: 'All Contacts',
+          name: localized('All Contacts'),
           iconName: 'people.png',
           children: [],
           selected: selected.type === 'unified',
@@ -219,5 +219,5 @@ export const ContactPerspectivesList = ListensToObservable(
 ContactPerspectivesList.displayName = 'ContactPerspectivesList';
 ContactPerspectivesList.containerStyles = {
   minWidth: 165,
-  maxWidth: 250,
+  maxWidth: 220,
 };

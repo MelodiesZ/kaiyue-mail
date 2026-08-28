@@ -91,8 +91,8 @@ npx playwright test --config playwright/playwright.config.ts tests/my-new-tests.
 
 Key points:
 - The `PLAYWRIGHT=1` env var is set at launch. App code checks `process.env.PLAYWRIGHT` to enable test-specific behavior.
-- **Mailsync (the C++ sync engine) is not running.** The app launches with a golden SQLite database snapshot, but no sync process is writing to it. All writes happen via Tasks, which are intercepted at the Flux action layer.
-- The test config directory is a temp copy of a fixture directory, isolated per test run, and cleaned up in `afterAll`.
+- **Mailsync (the C++ sync engine) is not running.** Each run creates the schema, then `kaiyue-fixture.ts` deterministically seeds the isolated SQLite database with the Kaiyue IMAP account, Chinese folders, six inbox threads, contacts, an attachment, and a calendar event. No external database snapshot is required.
+- The test config directory is generated in a temporary directory, isolated per test run, and cleaned up in `afterAll`.
 
 ## Key Concepts
 
@@ -558,14 +558,14 @@ Key findings:
 **10. Move-to-folder popover interaction** — DONE (added to `thread-actions.spec.ts`)
 
 Tests implemented:
-- `v` opens popover → type "Trash" in `input.search` to filter → filtered results shown → `Escape` closes popover
+- `v` opens popover → type "回收站" in `input.search` to filter → filtered results shown → `Escape` closes popover
 - `v` opens popover → click first folder item → `ChangeFolderTask` or `ChangeLabelsTask` created
 
 Key finding: The popover's search input has class `.search` and placeholder "Move to...". Filtering is immediate — no debounce.
 
 **11. Label picker** (`l`) — NOT TESTABLE with current fixture
 
-The `l` key (`core:change-labels`) only registers when `account.usesLabels()` returns true (Gmail/Google accounts). The test fixture uses a Yahoo account (IMAP/folders), so the label picker command is never bound. Testing this would require a Gmail account fixture.
+The `l` key (`core:change-labels`) only registers when `account.usesLabels()` returns true (Gmail/Google accounts). The Kaiyue fixture uses a standard IMAP folder account, so the label picker command is never bound. Testing this would require a separate Gmail-label fixture.
 
 ### Community-Reported Gaps — Tests sourced from real bug reports and regressions
 
@@ -607,7 +607,7 @@ Tests implemented:
 - Archive shortcut (`e`) works on search result threads → `ChangeFolderTask`/`ChangeLabelsTask` created
 - (Pre-existing) Escape/X clears search and returns to inbox
 
-Key finding: Search results are regular thread list items that respond to the same keyboard shortcuts. The tests search for "SMTP" (present in test fixture data), focus a result, and verify the shortcut creates the expected task.
+Key finding: Search results are regular thread list items that respond to the same keyboard shortcuts. The tests search for "KY-2500" (present in the deterministic Kaiyue fixture), focus a result, and verify the shortcut creates the expected task.
 
 **P2: Multi-select edge cases** — DONE (added to `multi-select.spec.ts`)
 
@@ -635,7 +635,7 @@ The ThemeManager's `updateThemePackageAndRecomputeLESS()` (which recompiles all 
 - Remote image loading (requires network access)
 - Link opens in external browser (OS-level integration)
 - Unread count badge changes (requires mailsync writing to DB)
-- Label picker (requires Gmail account fixture; test account is Yahoo/IMAP)
+- Label picker (requires a Gmail-label fixture; the Kaiyue account uses IMAP folders)
 
 ### Lower Priority — Less common interaction paths
 
@@ -649,20 +649,20 @@ Tests implemented:
 
 Key findings:
 - Thread popout windows can be identified by checking `windowType === 'thread-popout'` in the URL's loadSettings parameter.
-- The popout window loads the thread from the database via `DatabaseStore.find()`, which works with the golden test database.
+- The popout window loads the thread from the generated Kaiyue fixture database via `DatabaseStore.find()`.
 - Messages render in the popout window because `message-list/main.tsx` detects non-main windows and registers MessageList at `WorkspaceStore.Location.Center`.
 
 **14. Mute thread** (`m`) — NOT TESTABLE
 
 The `core:mute-conversation` command has a keybinding in the Gmail keymap (`m`) but no handler is implemented in the codebase. Pressing `m` is a no-op.
 
-**15. Snooze** (`h`) — DONE (added to `thread-actions.spec.ts`)
+**15. Snooze** — CONDITIONAL
 
 Tests implemented:
-- `h` opens snooze popover (`.snooze-popover`) → contains 6 `.snooze-item` date options (Later Today, Tonight, Tomorrow, This Weekend, Next Week, Next Month) → `Escape` closes popover
+- When the identity-gated snooze package is active, its toolbar button opens `.snooze-popover` with six date options and `Escape` closes it. The branded no-identity Kaiyue configuration normally leaves this package inactive, so the test exits when the button is absent.
 
 Key findings:
-- The snooze popover is rendered via `Actions.openPopover()` when the toolbar `SnoozeButton` is clicked. The `core:snooze-item` keybinding (mapped to `h` in Gmail keymap) triggers `this._btn.onClick()` on the `ToolbarSnooze` component via `BindGlobalCommands`.
+- The snooze popover is rendered via `Actions.openPopover()` when the toolbar `SnoozeButton` is clicked. Key bindings depend on the selected keymap template.
 - The `ToolbarSnooze` component only renders when `FocusedPerspectiveStore.current().isInbox()` returns true, so the test must start from the Inbox folder.
 - Clicking a snooze item would trigger `SnoozeActions.snoozeThreads()` (a Reflux action, not `Actions.queueTask`), so it cannot be verified via the standard task capture system.
 
@@ -679,7 +679,7 @@ Key findings:
 **17. Drag-and-drop threads to folders** — DONE (`drag-to-folder.spec.ts`)
 
 Tests implemented:
-- Drag thread to Trash folder → `ChangeFolderTask` created with `folder.role === 'trash'`
+- Drag thread to 回收站 → `ChangeFolderTask` created with `folder.role === 'trash'`
 - Drag thread to Archive folder → `ChangeFolderTask` or `ChangeLabelsTask` created
 - Undo toast appears after drag-to-folder
 

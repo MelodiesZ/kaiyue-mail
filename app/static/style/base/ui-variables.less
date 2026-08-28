@@ -16,8 +16,8 @@
 
 //=============================== Colors ===============================//
 //== Color Definitions
-@black: #231f20;
-@gray-base: #0a0b0c;
+@black: #17233a;
+@gray-base: #111827;
 @gray-darker: lighten(@gray-base, 13.5%); // #222
 @gray-dark: lighten(@gray-base, 20%); // #333
 @gray: lighten(@gray-base, 33.5%); // #555
@@ -25,9 +25,9 @@
 @gray-lighter: lighten(@gray-base, 92.5%); // #eee
 @white: #ffffff;
 
-@blue-dark: #3187e1;
-@blue: #419bf9;
-@blue-light: #009ec4;
+@blue-dark: #14315f;
+@blue: #1a3b70;
+@blue-light: #2f6fed;
 
 //== Color Descriptors
 // --system-accent / --system-accent-dark are optionally set at runtime by
@@ -36,56 +36,53 @@
 // @accent-primary via CSS color-mix() so per-theme overrides of
 // @accent-primary also flow through automatically (LESS resolves @accent-
 // primary lazily to the theme's last declaration).
-@accent-primary: var(--system-accent, @blue);
+@accent-primary: var(--system-accent, #1a3b70);
 @accent-primary-dark: var(--system-accent-dark, color-mix(in srgb, @accent-primary, black 10%));
 
 @background-primary: @white;
-@background-off-primary: #fdfdfd;
-@background-secondary: #f6f6f6;
-@background-tertiary: #6d7987;
+@background-off-primary: #f8fafc;
+@background-secondary: #f6f8fb;
+@background-tertiary: #6b788b;
 
-@color-info: @blue-dark;
-@color-success: #5cb346;
-@color-warning: #f0ad4e;
-@color-error: #d9534f;
-@color-danger: #d9534f;
+@color-info: #2f6fed;
+@color-success: #248a5a;
+@color-warning: #b66a11;
+@color-error: #c33d4a;
+@color-danger: #c33d4a;
 
 @component-active-color: @accent-primary-dark;
-@component-active-bg: @background-primary;
+@component-active-bg: #eaf1fb;
 
-@background-gradient: linear-gradient(
-  to top,
-  rgba(241, 241, 241, 0.75) 0%,
-  rgba(253, 253, 253, 0.75) 100%
-);
+@background-gradient: none;
 
-@border-color-primary: darken(@background-primary, 10%);
-@border-color-secondary: darken(@background-secondary, 10%);
+@border-color-primary: #dce3ec;
+@border-color-secondary: #dce3ec;
 @border-color-tertiary: darken(@background-tertiary, 10%);
 @border-color-divider: @border-color-secondary;
 
 //============================= Typography =============================//
 
 // ----- Colors -----
-@text-color: @black;
-@text-color-subtle: fadeout(@text-color, 20%);
-@text-color-very-subtle: fadeout(@text-color, 50%);
+@text-color: #17233a;
+@text-color-subtle: #526176;
+@text-color-very-subtle: #6b788b;
 @text-color-inverse: @white;
 @text-color-inverse-subtle: fadeout(@text-color-inverse, 20%);
 @text-color-inverse-very-subtle: fadeout(@text-color-inverse, 50%);
 
-@text-color-heading: #434648;
+@text-color-heading: #17233a;
 
-@text-color-link: @blue;
-@text-color-link-hover: @blue-dark;
-@text-color-link-active: @blue-dark;
+@text-color-link: #1a3b70;
+@text-color-link-hover: #14315f;
+@text-color-link-active: #10284a;
 
-@text-color-selected: @text-color-inverse;
+@text-color-selected: @text-color;
 
 @text-color-search-match: #fff000;
 @text-color-search-current-match: #ff8b1a;
 
-@font-family-sans-serif: 'Nylas-Pro', 'Helvetica', sans-serif;
+@font-family-sans-serif: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei',
+  'Noto Sans CJK SC', sans-serif;
 @font-family-serif: Georgia, 'Times New Roman', Times, serif;
 @font-family-monospace: 'DejaVu Sans Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
 
@@ -120,7 +117,7 @@
 @font-size-h6: @font-size-base * 0.86; // 12px
 
 // ----- Line Height -----
-@line-height-base: 1.5; // 22.5/15
+@line-height-base: 1.45;
 @line-height-computed: floor((@font-size-base * @line-height-base)); // ~20px
 @line-height-heading: 1.1;
 
@@ -128,14 +125,14 @@
 // Define common padding and border radius sizes and more. Values based on
 // 14px text and 1.428 line-height (~20px to start).
 
-@spacing-standard: @font-size-base;
+@spacing-standard: 16px;
 
 @spacing-quarter: @spacing-standard * 0.25;
 @spacing-half: @spacing-standard * 0.5;
 @spacing-three-quarters: @spacing-standard * 0.75;
 @spacing-double: @spacing-standard * 2;
 
-@padding-base-vertical: 5px;
+@padding-base-vertical: 6px;
 @padding-base-horizontal: 12px;
 
 @padding-large-vertical: 9px;
@@ -150,31 +147,30 @@
 @line-height-large: @line-height-computed * 1.3;
 @line-height-small: @line-height-computed * 0.95;
 
-@border-radius-base: 3px;
-@border-radius-large: 5px;
-@border-radius-small: 2px;
+@border-radius-base: 6px;
+@border-radius-large: 8px;
+@border-radius-small: 4px;
 
 //============================== Shadows ===============================//
 
-@standard-shadow-color: rgba(0, 0, 0, 0.15);
-@standard-shadow: 0 1px 4px 0 @standard-shadow-color;
-@standard-shadow-up: 0 -1px 4px 0 @standard-shadow-color;
-@shadow-border: 0 0.5px 0 @standard-shadow-color, 0 -0.5px 0 @standard-shadow-color,
-  0.5px 0 0 @standard-shadow-color, -0.5px 0 0 @standard-shadow-color;
+@standard-shadow-color: rgba(23, 35, 58, 0.14);
+@standard-shadow: 0 4px 12px @standard-shadow-color;
+@standard-shadow-up: 0 -4px 12px @standard-shadow-color;
+@shadow-border: 0 0 0 1px rgba(23, 35, 58, 0.12);
 
 //=============================== Buttons ==============================//
 
-@btn-border-color: @standard-shadow-color;
+@btn-border-color: #dce3ec;
 
-@btn-default-bg-color: darken(@background-primary, 0.5%);
+@btn-default-bg-color: @background-primary;
 @btn-default-text-color: @text-color;
 
 @btn-icon-color: #919191;
 
 @btn-action-bg-color: @color-success;
-@btn-action-text-color: @text-color;
+@btn-action-text-color: @text-color-inverse;
 
-@btn-emphasis-bg-color: #5b90fb;
+@btn-emphasis-bg-color: #1a3b70;
 @btn-emphasis-text-color: @text-color-inverse;
 
 @btn-danger-bg-color: @color-danger;
@@ -191,7 +187,7 @@
 @input-bg: @white;
 @input-bg-disabled: @gray-lighter;
 
-@input-border-color: fadeout(@border-color-primary, 10%);
+@input-border-color: #c8d2df;
 @input-border-color-blurred: desaturate(@input-border-color, 100%);
 
 @input-font-size: 14px;
@@ -199,21 +195,21 @@
 //=============================== Components ===========================//
 
 //== Toolbar
-@toolbar-background-color: darken(@white, 17.5%);
+@toolbar-background-color: #ffffff;
 
 //== Account Sidebar
-@panel-background-color: @gray-lighter;
+@panel-background-color: #f6f8fb;
 @source-list-bg: @panel-background-color;
-@source-list-active-bg: @panel-background-color;
+@source-list-active-bg: #eaf1fb;
 @source-list-active-color: @component-active-color;
 
 //== Thread List (e.g, `.list-group-item`, `.list-item`)
 @list-bg: @white;
-@list-border: #ddd;
-@list-hover-bg: darken(@list-bg, 4%);
-@list-focused-color: @list-bg;
-@list-focused-bg: @component-active-color;
-@list-focused-border: @list-focused-bg;
+@list-border: #e4e9f0;
+@list-hover-bg: #f6f8fb;
+@list-focused-color: @text-color;
+@list-focused-bg: #eaf1fb;
+@list-focused-border: #c8d8ef;
 @list-selected-color: inherit;
 @list-selected-bg: color-mix(in srgb, @component-active-color 17%, @list-bg);
 @list-selected-border: color-mix(in srgb, @component-active-color 50%, @list-bg);

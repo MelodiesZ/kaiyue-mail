@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 
 import { RetinaImg } from './retina-img';
 import SelectableTable, { SelectableTableCell } from './selectable-table';
+import { localized } from 'mailspring-exports';
 
 /*
  * EditableTable component which renders a {SelectableTable} that supports
@@ -201,12 +202,22 @@ function EditableTable(props: EditableTableProps) {
     <div className="editable-table-container">
       <SelectableTable {...tableProps} />
       <div className="column-actions">
-        <div className="btn btn-small" onClick={onAddColumn}>
+        <button
+          type="button"
+          className="btn btn-small"
+          aria-label={localized('Add Column')}
+          onClick={onAddColumn}
+        >
           <RetinaImg name="icon-column-plus.png" mode={RetinaImg.Mode.ContentPreserve} />
-        </div>
-        <div className="btn btn-small" onClick={onRemoveColumn}>
+        </button>
+        <button
+          type="button"
+          className="btn btn-small"
+          aria-label={localized('Remove Column')}
+          onClick={onRemoveColumn}
+        >
           <RetinaImg name="icon-column-minus.png" mode={RetinaImg.Mode.ContentPreserve} />
-        </div>
+        </button>
       </div>
     </div>
   );

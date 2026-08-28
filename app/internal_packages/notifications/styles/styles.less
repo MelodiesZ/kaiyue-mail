@@ -2,12 +2,13 @@
 
 .notifications {
   background-color: @panel-background-color;
-  box-shadow: 0 -6px 4px @panel-background-color;
+  box-shadow: none;
   z-index: 2;
 }
 
 .notification {
-  background: @background-color-info;
+  border: 1px solid color-mix(in srgb, @accent-primary, transparent 76%);
+  background: @accent-primary;
   display: none;
   color: @text-color-inverse;
   margin: 10px;
@@ -16,11 +17,37 @@
 }
 
 .notification.error {
-  background: @background-color-error;
+  border-color: color-mix(in srgb, @color-error, transparent 66%);
+  color: @color-error;
+  background: color-mix(in srgb, @color-error, @background-primary 94%);
+
+  .notif-top {
+    padding: 12px;
+  }
+
+  .icon img {
+    background-color: @color-error;
+  }
+
+  .subtitle {
+    color: @color-error;
+  }
+
+  .action {
+    border-color: color-mix(in srgb, @color-error, transparent 80%);
+    color: @color-error;
+    background: @background-primary;
+
+    &:hover {
+      color: @color-error;
+      background: color-mix(in srgb, @color-error, @background-primary 90%);
+    }
+  }
 }
 
 .notification.offline {
-  background: linear-gradient(to top, darken(#cc9900, 4%) 0%, #cc9900 100%);
+  border-color: color-mix(in srgb, @color-warning, transparent 68%);
+  background: @color-warning;
 }
 
 .notification.highest-priority {
@@ -49,6 +76,13 @@
 
 .notification .subtitle.has-action {
   cursor: pointer;
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
 }
 
 .notification .subtitle.has-action::after {
@@ -67,6 +101,7 @@
 }
 
 .notification .action {
+  appearance: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,6 +111,9 @@
   border-left: solid rgba(255, 255, 255, 0.5) 1px;
   padding: 10px;
   cursor: pointer;
+  color: inherit;
+  background: transparent;
+  font: inherit;
 
   /* The semi-transparent backgrounds that can be layered on top
      of this class shouldn't have sharp corners on the bottom */
@@ -89,11 +127,17 @@
 
 .notification .action:hover {
   background-color: rgba(255, 255, 255, 0.2);
-  box-shadow: @standard-shadow inset;
+  box-shadow: none;
+}
+
+.notification .action:focus-visible,
+.notification .subtitle.has-action:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
 }
 
 .notification .action.loading {
   cursor: progress;
   background-color: rgba(0, 0, 0, 0.2);
-  box-shadow: @standard-shadow inset;
+  box-shadow: none;
 }

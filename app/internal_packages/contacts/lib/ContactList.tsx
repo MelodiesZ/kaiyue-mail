@@ -21,7 +21,7 @@ const ContactColumn = new ListTabular.Column({
     // until we revisit the UI to accommodate more icons
     const account = AccountStore.accountForId(contact.accountId);
     let style: CSSProperties = {};
-    if (account && account.color) {
+    if (AccountStore.accounts().length > 1 && account && account.color) {
       style = {
         height: '50%',
         paddingLeft: '4px',
@@ -42,7 +42,11 @@ const ContactColumn = new ListTabular.Column({
 
 class ContactsListEmpty extends React.Component<{ visible: boolean }> {
   render() {
-    return this.props.visible ? <div>No contacts to display</div> : <span />;
+    return this.props.visible ? (
+      <div className="contacts-list-empty">{localized('No contacts to display')}</div>
+    ) : (
+      <span />
+    );
   }
 }
 
@@ -209,7 +213,7 @@ export const ContactList = ListensToFluxStore(ContactListWithData, {
 ContactList.displayName = 'ContactList';
 ContactList.containerStyles = {
   minWidth: 140,
-  maxWidth: 450,
+  maxWidth: 280,
 };
 
 interface ContactListSearchWithDataProps {
@@ -233,7 +237,7 @@ const ContactListSearchWithData = (props: ContactListSearchWithDataProps) => {
         ref={searchEl}
         value={props.search}
         placeholder={`${localized('Search')} ${
-          props.perspective.type === 'unified' ? 'All Contacts' : props.perspective.label
+          props.perspective.type === 'unified' ? localized('All Contacts') : props.perspective.label
         }`}
         onChange={(e) => props.setSearch(e.currentTarget.value)}
       />

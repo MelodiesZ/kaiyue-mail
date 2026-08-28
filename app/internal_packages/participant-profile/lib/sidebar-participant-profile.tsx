@@ -299,9 +299,14 @@ export default class SidebarParticipantProfile extends React.Component<
             `The contact sidebar in Mailspring Pro shows information about the people and companies you're emailing with.`
           )}
         </p>
-        <div className="btn" onClick={!this.state.loading ? this._onClickedToTry : null}>
+        <button
+          type="button"
+          className="btn"
+          disabled={this.state.loading}
+          onClick={this._onClickedToTry}
+        >
           {!this.state.loading ? localized(`Try it Now`) : localized(`Loading...`)}
-        </div>
+        </button>
       </div>
     );
   }

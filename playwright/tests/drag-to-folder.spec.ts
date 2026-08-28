@@ -35,7 +35,9 @@ test('dragging a thread to a sidebar folder creates a ChangeFolderTask', async (
 
   // Drag the focused thread to the Trash folder in the sidebar
   const source = threads(mainWindow).nth(0);
-  const target = mainWindow.locator('.account-sidebar .item .name:has-text("Trash")').first();
+  const target = mainWindow
+    .locator('.account-sidebar .item', { has: mainWindow.getByText('回收站', { exact: true }) })
+    .first();
 
   await source.dragTo(target);
   await mainWindow.waitForTimeout(1_000);
@@ -43,7 +45,7 @@ test('dragging a thread to a sidebar folder creates a ChangeFolderTask', async (
   // A ChangeFolderTask should be created with the target folder
   const task = await waitForCapturedTask(
     mainWindow,
-    t => t.__cls === 'ChangeFolderTask' || t.__cls === 'ChangeLabelsTask'
+    (t) => t.__cls === 'ChangeFolderTask' || t.__cls === 'ChangeLabelsTask'
   );
   expect(task).not.toBeNull();
   if (task.folder) {
@@ -59,14 +61,16 @@ test('dragging a thread to Archive creates a ChangeFolderTask', async () => {
   await clearCapturedTasks(electronApp);
 
   const source = threads(mainWindow).nth(0);
-  const target = mainWindow.locator('.account-sidebar .item .name:has-text("Archive")').first();
+  const target = mainWindow
+    .locator('.account-sidebar .item', { has: mainWindow.getByText('归档', { exact: true }) })
+    .first();
 
   await source.dragTo(target);
   await mainWindow.waitForTimeout(1_000);
 
   const task = await waitForCapturedTask(
     mainWindow,
-    t => t.__cls === 'ChangeFolderTask' || t.__cls === 'ChangeLabelsTask'
+    (t) => t.__cls === 'ChangeFolderTask' || t.__cls === 'ChangeLabelsTask'
   );
   expect(task).not.toBeNull();
 });
@@ -79,7 +83,9 @@ test('undo toast appears after drag-to-folder', async () => {
   await clearCapturedTasks(electronApp);
 
   const source = threads(mainWindow).nth(0);
-  const target = mainWindow.locator('.account-sidebar .item .name:has-text("Trash")').first();
+  const target = mainWindow
+    .locator('.account-sidebar .item', { has: mainWindow.getByText('回收站', { exact: true }) })
+    .first();
 
   await source.dragTo(target);
 

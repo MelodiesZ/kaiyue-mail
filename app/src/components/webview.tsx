@@ -69,9 +69,9 @@ class InitialLoadingCover extends React.Component<
           mode={RetinaImg.Mode.ContentPreserve}
         />
         <div className="message">{message}</div>
-        <div className="btn try-again" onClick={this.props.onTryAgain}>
+        <button type="button" className="btn try-again" onClick={this.props.onTryAgain}>
           {localized('Try Again')}
-        </div>
+        </button>
         <div style={{ flex: 1 }} />
       </div>
     );

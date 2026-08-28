@@ -10,7 +10,9 @@ function SyncingListState(props: { empty?: boolean }) {
     <div className="syncing-list-state" style={{ width: '100%', textAlign: 'center' }}>
       {message}&hellip;
       <br />
-      <a onClick={Actions.expandSyncState}>{localized('Show Progress')}</a>
+      <button type="button" className="btn btn-small" onClick={Actions.expandSyncState}>
+        {localized('Show Progress')}
+      </button>
     </div>
   );
 }

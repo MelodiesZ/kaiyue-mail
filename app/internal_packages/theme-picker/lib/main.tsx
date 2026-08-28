@@ -8,8 +8,8 @@ export function activate() {
     WorkspaceStore.popToRootSheet();
     Actions.openModal({
       component: <ThemePicker />,
-      height: 390,
-      width: 250,
+      height: 520,
+      width: 420,
     });
   });
 }

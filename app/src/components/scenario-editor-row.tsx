@@ -173,17 +173,17 @@ export default class ScenarioEditorRow extends React.Component<ScenarioEditorRow
     return (
       <div className="actions">
         {this.props.removable && (
-          <div className="btn" onClick={this.props.onRemove}>
+          <button type="button" className="btn" aria-label="删除条件" onClick={this.props.onRemove}>
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M1 5h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
-          </div>
+          </button>
         )}
-        <div className="btn" onClick={this.props.onInsert}>
+        <button type="button" className="btn" aria-label="添加条件" onClick={this.props.onInsert}>
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
             <path d="M5 1v8M1 5h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
-        </div>
+        </button>
       </div>
     );
   }

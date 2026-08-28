@@ -1,6 +1,6 @@
 import { shell } from 'electron';
 import React from 'react';
-import { localized, localizedReactFragment, Account } from 'mailspring-exports';
+import { localized, Account } from 'mailspring-exports';
 import { CopyButton, RetinaImg } from 'mailspring-component-kit';
 import http from 'http';
 import url from 'url';
@@ -66,6 +66,10 @@ export default class OAuthSignInPage extends React.Component<
     // Show the "Sign in to ..." prompt for a moment before bouncing
     // to URL. (400msec animation + 200msec to read)
     this._mounted = true;
+    if (process.env.PLAYWRIGHT === '1') {
+      this.setState({ showAlternative: true });
+      return;
+    }
     this._startTimer = setTimeout(() => {
       if (!this._mounted) return;
       shell.openExternal(this.props.providerAuthPageUrl);
@@ -147,24 +151,16 @@ export default class OAuthSignInPage extends React.Component<
   _renderHeader() {
     const authStage = this.state.authStage;
     if (authStage === 'initial') {
-      return (
-        <h2>
-          {localizedReactFragment(
-            'Sign in with %@ in %@ your browser.',
-            this.props.serviceName,
-            <br />
-          )}
-        </h2>
-      );
+      return <h2>{localized('请在浏览器中登录 %@', this.props.serviceName)}</h2>;
     }
     if (authStage === 'buildingAccount') {
-      return <h2>{localized('Connecting to %@…', this.props.serviceName)}</h2>;
+      return <h2>{localized('正在连接 %@…', this.props.serviceName)}</h2>;
     }
     if (authStage === 'accountSuccess') {
       return (
         <div>
-          <h2>{localized('Successfully connected to %@!', this.props.serviceName)}</h2>
-          <h3>{localized('Adding your account to Mailspring…')}</h3>
+          <h2>{localized('%@ 连接成功', this.props.serviceName)}</h2>
+          <h3>{localized('正在添加到凯越邮箱…')}</h3>
         </div>
       );
     }
@@ -177,9 +173,14 @@ export default class OAuthSignInPage extends React.Component<
         <div className="error-region">
           <FormErrorMessage message={this.state.errorMessage} log={this.state.errorLog} />
           {note && <div className="message empty note">{note}</div>}
-          <div className="btn" style={{ marginTop: 20 }} onClick={this.props.onTryAgain}>
+          <button
+            type="button"
+            className="btn"
+            style={{ marginTop: 20 }}
+            onClick={this.props.onTryAgain}
+          >
             {localized('Try Again')}
-          </div>
+          </button>
         </div>
       </div>
     );

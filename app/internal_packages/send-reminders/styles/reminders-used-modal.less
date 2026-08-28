@@ -3,9 +3,7 @@
 .feature-usage-modal.send-reminders {
   @send-reminders-color: #517ff2;
   .feature-header {
-    @from: @send-reminders-color;
-    @to: lighten(@send-reminders-color, 10%);
-    background: linear-gradient(to top, @from, @to);
+    background: @send-reminders-color;
   }
   .feature-name {
     color: @send-reminders-color;

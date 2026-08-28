@@ -5,17 +5,24 @@
   position: relative;
   left: -15px;
   border-top: 1px solid rgba(0, 0, 0, 0.15);
-  transition: height 150ms ease-in-out;
   top: 15px;
   margin-top: -15px;
   overflow: hidden;
   border-radius: 0 0 @border-radius-large @border-radius-large;
 
   .related-thread {
+    appearance: none;
     display: flex;
     font-size: 12px;
     color: @text-color-very-subtle;
     width: 100%;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
     padding: 0.5em 15px;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
 
@@ -37,6 +44,14 @@
   }
 
   .toggle {
+    appearance: none;
+    width: 100%;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
     font-size: 12px;
     text-align: center;
     padding: 0.5em 15px;
@@ -138,9 +153,7 @@ body.platform-win32 {
 .feature-usage-modal.contact-profiles {
   @send-later-color: #777ff0;
   .feature-header {
-    @from: @send-later-color;
-    @to: lighten(@send-later-color, 10%);
-    background: linear-gradient(to top, @from, @to);
+    background: @send-later-color;
   }
   .feature-name {
     color: @send-later-color;

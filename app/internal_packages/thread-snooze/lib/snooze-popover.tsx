@@ -70,14 +70,19 @@ class SnoozePopover extends Component<{
     const iconName = SnoozeIconNames[itemLabel];
     const iconPath = `mailspring://thread-snooze/assets/ic-snoozepopover-${iconName}@2x.png`;
     return (
-      <div key={itemLabel} className="snooze-item" onClick={() => this.onSnooze(date, itemLabel)}>
+      <button
+        type="button"
+        key={itemLabel}
+        className="snooze-item"
+        onClick={() => this.onSnooze(date, itemLabel)}
+      >
         <RetinaImg
           url={iconPath}
           mode={RetinaImg.Mode.ContentIsMask}
           style={{ width: 45, height: 45 }}
         />
-        {itemLabel}
-      </div>
+        {localized(itemLabel)}
+      </button>
     );
   };
 

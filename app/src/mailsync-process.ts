@@ -88,6 +88,14 @@ export const LocalizedErrorStrings = {
 // being treated as expected, user-actionable failures.
 const AMBIGUOUS_MAILSYNC_ERRORS = new Set(['ErrorParse', 'ErrorIdentityMissingFields']);
 
+// Windows STATUS_DLL_NOT_FOUND. Node may surface native process exit codes as
+// either an unsigned DWORD (3221225781) or a signed 32-bit integer (-1073741515).
+export const WINDOWS_MISSING_RUNTIME_EXIT_CODE = 0xc0000135;
+
+export function isMissingWindowsRuntimeExit(code: number | null) {
+  return code !== null && code >>> 0 === WINDOWS_MISSING_RUNTIME_EXIT_CODE;
+}
+
 export class MailsyncProcess extends EventEmitter {
   _proc: ChildProcess = null;
   _win = null;
@@ -106,7 +114,25 @@ export class MailsyncProcess extends EventEmitter {
     this.verbose = verbose;
     this.resourcePath = resourcePath;
     this.configDirPath = configDirPath;
-    this.binaryPath = path.join(resourcePath, 'mailsync').replace('app.asar', 'app.asar.unpacked');
+    // Release builds of the upstream sync engine intentionally require
+    // `mailspring` to appear in argv[0] on every platform. Keep the engine (and
+    // its Windows DLLs) in a clearly attributed compatibility directory so a
+    // branded install path does not make mailsync exit with code 2.
+    const relativeBinaryPath = path.join(
+      'mailspring-runtime',
+      process.platform === 'win32' ? 'mailsync.exe' : 'mailsync'
+    );
+    const packagedBinaryPath = path
+      .join(resourcePath, relativeBinaryPath)
+      .replace('app.asar', 'app.asar.unpacked');
+    const developmentBinaryPath = path.join(
+      resourcePath,
+      process.platform === 'win32' ? 'mailsync.exe' : 'mailsync'
+    );
+    this.binaryPath =
+      resourcePath.includes('app.asar') || fs.existsSync(packagedBinaryPath)
+        ? packagedBinaryPath
+        : developmentBinaryPath;
   }
 
   _showStatusWindow(mode) {
@@ -331,14 +357,23 @@ export class MailsyncProcess extends EventEmitter {
     rawLog: string
   ) {
     const isNetworkFailure = mode === 'test' && /"offline"\s*:\s*true/.test(rawLog);
+    const isMissingRuntimeError = process.platform === 'win32' && isMissingWindowsRuntimeExit(code);
     const exitDescription = signal ? `signal ${signal}` : `${code}`;
-    const error = isNetworkFailure
-      ? new Error(LocalizedErrorStrings.ErrorConnection)
-      : new Error(
-          `${localized(`An unknown error has occurred`)} mailsync: ${exitDescription}. ${rawLog}`
-        );
+    const error = isMissingRuntimeError
+      ? new Error(
+          localized(
+            'Kaiyue Mail could not start its Windows mail service because required runtime components are missing. Reinstall Kaiyue Mail using the latest installer.'
+          )
+        )
+      : isNetworkFailure
+        ? new Error(LocalizedErrorStrings.ErrorConnection)
+        : new Error(
+            `${localized(`An unknown error has occurred`)} mailsync: ${exitDescription}. ${rawLog}`
+          );
     (error as any).rawLog = rawLog;
     (error as any).isNetworkError = isNetworkFailure;
+    (error as any).isMissingRuntimeError = isMissingRuntimeError;
+    (error as any).mailsyncExitCode = code;
     return error;
   }
 

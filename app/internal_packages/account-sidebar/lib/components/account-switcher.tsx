@@ -47,10 +47,9 @@ export default class AccountSwitcher extends React.Component<{
 
   render() {
     return (
-      <div
+      <button
+        type="button"
         className="account-switcher"
-        role="button"
-        tabIndex={0}
         aria-label={localized('Account switcher')}
         aria-haspopup="menu"
         onMouseDown={this._onShowMenu}
@@ -62,7 +61,7 @@ export default class AccountSwitcher extends React.Component<{
           mode={RetinaImg.Mode.ContentDark}
           alt=""
         />
-      </div>
+      </button>
     );
   }
 }

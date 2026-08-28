@@ -3,14 +3,90 @@
 
 @keyframes sending-progress-move {
   0% {
-    background-position: 0 0;
+    opacity: 0.45;
   }
   100% {
-    background-position: 50px 50px;
+    opacity: 1;
   }
 }
 
 .draft-list {
+  color: @text-color;
+  background: @background-primary;
+
+  .list-item {
+    border-bottom: 1px solid @border-color-divider;
+    background: @background-primary;
+
+    &:hover {
+      background: @background-off-primary;
+    }
+
+    &.focused,
+    &.selected {
+      background: @list-focused-bg;
+    }
+  }
+
+  .list-column {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+  }
+
+  .participants,
+  .details {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .participants {
+    color: @text-color-subtle;
+
+    &.no-recipients {
+      color: @text-color-very-subtle;
+    }
+  }
+
+  .details {
+    display: flex;
+    flex: 1;
+    align-items: baseline;
+    gap: 8px;
+
+    .subject {
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      color: @text-color;
+      font-weight: @font-weight-semi-bold;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .snippet {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      color: @text-color-subtle;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .no-subject {
+      color: @text-color-very-subtle;
+      font-style: italic;
+    }
+  }
+
+  .timestamp {
+    color: @text-color-very-subtle;
+    font-size: @font-size-small;
+    white-space: nowrap;
+  }
+
   .sending {
     background-color: @background-primary;
     &:hover {
@@ -30,8 +106,10 @@
       display: block;
       background: @component-active-color;
       height: 6px;
-      width: 0; //overridden by style
-      transition: width 1000ms linear;
+      width: 100%;
+      transform: scaleX(0); // overridden by style
+      transform-origin: left center;
+      transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
     }
     .indeterminate {
       display: block;
@@ -46,18 +124,8 @@
       left: 0;
       bottom: 0;
       right: 0;
-      background-image: linear-gradient(
-        -45deg,
-        rgba(255, 255, 255, 0.2) 25%,
-        transparent 25%,
-        transparent 50%,
-        rgba(255, 255, 255, 0.2) 50%,
-        rgba(255, 255, 255, 0.2) 75%,
-        transparent 75%,
-        transparent
-      );
-      background-size: 50px 50px;
-      animation: sending-progress-move 2s linear infinite;
+      background: rgba(255, 255, 255, 0.3);
+      animation: sending-progress-move 900ms ease-in-out infinite alternate;
     }
   }
 }

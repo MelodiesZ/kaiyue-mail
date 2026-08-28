@@ -93,14 +93,19 @@ class ToolbarBack extends React.Component<Record<string, unknown>, { categoryNam
       title = this.state.categoryName;
     }
     return (
-      <div className="item-back" onClick={this._onClick} title={localized(`Return to %@`, title)}>
+      <button
+        type="button"
+        className="item-back"
+        onClick={this._onClick}
+        title={localized(`Return to %@`, title)}
+      >
         <RetinaImg
           name="sheet-back.png"
           mode={RetinaImg.Mode.ContentIsMask}
           style={isRTL ? { transform: `scaleX(-1)` } : {}}
         />
         <div className="item-back-title">{title}</div>
-      </div>
+      </button>
     );
   }
 }

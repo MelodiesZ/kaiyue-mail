@@ -115,7 +115,8 @@ const UndoSendContent = ({ block, onMouseEnter, onMouseLeave }) => {
     <div className="content" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <Countdown expiration={getUndoSendExpiration(block)} />
       <div className="message">{localized('Sending soon...')}</div>
-      <div
+      <button
+        type="button"
         className="action"
         onClick={async () => {
           (await sendMessageNow(block)) && onMouseLeave();
@@ -123,11 +124,15 @@ const UndoSendContent = ({ block, onMouseEnter, onMouseLeave }) => {
       >
         <RetinaImg name="icon-composer-send.png" mode={RetinaImg.Mode.ContentIsMask} />
         <span className="send-action-text">{localized('Send now instead')}</span>
-      </div>
-      <div className="action" onClick={() => AppEnv.commands.dispatch('core:undo')}>
+      </button>
+      <button
+        type="button"
+        className="action"
+        onClick={() => AppEnv.commands.dispatch('core:undo')}
+      >
         <RetinaImg name="undo-icon@2x.png" mode={RetinaImg.Mode.ContentIsMask} />
         <span className="undo-action-text">{localized('Undo')}</span>
-      </div>
+      </button>
     </div>
   );
 };
@@ -136,10 +141,14 @@ const BasicContent = ({ block, onMouseEnter, onMouseLeave }) => {
   return (
     <div className="content" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <div className="message">{block.description}</div>
-      <div className="action" onClick={() => AppEnv.commands.dispatch('core:undo')}>
+      <button
+        type="button"
+        className="action"
+        onClick={() => AppEnv.commands.dispatch('core:undo')}
+      >
         <RetinaImg name="undo-icon@2x.png" mode={RetinaImg.Mode.ContentIsMask} />
         <span className="undo-action-text">{localized('Undo')}</span>
-      </div>
+      </button>
     </div>
   );
 };

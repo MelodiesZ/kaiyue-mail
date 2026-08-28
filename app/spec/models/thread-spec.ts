@@ -31,7 +31,7 @@ describe('Thread', function () {
     it("puts 'important' label first, if it's present", function () {
       const inputs = ['alphabetically before important', 'important'];
       const actualOut = sortedForCategoryNames(inputs);
-      expect(actualOut[0].displayName).toBe('important');
+      expect(actualOut[0].displayName).toBe('Important');
     });
 
     it("ignores 'important' label if not present", function () {
@@ -50,28 +50,28 @@ describe('Thread', function () {
     it("displays standard category names which aren't hidden next, if they're present", function () {
       const inputs = ['inbox', 'important', 'social'];
       const actualOut = _.pluck(sortedForCategoryNames(inputs), 'displayName');
-      const expectedOut = ['important', 'inbox', 'social'];
+      const expectedOut = ['Important', 'Inbox', 'social'];
       expect(actualOut).toEqual(expectedOut);
     });
 
     it("ignores standard category names if they aren't present", function () {
       const inputs = ['social', 'work', 'important'];
       const actualOut = _.pluck(sortedForCategoryNames(inputs), 'displayName');
-      const expectedOut = ['important', 'social', 'work'];
+      const expectedOut = ['Important', 'social', 'work'];
       expect(actualOut).toEqual(expectedOut);
     });
 
     it('puts user-added categories at the end', function () {
       const inputs = ['food', 'inbox'];
       const actualOut = _.pluck(sortedForCategoryNames(inputs), 'displayName');
-      const expectedOut = ['inbox', 'food'];
+      const expectedOut = ['Inbox', 'food'];
       expect(actualOut).toEqual(expectedOut);
     });
 
     it('sorts user-added categories by displayName', function () {
       const inputs = ['work', 'social', 'receipts', 'important', 'inbox'];
       const actualOut = _.pluck(sortedForCategoryNames(inputs), 'displayName');
-      const expectedOut = ['important', 'inbox', 'receipts', 'social', 'work'];
+      const expectedOut = ['Important', 'Inbox', 'receipts', 'social', 'work'];
       expect(actualOut).toEqual(expectedOut);
     });
   });

@@ -10,14 +10,19 @@ export function CalendarEmptyState() {
   return (
     <div className="calendar-empty-state">
       <div className="calendar-empty-state-content">
-        <h2 className="calendar-empty-state-title">{localized('No Calendars')}</h2>
+        <div className="calendar-empty-state-icon" aria-hidden="true">
+          日
+        </div>
+        <h2 className="calendar-empty-state-title">还没有可用日历</h2>
         <p className="calendar-empty-state-message">
-          {localized(
-            'None of your connected accounts provide calendars. Mailspring supports calendars from Gmail and other providers with CalDAV support.'
-          )}
+          当前连接的账号未提供日历。您可添加 Google 账号，或任何支持 CalDAV 的账号。
         </p>
-        <button className="btn btn-large btn-emphasis" onClick={onOpenAccountPreferences}>
-          {localized('Add a Calendar Account')}
+        <button
+          type="button"
+          className="btn btn-large btn-emphasis"
+          onClick={onOpenAccountPreferences}
+        >
+          添加日历账号
         </button>
       </div>
     </div>

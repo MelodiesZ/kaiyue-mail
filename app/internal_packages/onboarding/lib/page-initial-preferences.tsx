@@ -3,7 +3,6 @@ import path from 'path';
 import fs from 'fs';
 import { RetinaImg, Flexbox, ConfigPropContainer } from 'mailspring-component-kit';
 import { localized, AccountStore, Account } from 'mailspring-exports';
-import KaiyueConfig from '../../../src/kaiyue-config';
 
 // NOTE: Temporarily copied from preferences module
 class AppearanceModeOption extends React.Component<{
@@ -23,13 +22,13 @@ class AppearanceModeOption extends React.Component<{
     }[this.props.mode];
 
     return (
-      <div className={classname} onClick={this.props.onClick}>
+      <button type="button" className={classname} onClick={this.props.onClick}>
         <RetinaImg
           name={`appearance-mode-${this.props.mode}.png`}
           mode={RetinaImg.Mode.ContentIsMask}
         />
         <div>{label}</div>
-      </div>
+      </button>
     );
   }
 }
@@ -92,17 +91,8 @@ class InitialPreferencesOptions extends React.Component<
     }
 
     return (
-      <div
-        style={{
-          display: 'flex',
-          width: 600,
-          marginBottom: 50,
-          marginLeft: 150,
-          marginRight: 150,
-          textAlign: 'left',
-        }}
-      >
-        <div style={{ flex: 1 }}>
+      <div className="initial-preferences-options">
+        <section className="initial-preferences-section">
           <p>
             {localized('Do you prefer a single panel layout (like Gmail) or a two panel layout?')}
           </p>
@@ -116,12 +106,8 @@ class InitialPreferencesOptions extends React.Component<
               />
             ))}
           </Flexbox>
-        </div>
-        <div
-          key="divider"
-          style={{ marginLeft: 20, marginRight: 20, borderLeft: '1px solid #ccc' }}
-        />
-        <div style={{ flex: 1 }}>
+        </section>
+        <section className="initial-preferences-section">
           <p>
             {localized(
               `We've picked a set of keyboard shortcuts based on your email account and platform. You can also pick another set:`
@@ -138,24 +124,21 @@ class InitialPreferencesOptions extends React.Component<
               </option>
             ))}
           </select>
-          <div className="kaiyue-company-note">{KaiyueConfig.brand.company}</div>
-        </div>
+          <div className="kaiyue-company-note">之后可随时在“偏好设置”中修改</div>
+        </section>
       </div>
     );
   }
 }
 
-class InitialPreferencesPage extends React.Component<
-  Record<string, unknown>,
-  { account: Account }
-> {
+class InitialPreferencesPage extends React.Component<{ account?: Account }, { account: Account }> {
   static displayName = 'InitialPreferencesPage';
 
   _unlisten?: () => void;
 
   constructor(props) {
     super(props);
-    this.state = { account: AccountStore.accounts()[0] };
+    this.state = { account: AccountStore.accounts()[0] || props.account };
   }
 
   componentDidMount() {
@@ -169,7 +152,7 @@ class InitialPreferencesPage extends React.Component<
   }
 
   _onAccountStoreChange = () => {
-    this.setState({ account: AccountStore.accounts()[0] });
+    this.setState({ account: AccountStore.accounts()[0] || this.props.account });
   };
 
   render() {
@@ -177,14 +160,14 @@ class InitialPreferencesPage extends React.Component<
       return <div />;
     }
     return (
-      <div className="page opaque" style={{ width: 900, height: 620 }}>
-        <h1 style={{ paddingTop: 100 }}>{localized(`欢迎使用凯越邮箱`)}</h1>
-        <h4 style={{ marginBottom: 60 }}>{localized(`Let's set things up to your liking.`)}</h4>
+      <div className="page opaque initial-preferences">
+        <h1>{localized(`欢迎使用凯越邮箱`)}</h1>
+        <h4>{localized(`选择适合你的阅读布局和快捷键。`)}</h4>
         <ConfigPropContainer>
           <InitialPreferencesOptions account={this.state.account} />
         </ConfigPropContainer>
-        <button className="btn btn-large" style={{ marginBottom: 60 }} onClick={this._onFinished}>
-          {localized(`Looks Good!`)}
+        <button className="btn btn-large btn-emphasis" onClick={this._onFinished}>
+          {localized(`完成设置`)}
         </button>
       </div>
     );

@@ -1,7 +1,11 @@
 import moment, { Moment } from 'moment-timezone';
+import 'moment/locale/zh-cn';
 
-// Init locale for moment
-moment.locale(navigator.language);
+// Keep Moment's calendar labels aligned with the language selected inside the
+// app. Electron's navigator.language reflects the OS and can differ from the
+// explicit application preference.
+const configuredLanguage = AppEnv.config.get('core.intl.language') || navigator.language;
+moment.locale(configuredLanguage.toLowerCase());
 
 // Initialise moment timezone
 const tz = moment.tz.guess();

@@ -125,7 +125,7 @@ body.platform-win32 {
       background-color: @btn-emphasis-text-color;
     }
 
-    background: linear-gradient(to bottom, #6bb1f9 0%, #0a80ff 100%);
+    background: @btn-emphasis-bg-color;
     box-shadow: none;
     border: 1px solid darken(@btn-emphasis-bg-color, 7%);
 
@@ -134,24 +134,10 @@ body.platform-win32 {
     }
 
     &:before {
-      content: ' ';
-      width: calc(~'100% + 2px');
-      height: calc(~'100% + 2px');
-      border-radius: @border-radius-base + 1;
-      top: -1px;
-      left: -1px;
-      position: absolute;
-      z-index: -1;
-      background: linear-gradient(to bottom, #4ca2f9 0%, #015cff 100%);
+      content: none;
     }
     &:active {
-      background: -webkit-gradient(
-        linear,
-        left top,
-        left bottom,
-        from(darken(@btn-emphasis-bg-color, 10%)),
-        to(darken(@btn-emphasis-bg-color, 4%))
-      );
+      background: darken(@btn-emphasis-bg-color, 8%);
     }
   }
 

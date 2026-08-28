@@ -49,9 +49,16 @@ export function applySignature(
   // Remove any existing signature in the body
   let additionalWhitespace = '<br/>';
 
-  let newBody = body;
-  if (currentSignatureId(body)) {
-    newBody = newBody.replace(RegExpUtils.mailspringSignatureRegex(), '');
+  const quoteStart = body.search(RegExpUtils.nativeQuoteStartRegex());
+  const editableEnd = quoteStart === -1 ? body.length : quoteStart;
+  const signatureBlockRegex = /<signature\b[^>]*>[\s\S]*?<\/signature>/gi;
+  let removedSignature = false;
+  const editableBody = body.slice(0, editableEnd).replace(signatureBlockRegex, () => {
+    removedSignature = true;
+    return '';
+  });
+  const newBody = `${editableBody}${body.slice(editableEnd)}`;
+  if (removedSignature) {
     additionalWhitespace = ''; // never add whitespace when switching signatures
   }
 

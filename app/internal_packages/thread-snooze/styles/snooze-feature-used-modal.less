@@ -3,9 +3,7 @@
 .feature-usage-modal.snooze {
   @snooze-color: #8e6ce3;
   .feature-header {
-    @from: @snooze-color;
-    @to: lighten(@snooze-color, 10%);
-    background: linear-gradient(to top, @from, @to);
+    background: @snooze-color;
   }
   .feature-name {
     color: @snooze-color;

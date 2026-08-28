@@ -114,7 +114,11 @@ class ContactDetailWithFocus extends React.Component<ContactDetailProps, Contact
       return (
         <div className="contact-detail-column">
           <div className="contacts-empty-state">
-            <div className="message">No contact selected.</div>
+            <div className="contacts-empty-state__icon" aria-hidden="true">
+              人
+            </div>
+            <div className="message">{localized('No contact selected.')}</div>
+            <div className="description">{localized('Select a contact to view its details.')}</div>
           </div>
         </div>
       );
@@ -173,6 +177,6 @@ export const ContactDetail: React.FunctionComponent<ContactDetailProps> = Listen
 
 ContactDetail.displayName = 'ContactDetail';
 (ContactDetail as any).containerStyles = {
-  minWidth: 360,
+  minWidth: 420,
   maxWidth: 100000,
 };

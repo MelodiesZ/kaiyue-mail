@@ -2,7 +2,7 @@
   "*": {
     "env": "production",
     "core": {
-      "themes": ["ui-light"],
+      "theme": "ui-light",
       "disabledPackages": [
         "message-view-on-github",
         "personal-level-indicators",

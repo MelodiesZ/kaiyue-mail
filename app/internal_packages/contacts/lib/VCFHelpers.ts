@@ -116,16 +116,25 @@ export const serializeAddress = (item: ContactBase['addresses'][0]) => {
 
 export const parseName = (name: { _data: string } | null) => {
   const parts = (name ? name._data : '').split(';');
+  const givenName = parts[1] || '';
+  const familyName = parts[0] || '';
+  const usesCJKNameOrder = /[\u3400-\u9fff\uf900-\ufaff]/.test(`${familyName}${givenName}`);
 
   return {
-    givenName: parts[1] || '',
-    familyName: parts[0] || '',
+    givenName,
+    familyName,
     honorificPrefix: parts[3] || '',
     honorificSuffix: parts[4] || '',
-    displayName: `${parts[3] || ''} ${parts[1]} ${parts[0]} ${parts[4] || ''}`.trim(),
+    displayName: usesCJKNameOrder
+      ? `${parts[3] || ''}${familyName}${givenName}${parts[4] || ''}`.trim()
+      : `${parts[3] || ''} ${givenName} ${familyName} ${parts[4] || ''}`.trim(),
   };
 };
 
 export const formatDisplayName = (name: ContactBase['name']) => {
-  return `${name.givenName || ''} ${name.familyName || ''}`.trim();
+  const givenName = name.givenName || '';
+  const familyName = name.familyName || '';
+  return /[\u3400-\u9fff\uf900-\ufaff]/.test(`${familyName}${givenName}`)
+    ? `${familyName}${givenName}`.trim()
+    : `${givenName} ${familyName}`.trim();
 };

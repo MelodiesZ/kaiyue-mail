@@ -60,9 +60,9 @@ export function ScheduledReminderThreadHeader({
       <span className="reminder-date">
         {` ${moment(metadata.expiration).format(DateUtils.DATE_FORMAT_LONG_NO_YEAR)}`}
       </span>
-      <span className="clear-reminder" onClick={onClearReminder}>
+      <button type="button" className="clear-reminder" onClick={onClearReminder}>
         {localized('Cancel')}
-      </span>
+      </button>
     </div>
   );
 }

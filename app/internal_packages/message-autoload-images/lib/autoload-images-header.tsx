@@ -50,14 +50,23 @@ export default class AutoloadImagesHeader extends React.Component<
     }
 
     return (
-      <div className="autoload-images-header">
-        <a className="option" onClick={() => Actions.temporarilyEnableImages(message)}>
-          {localized('Show Images')}
-        </a>
-        <span style={{ paddingLeft: 10, paddingRight: 10 }}>|</span>
-        <a className="option" onClick={() => Actions.permanentlyEnableImages(message)}>
-          {localized('Always show images from %@', message.fromContact().toString())}
-        </a>
+      <div className="autoload-images-header" role="status">
+        <span className="autoload-images-message">远程图片已拦截，以保护您的隐私</span>
+        <button
+          type="button"
+          className="option"
+          onClick={() => Actions.temporarilyEnableImages(message)}
+        >
+          显示图片
+        </button>
+        <button
+          type="button"
+          className="option"
+          aria-label={`始终显示 ${message.fromContact().toString()} 发送的图片`}
+          onClick={() => Actions.permanentlyEnableImages(message)}
+        >
+          始终显示此发件人的图片
+        </button>
       </div>
     );
   }

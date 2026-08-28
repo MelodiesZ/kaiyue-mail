@@ -8,28 +8,28 @@
   order: -100;
   overflow: visible;
   z-index: 100;
-  width: 450px;
-  height: 23px;
+  width: ~'min(520px, calc(100vw - 420px))';
+  min-width: 280px;
+  height: 32px;
   font-weight: 400;
-  line-height: 23px;
+  line-height: 30px;
   background: @input-bg;
   color: @text-color;
-  margin-top: 5px;
-  padding-left: @padding-xs-horizontal;
-  padding-right: @padding-xs-horizontal;
+  margin-top: 7px;
+  padding: 0 10px;
+  border: 1px solid @input-border-color;
   border-radius: @border-radius-base;
-  box-shadow: @shadow-border;
+  box-shadow: none;
   display: flex;
   align-items: center;
 
-  &:focus {
-    border: 0;
-    border-radius: 0;
-    box-shadow: 0 0 0 2px darken(@input-border-color, 20%);
+  &:focus-within {
+    border-color: @accent-primary;
+    box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.18);
   }
   &.placeholder {
     .tokenizing-contenteditable .layer-tokens {
-      color: @text-color-very-subtle;
+      color: @text-color-subtle;
     }
   }
   .search-accessory {
@@ -46,30 +46,30 @@
 
   .suggestions {
     left: 0;
-    top: 23px;
+    top: 36px;
     width: 100%;
     position: absolute;
     background: @input-bg;
-    border-bottom-left-radius: @border-radius-base;
-    border-bottom-right-radius: @border-radius-base;
-    box-shadow: 0 0.5px 0 @btn-border-color, 0 -0.5px 0 @btn-border-color,
-      0.5px 0 0 @btn-border-color, -0.5px 0 0 @btn-border-color, 0 4px 7px @standard-shadow-color;
+    overflow: hidden;
+    border: 1px solid @border-color-divider;
+    border-radius: @border-radius-large;
+    box-shadow: @standard-shadow;
 
     padding-top: @padding-small-vertical;
 
     .suggestion {
-      color: @text-color-very-subtle;
-      padding: @padding-small-vertical @padding-small-horizontal;
+      color: @text-color-subtle;
+      padding: 8px 10px;
 
       &.selected {
-        background-color: @accent-primary;
-        color: @text-color-inverse;
+        background-color: #eaf1fb;
+        color: @text-color;
         .suggestion-token {
-          color: @text-color-inverse;
+          color: @accent-primary;
         }
       }
       &:hover:not(.selected) {
-        background-color: fade(@black, 3%);
+        background-color: @background-secondary;
       }
       .suggestion-token {
         color: @token-color;
@@ -82,8 +82,8 @@
       color: @text-color-subtle;
       line-height: 1.4em;
       padding: @padding-base-vertical @padding-small-horizontal;
-      background-color: fade(@black, 3%);
-      border-top: 1px solid fade(@black, 6%);
+      background-color: @background-secondary;
+      border-top: 1px solid @border-color-divider;
       font-size: @font-size-small;
     }
   }
@@ -104,8 +104,7 @@
       bottom: 0;
       min-width: 100%;
       position: absolute;
-      padding-left: @padding-xs-horizontal;
-      padding-right: @padding-xs-horizontal;
+      padding: 0 8px;
     }
 
     .layer-tokens {
@@ -123,5 +122,12 @@
       caret-color: @text-color;
       color: transparent;
     }
+  }
+}
+
+@media (max-width: 900px) {
+  .thread-search-bar {
+    width: ~'min(360px, calc(100vw - 300px))';
+    min-width: 220px;
   }
 }

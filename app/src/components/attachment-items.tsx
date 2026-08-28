@@ -62,7 +62,7 @@ const ProgressBar: React.FunctionComponent<{
   }
   const { state: downloadState, percent: downloadPercent } = download;
   const downloadProgressStyle = {
-    width: `${Math.min(downloadPercent, 97.5)}%`,
+    transform: `scaleX(${Math.min(downloadPercent, 100) / 100})`,
   };
   return (
     <span className={`progress-bar-wrap state-${downloadState}`}>
@@ -93,7 +93,7 @@ function AttachmentActionIcon(props: {
   const isDownloading = download ? download.state === 'downloading' : false;
   const actionIconName = isRemovable || isDownloading ? removeIcon : downloadIcon;
 
-  const onClickActionIcon = (event: React.MouseEvent<HTMLDivElement>) => {
+  const onClickActionIcon = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation(); // Prevent 'onOpenAttachment'
     if (isRemovable) {
       onRemoveAttachment();
@@ -103,9 +103,14 @@ function AttachmentActionIcon(props: {
   };
 
   return (
-    <div className="file-action-icon" onClick={onClickActionIcon}>
+    <button
+      type="button"
+      className="file-action-icon"
+      aria-label={localized(isRemovable ? 'Remove Attachment' : 'Download Attachment')}
+      onClick={onClickActionIcon}
+    >
       <RetinaImg name={actionIconName} mode={retinaImgMode} />
-    </div>
+    </button>
   );
 }
 
@@ -247,9 +252,14 @@ export class AttachmentItem extends Component<AttachmentItemProps> {
               <span className="file-size">{displaySize ? `(${displaySize})` : ''}</span>
             </div>
             {filePreviewPath && (
-              <div className="file-action-icon quicklook" onClick={this._onClickQuicklookIcon}>
+              <button
+                type="button"
+                className="file-action-icon quicklook"
+                aria-label={localized('Quick Look')}
+                onClick={this._onClickQuicklookIcon}
+              >
                 <RetinaImg name="attachment-quicklook.png" mode={RetinaImg.Mode.ContentIsMask} />
-              </div>
+              </button>
             )}
             <AttachmentActionIcon
               {...this.props}

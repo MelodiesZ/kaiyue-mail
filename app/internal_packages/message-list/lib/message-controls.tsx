@@ -207,9 +207,10 @@ export default class MessageControls extends React.Component<MessageControlsProp
           closeOnMenuClick
           menu={this._dropdownMenu(items.slice(1))}
         />
-        <div
+        <button
+          type="button"
           className="message-actions-ellipsis"
-          tabIndex={-1}
+          aria-label={localized('更多邮件操作')}
           onClick={this._onShowActionsMenu}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -223,7 +224,7 @@ export default class MessageControls extends React.Component<MessageControlsProp
             mode={RetinaImg.Mode.ContentIsMask}
             aria-hidden="true"
           />
-        </div>
+        </button>
       </div>
     );
   }

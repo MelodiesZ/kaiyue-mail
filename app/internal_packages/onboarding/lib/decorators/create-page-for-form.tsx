@@ -224,7 +224,11 @@ const CreatePageForForm = (FormComponent: React.ComponentType<any> & Record<stri
       // We're not on the last page.
       if (submitting) {
         return (
-          <button className="btn btn-large btn-disabled btn-add-account spinning">
+          <button
+            type="button"
+            className="btn btn-large btn-disabled btn-add-account spinning"
+            disabled
+          >
             <RetinaImg
               name="sending-spinner.gif"
               width={15}
@@ -238,14 +242,22 @@ const CreatePageForForm = (FormComponent: React.ComponentType<any> & Record<stri
 
       if (!this._isValid()) {
         return (
-          <button className="btn btn-large btn-gradient btn-disabled btn-add-account">
+          <button
+            type="button"
+            className="btn btn-large btn-gradient btn-disabled btn-add-account"
+            disabled
+          >
             {buttonLabel}
           </button>
         );
       }
 
       return (
-        <button className="btn btn-large btn-gradient btn-add-account" onClick={this.onSubmit}>
+        <button
+          type="button"
+          className="btn btn-large btn-gradient btn-add-account"
+          onClick={this.onSubmit}
+        >
           {buttonLabel}
         </button>
       );
@@ -312,9 +324,9 @@ const CreatePageForForm = (FormComponent: React.ComponentType<any> & Record<stri
           />
           <div>
             {!FormComponent.hideBackButton && (
-              <div className="btn btn-large btn-gradient" onClick={this.onBack}>
+              <button type="button" className="btn btn-large btn-gradient" onClick={this.onBack}>
                 {localized('Back')}
-              </div>
+              </button>
             )}
             {this._renderButton()}
           </div>

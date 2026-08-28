@@ -472,7 +472,9 @@ class RootWithTimespan extends React.Component<
             <div className="empty-note">
               {localizedReactFragment(
                 'Send more than one message using the same %@ or subject line to compare open rates and reply rates.',
-                <a onClick={this._onShowTemplates}>{localized('Template').toLocaleLowerCase()}</a>
+                <button type="button" className="text-link" onClick={this._onShowTemplates}>
+                  {localized('Template').toLocaleLowerCase()}
+                </button>
               )}
             </div>
           ) : (
@@ -481,16 +483,22 @@ class RootWithTimespan extends React.Component<
         </div>
         <div className="section hidden-on-web" style={{ display: 'flex', textAlign: 'center' }}>
           <div style={{ display: 'flex', margin: 'auto' }}>
-            <div className="btn" onClick={this._onLearnMore} style={{ minWidth: 115 }}>
+            <button
+              type="button"
+              className="btn"
+              onClick={this._onLearnMore}
+              style={{ minWidth: 115 }}
+            >
               {localized('Learn More')}
-            </div>
-            <div
+            </button>
+            <button
+              type="button"
               className="btn"
               onClick={this._onExport}
               style={{ marginRight: 10, marginLeft: 10, minWidth: 135 }}
             >
               {localized('Export Raw Data')}
-            </div>
+            </button>
             <ShareButton key={version} />
           </div>
         </div>

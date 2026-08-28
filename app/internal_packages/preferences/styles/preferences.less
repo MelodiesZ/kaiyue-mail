@@ -271,13 +271,202 @@
   .platform-note {
     padding: @padding-base-vertical @padding-base-horizontal;
     background: fade(@black, 4%);
-    border-left: 3px solid @color-info;
+    border: 1px solid fade(@color-info, 24%);
+    border-radius: @border-radius-base;
     margin: @padding-base-vertical 0;
     font-size: 0.95em;
     &:before {
       color: @color-info;
       font-weight: @font-weight-semi-bold;
-      content: 'NOTE: ';
+      content: '提示：';
+    }
+  }
+}
+
+// Kaiyue settings: quiet navigation, readable forms, and responsive content widths.
+.preferences-wrap {
+  color: @text-color;
+  background: @background-secondary;
+
+  h6 {
+    margin-top: 28px;
+    margin-bottom: 10px;
+    color: @text-color;
+    font-size: @font-size-base;
+    font-weight: @font-weight-semi-bold;
+    line-height: 1.35;
+  }
+
+  p {
+    max-width: 72ch;
+    color: @text-color-subtle;
+    font-size: @font-size-small;
+    line-height: 1.55;
+
+    a {
+      color: @text-color-link;
+      font-weight: @font-weight-medium;
+      text-decoration: none;
+    }
+  }
+
+  section {
+    padding-bottom: 12px;
+
+    .item {
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+  }
+
+  .container-preference-tabs {
+    padding: 0 12px;
+    border-bottom: 1px solid @border-color-divider;
+    background: @background-primary;
+
+    .preferences-tabs {
+      gap: 4px;
+      width: 100%;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 8px 0 0;
+      overflow-x: auto;
+      background: transparent;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .item {
+        flex: 1 0 auto;
+        min-width: max-content;
+        max-width: none;
+        margin: 0;
+        padding: 11px 12px 10px;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        color: @text-color-subtle;
+        transition: color 150ms cubic-bezier(0.22, 1, 0.36, 1),
+          background-color 150ms cubic-bezier(0.22, 1, 0.36, 1);
+
+        &:hover:not(.active) {
+          color: @text-color;
+          background: @background-secondary;
+        }
+
+        &.active {
+          border-bottom-color: @accent-primary;
+          border-radius: 0;
+          color: @accent-primary;
+          background: transparent;
+          box-shadow: none;
+
+          .tab-icon {
+            background-color: @accent-primary;
+          }
+        }
+
+        .name {
+          padding: 0;
+          overflow: visible;
+          color: inherit;
+          text-overflow: clip;
+          font-size: @font-size-small;
+          font-weight: @font-weight-medium;
+          line-height: 1.35;
+        }
+
+        img.tab-icon {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .preferences-content {
+    background: @background-secondary;
+
+    & > .scroll-region-content {
+      padding: 0;
+    }
+
+    & > .scroll-region-content > .scroll-region-content-inner {
+      padding: 30px 32px 48px;
+    }
+  }
+
+  .container-general,
+  .container-keymaps,
+  .container-appearance,
+  .container-accounts,
+  .container-mail-rules {
+    width: 100%;
+    min-width: 0;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .appearance-mode-switch {
+    gap: 10px;
+
+    .appearance-mode {
+      margin: 0;
+      padding: 18px 16px 12px;
+      border: 1px solid @border-color-divider;
+      border-radius: @border-radius-large;
+      background: @background-primary;
+
+      &:hover {
+        border-color: #b8c3d0;
+        background: @background-off-primary;
+      }
+
+      &.active {
+        border-color: @accent-primary;
+        color: @accent-primary;
+        background: #eaf1fb;
+      }
+    }
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    accent-color: @accent-primary;
+  }
+
+  select,
+  input[type='text'],
+  input[type='email'],
+  input[type='password'] {
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 760px) {
+  .preferences-wrap {
+    .container-preference-tabs {
+      padding: 0 6px;
+
+      .preferences-tabs {
+        overflow-x: auto;
+
+        .item {
+          min-width: 76px;
+          flex: 0 0 auto;
+        }
+      }
+    }
+
+    .preferences-content > .scroll-region-content > .scroll-region-content-inner {
+      padding: 22px 18px 36px;
+    }
+
+    .container-general,
+    .container-keymaps {
+      .two-columns-flexbox {
+        flex-direction: column;
+      }
     }
   }
 }

@@ -10,7 +10,7 @@ function buildShareHTML(htmlEl: HTMLElement, styleEl: HTMLStyleElement) {
     <meta charset="utf-8"> 
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="author" content="Mailspring">
-    <title>Mailspring Activity</title>
+    <title>凯越邮箱活动</title>
     <style type="text/css">
     body {
       font-family: sans-serif;
@@ -94,7 +94,12 @@ export default class ShareButton extends React.Component<
   render() {
     return (
       <div style={{ display: 'flex' }}>
-        <div className="btn" onClick={this._onShareReport} style={{ minWidth: 150 }}>
+        <button
+          type="button"
+          className="btn"
+          onClick={this._onShareReport}
+          style={{ minWidth: 150 }}
+        >
           {localized('Share this Report')}
           {this.state.loading && (
             <RetinaImg
@@ -103,7 +108,7 @@ export default class ShareButton extends React.Component<
               style={{ width: 14, height: 14, marginLeft: 10 }}
             />
           )}
-        </div>
+        </button>
         {this.state.link && (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <input

@@ -135,3 +135,114 @@
     }
   }
 }
+
+// Kaiyue mail-rule editor.
+.preferences-wrap .container-mail-rules {
+  .empty-list {
+    display: flex;
+    min-height: 360px;
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: @border-radius-large;
+    background: @background-primary;
+
+    .icon-mail-rules {
+      width: 76px;
+      height: 76px;
+      margin-top: 0;
+      opacity: 0.42;
+    }
+
+    h2 {
+      margin: 16px 0 4px;
+      color: @text-color;
+      font-size: @font-size-h3;
+      font-weight: @font-weight-semi-bold;
+    }
+  }
+
+  .rule-list {
+    flex: 0 0 260px;
+    overflow: hidden;
+    border: 1px solid @border-color-divider;
+    border-radius: @border-radius-large 0 0 @border-radius-large;
+    background: @background-primary;
+
+    .editable-item {
+      padding: 10px 12px;
+    }
+  }
+
+  .rule-detail {
+    min-width: 0;
+    border-left: 0;
+    border-radius: 0 @border-radius-large @border-radius-large 0;
+    background: @background-primary;
+
+    .inner {
+      padding: 16px 18px;
+    }
+
+    .no-selection {
+      padding: 100px 24px;
+    }
+
+    .well {
+      overflow: hidden;
+      border-radius: @border-radius-base;
+      background: @background-primary;
+
+      .well-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 12px;
+
+        select,
+        input {
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  .footer {
+    padding: 12px 16px;
+    background: @background-off-primary;
+
+    .btn {
+      margin-right: 8px;
+    }
+  }
+}
+
+@media (max-width: 720px) {
+  .preferences-wrap .container-mail-rules {
+    flex-direction: column;
+
+    .rule-list {
+      flex-basis: auto;
+      max-height: 220px;
+      border-radius: @border-radius-large @border-radius-large 0 0;
+    }
+
+    .rule-detail {
+      border-top: 0;
+      border-left: 1px solid @border-color-divider;
+      border-radius: 0 0 @border-radius-large @border-radius-large;
+
+      .well .well-row {
+        align-items: stretch;
+        flex-direction: column;
+
+        select,
+        input {
+          width: 100%;
+          max-width: none;
+        }
+      }
+    }
+  }
+}

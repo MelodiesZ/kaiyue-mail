@@ -15,7 +15,7 @@ body.platform-win32 {
 .category-picker-popover,
 .category-picker-dropdown {
   .menu {
-    background: @background-secondary;
+    background: @background-primary;
     width: @popover-width;
     max-height: 400px;
 
@@ -26,7 +26,8 @@ body.platform-win32 {
     .item.divider {
       background-color: @border-color-divider;
       margin: 4px 0;
-      height: 2px;
+      height: 1px;
+      min-height: 1px;
       padding: 0;
     }
   }
@@ -39,7 +40,7 @@ body.platform-win32 {
   .check-wrap {
     width: 14px;
     height: 14px;
-    border-radius: 2px;
+    border-radius: 4px;
     display: inline-block;
     position: relative;
     flex-shrink: 0;
@@ -54,7 +55,7 @@ body.platform-win32 {
   .item.selected,
   .item.active {
     img.content-mask {
-      background-color: @text-color-inverse;
+      background-color: @accent-primary;
     }
   }
 
@@ -63,7 +64,8 @@ body.platform-win32 {
   }
 
   .category-item {
-    font-size: 14px;
+    min-height: 34px;
+    font-size: @font-size-base;
     display: flex;
     align-items: center;
   }

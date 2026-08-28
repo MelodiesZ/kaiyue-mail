@@ -22,20 +22,22 @@ test('Cmd+, opens preferences panel', async () => {
 });
 
 test('preferences shows all expected tabs', async () => {
-  const tabs = ['General', 'Accounts', 'Subscription', 'Appearance', 'Shortcuts', 'Mail Rules', 'Folders', 'Signatures', 'Templates'];
+  const tabs = ['通用', '账号', '外观', '快捷键', '邮件规则', '文件夹', '签名', '模板', 'MCP 服务'];
   for (const tab of tabs) {
     await expect(mainWindow.locator(`.preferences-tabs .item:has-text("${tab}")`)).toBeVisible();
   }
 });
 
 test('clicking Shortcuts tab shows shortcut preferences', async () => {
-  await mainWindow.locator('.preferences-tabs .item:has-text("Shortcuts")').click();
-  await expect(mainWindow.locator('text=Shortcut set')).toBeVisible({ timeout: 3_000 });
+  await mainWindow.locator('.preferences-tabs .item:has-text("快捷键")').click();
+  await expect(mainWindow.locator('.container-keymaps')).toBeVisible({ timeout: 3_000 });
 });
 
 test('clicking back arrow closes preferences', async () => {
-  const backButton = mainWindow.locator('.sheet-toolbar .btn-back, .sheet-toolbar-container .item-back');
-  if (await backButton.count() > 0) {
+  const backButton = mainWindow.locator(
+    '.sheet-toolbar .btn-back, .sheet-toolbar-container .item-back'
+  );
+  if ((await backButton.count()) > 0) {
     await backButton.click();
   } else {
     await mainWindow.keyboard.press('Escape');

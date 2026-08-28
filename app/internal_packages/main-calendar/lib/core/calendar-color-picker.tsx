@@ -53,19 +53,27 @@ export const CalendarColorPicker: React.FC<CalendarColorPickerProps> = ({
 
   return (
     <div className="calendar-color-picker" ref={containerRef}>
-      <div className="color-picker-trigger" onClick={toggleDropdown}>
+      <button
+        type="button"
+        className="color-picker-trigger"
+        aria-label="选择日历颜色"
+        aria-expanded={isOpen}
+        onClick={toggleDropdown}
+      >
         <div className="color-dot" style={{ backgroundColor: color }} />
         <div className="color-picker-chevron">▾</div>
-      </div>
+      </button>
       {isOpen && (
         <div className="color-picker-dropdown">
           {availableColors.map((c) => (
-            <div
+            <button
+              type="button"
               key={c}
               className={`color-option ${c === color ? 'selected' : ''}`}
               style={{ backgroundColor: c }}
               onClick={() => handleColorSelect(c)}
-              title={c}
+              aria-label={`颜色 ${c}`}
+              aria-pressed={c === color}
             />
           ))}
         </div>

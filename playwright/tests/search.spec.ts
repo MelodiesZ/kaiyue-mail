@@ -45,7 +45,7 @@ test('typing a search term filters the thread list', async () => {
 
   // Focus search and type a term
   await mainWindow.keyboard.press('/');
-  await mainWindow.keyboard.type('SMTP');
+  await mainWindow.keyboard.type('wanghaifeng');
   await mainWindow.keyboard.press('Enter');
 
   // Wait for search results to load
@@ -61,26 +61,26 @@ test('typing a search term filters the thread list', async () => {
 
 test('from: operator searches by sender', async () => {
   await mainWindow.keyboard.press('/');
-  await mainWindow.keyboard.type('from:bengotow');
+  await mainWindow.keyboard.type('from:wanghaifeng');
   await mainWindow.keyboard.press('Enter');
 
   await mainWindow.waitForTimeout(2_000);
 
   const count = await threads(mainWindow).count();
-  expect(count).toBeGreaterThanOrEqual(0);
+  expect(count).toBeGreaterThan(0);
 
   await clearSearch(mainWindow);
 });
 
 test('subject: operator searches by subject', async () => {
   await mainWindow.keyboard.press('/');
-  await mainWindow.keyboard.type('subject:Test');
+  await mainWindow.keyboard.type('subject:"KY-2500"');
   await mainWindow.keyboard.press('Enter');
 
   await mainWindow.waitForTimeout(2_000);
 
   const count = await threads(mainWindow).count();
-  expect(count).toBeGreaterThanOrEqual(0);
+  expect(count).toBeGreaterThan(0);
 
   await clearSearch(mainWindow);
 });
@@ -110,7 +110,7 @@ test('Escape clears search and returns to inbox', async () => {
 test('star shortcut works on search result threads', async () => {
   // Search for something that returns results
   await mainWindow.keyboard.press('/');
-  await mainWindow.keyboard.type('SMTP');
+  await mainWindow.keyboard.type('wanghaifeng');
   await mainWindow.keyboard.press('Enter');
   await mainWindow.waitForTimeout(2_000);
 
@@ -126,7 +126,7 @@ test('star shortcut works on search result threads', async () => {
   await clearCapturedTasks(electronApp);
   await mainWindow.keyboard.press('s');
 
-  const task = await waitForCapturedTask(mainWindow, t => t.__cls === 'ChangeStarredTask');
+  const task = await waitForCapturedTask(mainWindow, (t) => t.__cls === 'ChangeStarredTask');
   expect(task).not.toBeNull();
   expect(task.threadIds.length).toBeGreaterThan(0);
 
@@ -135,7 +135,7 @@ test('star shortcut works on search result threads', async () => {
 
 test('archive shortcut works on search result threads', async () => {
   await mainWindow.keyboard.press('/');
-  await mainWindow.keyboard.type('SMTP');
+  await mainWindow.keyboard.type('wanghaifeng');
   await mainWindow.keyboard.press('Enter');
   await mainWindow.waitForTimeout(2_000);
 
@@ -151,7 +151,7 @@ test('archive shortcut works on search result threads', async () => {
 
   const task = await waitForCapturedTask(
     mainWindow,
-    t => t.__cls === 'ChangeFolderTask' || t.__cls === 'ChangeLabelsTask'
+    (t) => t.__cls === 'ChangeFolderTask' || t.__cls === 'ChangeLabelsTask'
   );
   expect(task).not.toBeNull();
 

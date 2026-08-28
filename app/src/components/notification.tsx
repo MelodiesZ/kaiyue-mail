@@ -105,7 +105,7 @@ export default class Notification extends React.Component<NotificationProps, Not
   render() {
     if (this.state.isDismissed) return <span />;
 
-    const actions = this.props.actions || [];
+    const actions = [...(this.props.actions || [])];
 
     if (this.props.isDismissable) {
       actions.push({
@@ -124,15 +124,18 @@ export default class Notification extends React.Component<NotificationProps, Not
         className += ' loading';
       }
       return (
-        <div
+        <button
+          type="button"
           key={id}
           id={id}
           className={className}
+          aria-busy={this.state.loadingActions.includes(id)}
+          disabled={this.state.loadingActions.includes(id)}
           onClick={(e) => this._onClick(e, id, action.fn)}
           {...action.props}
         >
           {action.label}
-        </div>
+        </button>
       );
     });
 
@@ -148,15 +151,18 @@ export default class Notification extends React.Component<NotificationProps, Not
       <div
         className={`notification${isError ? ' error' : ''} ${className}`}
         data-priority={priority}
+        role={isError ? 'alert' : 'status'}
+        aria-live={isError ? 'assertive' : 'polite'}
       >
         <div className="title">
           {iconEl} {title} <br />
-          <span
-            className={`subtitle ${subtitleAction ? 'has-action' : ''}`}
-            onClick={subtitleAction}
-          >
-            {subtitle}
-          </span>
+          {subtitleAction ? (
+            <button type="button" className="subtitle has-action" onClick={subtitleAction}>
+              {subtitle}
+            </button>
+          ) : (
+            <span className="subtitle">{subtitle}</span>
+          )}
         </div>
         {actionElems.length > 0 ? <div className="actions-wrapper">{actionElems}</div> : null}
       </div>

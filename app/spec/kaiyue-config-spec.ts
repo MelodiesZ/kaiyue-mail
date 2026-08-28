@@ -81,7 +81,7 @@ describe('KaiyueConfig', () => {
   it('ships independent application metadata', () => {
     expect(appPackage.name).toBe('kaiyue-mail');
     expect(appPackage.productName).toBe(KaiyueConfig.brand.name);
-    expect(appPackage.version).toBe('1.0.2');
+    expect(appPackage.version).toBe('1.0.3');
     expect(KaiyueConfig.brand.company).toBe('蒙阴县凯越工程机械有限公司');
     expect(KaiyueConfig.brand.positioning).toBe('自主研发企业邮件客户端');
   });

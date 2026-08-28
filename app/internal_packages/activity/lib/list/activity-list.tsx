@@ -98,14 +98,14 @@ class ActivityList extends React.Component<
       <Flexbox direction="column" height="none" className={classes} tabIndex={-1}>
         <ScrollRegion style={{ height: '100%' }}>{this.renderActions()}</ScrollRegion>
         {!empty && (
-          <a className="activity-summary-cta" onClick={this._onViewSummary}>
+          <button type="button" className="activity-summary-cta" onClick={this._onViewSummary}>
             {localized('Activity View')}
             <RetinaImg
               name="activity-drill-down-arrow.png"
               style={{ paddingLeft: 6 }}
               mode={RetinaImg.Mode.ContentDark}
             />
-          </a>
+          </button>
         )}
       </Flexbox>
     );

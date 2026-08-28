@@ -88,7 +88,7 @@ export default class MailsyncBridge {
   _lastWait: number;
 
   constructor() {
-    if (!AppEnv.isMainWindow() || AppEnv.inSpecMode()) {
+    if (!AppEnv.isMainWindow() || AppEnv.inSpecMode() || process.env.PLAYWRIGHT) {
       ipcRenderer.on('mailsync-bridge-message', this._onIncomingRebroadcastMessage);
       return;
     }

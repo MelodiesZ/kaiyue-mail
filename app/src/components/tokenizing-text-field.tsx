@@ -9,6 +9,9 @@ import { Menu } from 'mailspring-component-kit';
 import { RetinaImg } from './retina-img';
 import { KeyCommandsRegion } from './key-commands-region';
 
+const isComposingKeyboardEvent = (event: React.KeyboardEvent<HTMLInputElement>) =>
+  event.nativeEvent.isComposing || event.keyCode === 229;
+
 type SizeToFitInputProps = {
   value?: string;
 };
@@ -195,6 +198,10 @@ class Token<T> extends React.Component<TokenProps<T>, TokenState> {
 
   _onEditKeydown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (this.props.disabled) return;
+    if (isComposingKeyboardEvent(event)) {
+      event.stopPropagation();
+      return;
+    }
     if (event.key === 'Enter' && this.props.selected && this.props.onEditMotion) {
       this.props.onEditMotion(this.props.item);
     }
@@ -484,6 +491,17 @@ export class TokenizingTextField<T> extends React.Component<
   };
 
   _onInputKeydown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    // Enter confirms the current candidate while an IME is composing text. It
+    // must not also submit the recipient or finish editing an existing token.
+    // keyCode 229 covers Chromium / WebKit variants that do not reliably expose
+    // nativeEvent.isComposing on the keydown that ends composition.
+    if (isComposingKeyboardEvent(event)) {
+      // The completions Menu is an ancestor and also treats Enter as selection,
+      // so keep the IME event from bubbling into it.
+      event.stopPropagation();
+      return;
+    }
+
     if (['Backspace', 'Delete'].includes(event.key)) {
       this._removeTokens(this._selectedTokens());
     } else if (['Escape'].includes(event.key)) {

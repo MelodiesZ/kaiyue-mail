@@ -9,6 +9,7 @@ import {
   KeyManager,
   Account,
   AccountAutoaddress,
+  DOMUtils,
 } from 'mailspring-exports';
 import { KaiyueConfig } from '../../../../src/kaiyue-config';
 
@@ -228,17 +229,26 @@ class PreferencesAccountDetails extends Component<
 
       fs.writeFileSync(
         filepath,
-        `<div style="white-space: pre-wrap; font-family: monospace;">${result}</div>`
+        `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>${localized(
+          '账户诊断日志'
+        )}</title><style>html{color-scheme:light dark}body{margin:0;background:#f6f8fb;color:#17233a;font:14px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace}header{position:sticky;top:0;padding:14px 20px;border-bottom:1px solid #dce3ec;background:#fff;font:600 15px/1.4 system-ui,sans-serif}pre{margin:0;padding:20px;white-space:pre-wrap;overflow-wrap:anywhere}@media(prefers-color-scheme:dark){body{background:#111827;color:#e5e7eb}header{border-color:#334155;background:#182235}}</style><body><header>${localized(
+          '账户诊断日志'
+        )} · ${DOMUtils.escapeHTMLCharacters(id)}</header><pre>${DOMUtils.escapeHTMLCharacters(
+          result
+        )}</pre></body></html>`
       );
     } catch (err) {
-      AppEnv.showErrorDialog({ title: 'Error', message: `Could not retrieve sync logs. ${err}` });
+      AppEnv.showErrorDialog({
+        title: localized('错误'),
+        message: localized('无法读取同步日志：%@', `${err}`),
+      });
       return;
     }
     const { BrowserWindow } = require('@electron/remote');
     const win = new BrowserWindow({
       width: 800,
       height: 600,
-      title: `Account ${id} - Recent Logs`,
+      title: localized('账户 %@ · 最近的同步日志', id),
       webPreferences: {
         javascript: false,
         nodeIntegration: false,
@@ -255,9 +265,9 @@ class PreferencesAccountDetails extends Component<
         <div className="message">{message}</div>
         <div style={{ display: 'flex', flexShrink: 0 }}>
           {actions.map(({ text, action }) => (
-            <a className="action" onClick={action} key={text}>
+            <button type="button" className="action" onClick={action} key={text}>
               {text}
-            </a>
+            </button>
           ))}
         </div>
       </div>
@@ -323,6 +333,11 @@ class PreferencesAccountDetails extends Component<
           onBlur={this._saveChanges}
           onChange={(e) => this._setState({ name: e.target.value })}
         />
+        <div className="platform-note">
+          {localized(
+            "Sender profile photos are controlled by the recipient's mail service and cannot be set from Kaiyue Mail."
+          )}
+        </div>
         <h6>{localized('Automatic CC / BCC')}</h6>
         <AutoaddressControl
           autoaddress={account.autoaddress}
@@ -367,30 +382,35 @@ class PreferencesAccountDetails extends Component<
             onBlur={this._saveChanges}
             onChange={(e) => this._onSetColor({ color: e.target.value })}
           />
-          <div className="btn" style={{ marginLeft: 6 }} onClick={this._onResetColor}>
+          <button
+            type="button"
+            className="btn"
+            style={{ marginLeft: 6 }}
+            onClick={this._onResetColor}
+          >
             {localized('Reset Account Color')}
-          </div>
+          </button>
         </div>
         <h6>{localized('Account Settings')}</h6>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          <div className="btn" onClick={this._onManageContacts}>
+          <button type="button" className="btn" onClick={this._onManageContacts}>
             {localized('Manage Contacts')}
-          </div>
-          <div className="btn" onClick={this._onReconnect}>
+          </button>
+          <button type="button" className="btn" onClick={this._onReconnect}>
             {account.provider === 'gmail'
               ? localized('Re-authenticate...')
               : localized('Update Connection Settings...')}
-          </div>
+          </button>
           {account.provider === 'office365' && (
-            <div className="btn" onClick={this._onAddSharedMailbox}>
+            <button type="button" className="btn" onClick={this._onAddSharedMailbox}>
               {localized('Add Shared Mailbox...')}
-            </div>
+            </button>
           )}
         </div>
         <h6>{localized('Local Data')}</h6>
-        <div className="btn" onClick={this._onResetCache}>
+        <button type="button" className="btn" onClick={this._onResetCache}>
           {localized('Rebuild Cache...')}
-        </div>
+        </button>
       </div>
     );
   }

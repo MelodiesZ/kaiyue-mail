@@ -29,7 +29,7 @@ function readConfig(): any {
 // --- Signatures ---
 
 test('creating a signature persists it to config.json', async () => {
-  await mainWindow.locator('.preferences-tabs .item:has-text("Signatures")').click();
+  await mainWindow.locator('.preferences-tabs .item:has-text("签名")').click();
   await mainWindow.waitForTimeout(500);
 
   // Click the + button to add a new signature
@@ -52,7 +52,7 @@ test('creating a signature persists it to config.json', async () => {
 
   // Fill in the Name field in the Information section
   const nameField = sigContainer.locator('.section.information #name');
-  if (await nameField.count() > 0) {
+  if ((await nameField.count()) > 0) {
     await nameField.fill('');
     await nameField.type('Jane Doe');
     await mainWindow.waitForTimeout(500);
@@ -64,10 +64,10 @@ test('creating a signature persists it to config.json', async () => {
 
   const signatures = config.signatures;
   const sigEntries = Object.values(signatures) as any[];
-  const testSig = sigEntries.find(s => s.title === 'Test Signature From Playwright');
+  const testSig = sigEntries.find((s) => s.title === 'Test Signature From Playwright');
   expect(testSig).toBeDefined();
   expect(testSig.body).toBeTruthy();
-  if (await nameField.count() > 0) {
+  if ((await nameField.count()) > 0) {
     expect(testSig.data.name).toBe('Jane Doe');
   }
 });
@@ -75,7 +75,7 @@ test('creating a signature persists it to config.json', async () => {
 // --- Templates ---
 
 test('creating a template persists it as an HTML file and renaming updates the file', async () => {
-  await mainWindow.locator('.preferences-tabs .item:has-text("Templates")').click();
+  await mainWindow.locator('.preferences-tabs .item:has-text("模板")').click();
   await mainWindow.waitForTimeout(500);
 
   const templatesContainer = mainWindow.locator('.preferences-templates-container');
@@ -91,7 +91,7 @@ test('creating a template persists it as an HTML file and renaming updates the f
   expect(fs.existsSync(templatesDir)).toBe(true);
 
   const files = fs.readdirSync(templatesDir);
-  const untitledFile = files.find(f => f.toLowerCase().startsWith('untitled'));
+  const untitledFile = files.find((f) => f.startsWith('无标题'));
   expect(untitledFile).toBeDefined();
 
   // Read the file and verify it has content
@@ -102,12 +102,15 @@ test('creating a template persists it as an HTML file and renaming updates the f
   // Rename the template via Actions.renameTemplate dispatched through the renderer.
   // Directly calling the action is more reliable than triggering onBlur, because
   // clicking elsewhere changes the selected template before blur fires.
-  await executeInRenderer(electronApp, `
+  await executeInRenderer(
+    electronApp,
+    `
     (function() {
       var Actions = require('mailspring-exports').Actions;
-      Actions.renameTemplate('Untitled', 'My Test Template');
+      Actions.renameTemplate('无标题', 'My Test Template');
     })()
-  `);
+  `
+  );
 
   // Wait for the async fs.rename + file watcher re-populate cycle (poll up to 5s)
   const renamedPath = path.join(templatesDir, 'My Test Template.html');
@@ -123,17 +126,24 @@ test('creating a template persists it as an HTML file and renaming updates the f
   expect(found).toBe(true);
 
   // Verify the list item was updated in the UI
-  const renamedItem = templatesContainer.locator('.template-list .list-item:has-text("My Test Template")');
+  const renamedItem = templatesContainer.locator(
+    '.template-list .list-item:has-text("My Test Template")'
+  );
   await expect(renamedItem).toBeVisible({ timeout: 3_000 });
 });
 
 test("a template's subject line is saved into the template file", async () => {
+  await mainWindow.locator('.preferences-tabs .item:has-text("模板")').click();
   const templatesContainer = mainWindow.locator('.preferences-templates-container');
   await expect(templatesContainer).toBeVisible({ timeout: 3_000 });
 
-  // The template renamed above is still selected - give it a subject line.
+  // File watcher refreshes may clear selection after a rename, so select the
+  // renamed template explicitly before editing its subject.
+  await templatesContainer
+    .locator('.template-list .list-item:has-text("My Test Template")')
+    .click();
   const subjectInput = templatesContainer.locator('#template-subject');
-  await expect(subjectInput).toBeVisible({ timeout: 3_000 });
+  await expect(subjectInput).toBeEnabled({ timeout: 3_000 });
   await subjectInput.fill('Following up on our call');
 
   // The editor saves on blur.
@@ -155,17 +165,17 @@ test("a template's subject line is saved into the template file", async () => {
 // --- Mail Rules ---
 
 test('creating a mail rule persists it to localStorage', async () => {
-  await mainWindow.locator('.preferences-tabs .item:has-text("Mail Rules")').click();
+  await mainWindow.locator('.preferences-tabs .item:has-text("邮件规则")').click();
   await mainWindow.waitForTimeout(500);
 
   const rulesContainer = mainWindow.locator('.container-mail-rules');
   await expect(rulesContainer).toBeVisible({ timeout: 3_000 });
 
   // Create a new rule — either via the empty state button or the + button
-  const emptyButton = rulesContainer.locator('.empty-list .btn:has-text("Create a new Rule")');
+  const emptyButton = rulesContainer.locator('.empty-list .btn').first();
   const addButton = rulesContainer.locator('.rule-list .btn-editable-list').first();
 
-  if (await emptyButton.count() > 0) {
+  if ((await emptyButton.count()) > 0) {
     await emptyButton.click();
   } else {
     await addButton.click();
@@ -182,7 +192,7 @@ test('creating a mail rule persists it to localStorage', async () => {
 
   // Edit the condition: set the value input to a test email
   const conditionInput = ruleDetail.locator('.well-matchers input[type="text"]').first();
-  if (await conditionInput.count() > 0) {
+  if ((await conditionInput.count()) > 0) {
     await conditionInput.fill('test@example.com');
     await mainWindow.waitForTimeout(500);
   }
@@ -190,15 +200,18 @@ test('creating a mail rule persists it to localStorage', async () => {
   // Verify the rule was persisted to localStorage (debounced 1s save)
   await mainWindow.waitForTimeout(1_500);
 
-  const rules = await executeInRenderer(electronApp, `
+  const rules = await executeInRenderer(
+    electronApp,
+    `
     (function() {
       var raw = window.localStorage.getItem('MailRules-V2');
       return raw ? JSON.parse(raw) : [];
     })()
-  `);
+  `
+  );
 
   expect(rules.length).toBeGreaterThan(0);
-  const newRule = rules.find((r: any) => r.name === 'Untitled Rule');
+  const newRule = rules.find((r: any) => r.name === '未命名规则');
   expect(newRule).toBeDefined();
   expect(newRule.conditions).toBeDefined();
   expect(newRule.conditions.length).toBeGreaterThan(0);
@@ -206,7 +219,7 @@ test('creating a mail rule persists it to localStorage', async () => {
   expect(newRule.actions.length).toBeGreaterThan(0);
 
   // If we set a condition value, verify it was saved
-  if (await conditionInput.count() > 0) {
+  if ((await conditionInput.count()) > 0) {
     const conditionValue = newRule.conditions[0].value;
     expect(conditionValue).toBe('test@example.com');
   }

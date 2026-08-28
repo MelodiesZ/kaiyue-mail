@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { renderIntoDocument } from 'react-dom/test-utils';
 import { Account } from 'mailspring-exports';
 
@@ -22,6 +23,13 @@ describe('PreferencesAccountDetails', function preferencesAccountDetails() {
     this.onAccountUpdated = jasmine.createSpy('onAccountUpdated');
     this.component = makeComponent({ account, onAccountUpdated: this.onAccountUpdated });
     spyOn(this.component, 'setState');
+  });
+
+  it('explains why a sender avatar cannot be configured in the mail client', () => {
+    const node = ReactDOM.findDOMNode(this.component) as HTMLElement;
+    expect(node.textContent).toContain(
+      "Sender profile photos are controlled by the recipient's mail service"
+    );
   });
 
   function assertAccountState(actual, expected) {

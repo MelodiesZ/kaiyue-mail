@@ -1,6 +1,7 @@
 import React from 'react';
 import { Range, Editor, Mark, Value, Block, Selection } from 'slate';
 import CompactPicker from 'react-color/lib/Compact';
+import { localized } from 'mailspring-exports';
 import { ComposerEditorPluginToolbarComponentProps } from './types';
 
 // Helper Functions
@@ -259,7 +260,9 @@ export function BuildMarkButtonWithValuePicker(config) {
                   }
                 }}
               />
-              <button onMouseDown={this.onConfirm}>{active ? 'Save' : 'Add'}</button>
+              <button onMouseDown={this.onConfirm}>
+                {active ? localized('Save') : localized('Add')}
+              </button>
             </div>
           )}
         </div>

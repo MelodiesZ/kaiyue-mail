@@ -92,7 +92,8 @@ class RelatedThreadsWithData extends React.Component<{
     return (
       <div className="related-threads" style={{ height }}>
         {shownThreads.map((thread) => (
-          <div
+          <button
+            type="button"
             key={thread.id}
             className="related-thread"
             onClick={() => Actions.setFocus({ collection: 'thread', item: thread })}
@@ -112,12 +113,16 @@ class RelatedThreadsWithData extends React.Component<{
             >
               {DateUtils.shortTimeString(thread.lastMessageReceivedTimestamp)}
             </span>
-          </div>
+          </button>
         ))}
         {showToggle && (
-          <div className="toggle" onClick={() => this.setState({ expanded: !this.state.expanded })}>
+          <button
+            type="button"
+            className="toggle"
+            onClick={() => this.setState({ expanded: !this.state.expanded })}
+          >
             {this.state.expanded ? localized('Collapse') : localized('Show more')}
-          </div>
+          </button>
         )}
       </div>
     );

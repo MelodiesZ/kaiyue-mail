@@ -152,12 +152,14 @@
       left: 4px;
       bottom: 0;
       height: 2px;
-      width: 0; // Changed by React
+      width: 97.5%;
       z-index: 3;
       display: block;
       background: @blue-light;
       border-bottom-left-radius: 4px;
-      transition: width 0.3s linear;
+      transform: scaleX(0); // Changed by React
+      transform-origin: left center;
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
     }
     .progress-background {
       position: absolute;
@@ -245,12 +247,7 @@ body.platform-win32 {
       height: 30px;
       max-width: 100%;
       border-top-right-radius: 3px;
-      background: linear-gradient(
-        to top,
-        rgba(0, 0, 0, 0.5) 0px,
-        rgba(0, 0, 0, 0.5) 20px,
-        rgba(0, 0, 0, 0) 50px
-      );
+      background: rgba(23, 35, 58, 0.78);
       vertical-align: bottom;
 
       // Important! file-name-container is on top of the image and prevents you from dragging it.

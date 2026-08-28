@@ -12,6 +12,16 @@ describe('Account', function () {
       expect(account.label).toBe('test@example.com');
     });
 
+    it('uses the mailbox name when persisted account data has a null display name', function () {
+      const account = new Account({
+        id: 'test-id',
+        name: null,
+        emailAddress: 'leipeng@kaiyuedrill.com',
+      });
+      expect(account.name).toBe('leipeng');
+      expect(account.defaultMe().toString()).toBe('leipeng <leipeng@kaiyuedrill.com>');
+    });
+
     it('preserves an explicitly provided label', function () {
       const account = new Account({
         id: 'test-id',

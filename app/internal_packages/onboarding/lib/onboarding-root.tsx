@@ -56,12 +56,23 @@ export default class OnboardingRoot extends React.Component<
     this.unsubscribe = OnboardingStore.listen(this._onStateChanged, this);
     AppEnv.center();
     AppEnv.displayWindow();
+    if (process.env.PLAYWRIGHT === '1') {
+      (window as any).__kaiyueOnboarding = {
+        showPage: (page: string, accountJSON?: Record<string, unknown>) => {
+          if (accountJSON) {
+            OnboardingStore._onSetAccount(new Account(accountJSON));
+          }
+          OnboardingStore._onMoveToPage(page);
+        },
+      };
+    }
   }
 
   componentWillUnmount() {
     if (this.unsubscribe) {
       this.unsubscribe();
     }
+    delete (window as any).__kaiyueOnboarding;
   }
 
   _getStateFromStore = () => {
@@ -86,7 +97,11 @@ export default class OnboardingRoot extends React.Component<
       <div className="page-frame">
         <PageTopBar
           pageDepth={this.state.pageDepth}
-          allowMoveBack={!['initial-preferences', 'account-choose'].includes(this.state.page)}
+          allowMoveBack={
+            !['initial-preferences', 'account-choose', 'account-onboarding-success'].includes(
+              this.state.page
+            )
+          }
         />
         <TransitionGroup component={null}>
           <CSSTransition key={this.state.page} classNames="alpha-fade" timeout={150}>

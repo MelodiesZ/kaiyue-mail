@@ -1,4 +1,5 @@
 import React from 'react';
+import { localized } from 'mailspring-exports';
 
 /**
  * Recurring event icon — two arrows tracing a rounded rectangle with
@@ -10,7 +11,7 @@ export const RecurringIcon = ({ size = 10 }: { size?: number }) => (
     viewBox="0 0 12 12"
     width={size}
     height={size}
-    aria-label="Recurring"
+    aria-label={localized('重复事件')}
   >
     {/* Left half: bottom edge → bottom-left corner → left edge → top-left corner → top edge */}
     <path

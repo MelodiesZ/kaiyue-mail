@@ -69,7 +69,7 @@
   }
 
   #inbox-html-wrapper {
-    font-family: 'Nylas-Pro', 'Helvetica', 'Lucidia Grande', sans-serif;
+    font-family: @font-family-sans-serif;
   }
 
   #inbox-html-wrapper.platform-win32 {
@@ -147,13 +147,19 @@
     // The default font for <pre> tags is the system monospace font. We want
     // themes to be able to override with monospace, but not have that be the
     // default for normal people.
-    font-family: 'Nylas-Pro', 'Helvetica', 'Lucidia Grande', sans-serif;
+    font-family: @font-family-sans-serif;
     white-space: pre-wrap;
     word-wrap: break-word;
   }
 
   img {
     border: 0;
+  }
+
+  // Remote images are rewritten to `#` while privacy protection is active.
+  // Hide those placeholders so Chromium does not paint a broken-image icon or alt text.
+  img[src='#'] {
+    display: none !important;
   }
 
   search-match,

@@ -49,17 +49,17 @@ class ThreadListEmptyFolderBar extends React.Component<ThreadListEmptyFolderBarP
             : localized(`Showing 1 thread with %@ messages`, term)}
         </div>
         {busy ? (
-          <div className="btn">
+          <button type="button" className="btn" disabled aria-label={localized('Working')}>
             <RetinaImg
               style={{ width: 16, height: 16 }}
               name="inline-loading-spinner.gif"
               mode={RetinaImg.Mode.ContentPreserve}
             />
-          </div>
+          </button>
         ) : (
-          <div className="btn" onClick={this._onClick}>
+          <button type="button" className="btn" onClick={this._onClick}>
             {localized(`Empty %@ now`, role)}
-          </div>
+          </button>
         )}
       </div>
     );

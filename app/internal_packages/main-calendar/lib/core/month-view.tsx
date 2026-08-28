@@ -1,7 +1,7 @@
 import React from 'react';
 import moment, { Moment } from 'moment-timezone';
 import { InjectedComponentSet } from 'mailspring-component-kit';
-import { CalendarDateUtils } from 'mailspring-exports';
+import { CalendarDateUtils, localized } from 'mailspring-exports';
 import { MailspringCalendarViewProps } from './mailspring-calendar';
 import { CalendarEventContainer } from './calendar-event-container';
 import { CalendarView } from './calendar-constants';
@@ -175,7 +175,7 @@ export class MonthView extends React.Component<MailspringCalendarViewProps, Mont
 
   render() {
     const weeks = this._getWeeksInMonth();
-    const headerText = this.props.focusedMoment.format('MMMM YYYY');
+    const headerText = this.props.focusedMoment.format('YYYY年M月');
 
     return (
       <div className="calendar-view month-view">
@@ -203,7 +203,7 @@ export class MonthView extends React.Component<MailspringCalendarViewProps, Mont
               onClick={this._onClickToday}
               style={{ position: 'absolute', left: 10 }}
             >
-              Today
+              {localized('Today')}
             </button>
           </HeaderControls>
 

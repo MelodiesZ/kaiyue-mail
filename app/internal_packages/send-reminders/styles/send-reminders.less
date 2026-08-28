@@ -47,7 +47,7 @@
 
 .send-reminders-header {
   color: @reminders-color;
-  background: linear-gradient(to bottom, #eee8ff 0%, #fff 25%);
+  background: mix(@reminders-color, @background-primary, 8%);
   padding: 13px 0 10px 20px;
   margin: -19px -20px 15px -20px;
   border-bottom: 1px solid #e7e1fb;
@@ -74,6 +74,12 @@
   .clear-reminder {
     position: absolute;
     right: 18px;
+    appearance: none;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
     cursor: pointer;
     text-decoration: underline;
   }

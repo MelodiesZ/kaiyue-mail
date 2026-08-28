@@ -214,11 +214,14 @@
     margin-left: auto;
 
     .color-picker-trigger {
+      appearance: none;
       display: flex;
       align-items: center;
       gap: 4px;
       cursor: pointer;
       padding: 4px;
+      border: 0;
+      background: transparent;
       border-radius: @border-radius-small;
 
       &:hover {
@@ -231,6 +234,13 @@
       height: 14px;
       border-radius: @border-radius-small;
       border: 1px solid fade(@black, 20%);
+    }
+
+    .color-option {
+      appearance: none;
+      padding: 0;
+      border: 0;
+      cursor: pointer;
     }
 
     .color-picker-chevron {
@@ -398,6 +408,14 @@
   // Action Links (Add Invitees, Add Notes)
   // ============================================
   .action-link {
+    appearance: none;
+    width: 100%;
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    background: transparent;
+    font: inherit;
+    text-align: left;
     display: block;
     padding: @padding-small-vertical @padding-base-horizontal;
     color: @text-color-very-subtle;
@@ -439,6 +457,10 @@
       }
 
       .section-close {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        font-family: inherit;
         cursor: pointer;
         color: @text-color-very-subtle;
         font-size: 16px;
@@ -489,6 +511,51 @@
   }
 }
 
+// Kaiyue calendar popovers and event controls.
+.fixed-popover .calendar-event-popover {
+  overflow: hidden;
+  border-radius: @border-radius-large;
+  color: @text-color;
+  background: @background-primary;
+
+  .title-wrapper {
+    padding: 10px 12px;
+    border-radius: @border-radius-large @border-radius-large 0 0;
+    color: #fff;
+    background: #1a3b70;
+    font-size: @font-size-large;
+    font-weight: @font-weight-semi-bold;
+  }
+
+  .location,
+  .label,
+  .event-property-row .row-label {
+    color: @text-color-subtle;
+  }
+
+  .section,
+  .event-property-row,
+  .event-popover-actions {
+    border-color: @border-color-divider;
+  }
+
+  .event-property-row:hover {
+    background: @background-secondary;
+  }
+
+  .attendee-chip {
+    border-radius: @border-radius-base;
+    color: @text-color;
+    background: @background-off-primary;
+  }
+
+  .calendar-color-picker .color-picker-dropdown {
+    border: 1px solid @border-color-divider;
+    border-radius: @border-radius-large;
+    box-shadow: @standard-shadow;
+  }
+}
+
 .quick-event-popover {
   width: 250px;
 }
@@ -511,7 +578,7 @@
   order: -100;
   overflow: visible;
   z-index: 100;
-  width: 400px;
+  width: clamp(260px, 34vw, 320px);
   height: 23px;
   font-weight: 400;
   line-height: 23px;
@@ -573,6 +640,17 @@
     }
   }
 
+  .event-search-clear {
+    appearance: none;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
   .suggestions {
     left: 0;
     top: 23px;
@@ -588,6 +666,13 @@
     overflow-y: auto;
 
     .suggestion {
+      appearance: none;
+      width: 100%;
+      border: 0;
+      color: inherit;
+      background: transparent;
+      font: inherit;
+      text-align: left;
       display: flex;
       align-items: flex-start;
       padding: @padding-small-vertical @padding-small-horizontal;
@@ -648,5 +733,48 @@
         text-overflow: ellipsis;
       }
     }
+  }
+
+  .event-search-empty {
+    padding: 16px;
+    color: @text-color-very-subtle;
+    text-align: center;
+  }
+}
+
+.mailspring-calendar .calendar-empty-state {
+  background: @background-primary;
+
+  .calendar-empty-state-content {
+    max-width: 440px;
+    padding: 40px 32px;
+  }
+
+  .calendar-empty-state-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    border: 1px solid @border-color-divider;
+    border-radius: 13px;
+    color: @accent-primary;
+    background: #eaf1fb;
+    font-size: 18px;
+    font-weight: @font-weight-semi-bold;
+  }
+
+  .calendar-empty-state-title {
+    margin-bottom: 8px;
+    color: @text-color;
+    font-size: @font-size-h3;
+    font-weight: @font-weight-semi-bold;
+  }
+
+  .calendar-empty-state-message {
+    margin-bottom: 22px;
+    color: @text-color-subtle;
+    font-size: @font-size-small;
+    line-height: 1.65;
   }
 }

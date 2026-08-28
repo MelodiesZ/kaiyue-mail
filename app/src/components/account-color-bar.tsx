@@ -28,7 +28,10 @@ class AccountColorBar extends React.Component<{ accountId: string }, { color: st
   }
 
   render() {
-    return this.state.color ? (
+    // A color marker only carries meaning when the list combines multiple
+    // accounts. In the common single-account workspace it reads as a stray
+    // selection bar beside every sender.
+    return AccountStore.accounts().length > 1 && this.state.color ? (
       <span
         style={{
           height: '50%',

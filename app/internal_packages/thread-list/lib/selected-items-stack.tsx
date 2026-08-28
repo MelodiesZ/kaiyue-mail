@@ -61,9 +61,9 @@ class SelectedItemsStack extends Component<{ selectionCount: number }> {
           <div className="count-info">
             <div className="count">{selectionCount}</div>
             <div className="count-message">{localized('Selected Messages')}</div>
-            <div className="clear btn" onClick={this.onClearSelection}>
+            <button type="button" className="clear btn" onClick={this.onClearSelection}>
               {localized('Clear Selection')}
-            </div>
+            </button>
           </div>
         </div>
       </div>

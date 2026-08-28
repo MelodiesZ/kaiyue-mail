@@ -22,13 +22,8 @@ class AccountOnboardingSuccess extends Component<{ account: Account }> {
           />
         </div>
         <div>
-          <h2>
-            {localized(
-              'Successfully connected to %@!',
-              providerConfig.displayNameShort || providerConfig.displayName
-            )}
-          </h2>
-          <h3>{localized('Adding your account to Mailspring…')}</h3>
+          <h2>{localized('账号连接成功')}</h2>
+          <h3>{localized('正在同步邮件，请稍候…')}</h3>
         </div>
       </div>
     );

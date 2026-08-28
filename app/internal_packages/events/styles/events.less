@@ -32,10 +32,13 @@
       color: @text-color;
     }
     .event-download {
+      appearance: none;
       float: right;
       border-radius: @border-radius-base;
       border: 1px solid @border-color-divider;
       padding: 0 4px;
+      background: transparent;
+      cursor: pointer;
       img {
         background: @text-color-very-subtle;
         margin: 0;
@@ -58,7 +61,7 @@
       .event-day {
         display: block;
         font-size: @font-size-large;
-        color: #e64d65;
+        color: @color-error;
       }
 
       .event-time {

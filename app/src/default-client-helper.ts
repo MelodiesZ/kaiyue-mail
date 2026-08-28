@@ -5,7 +5,11 @@ import { localized } from './intl';
 import pkg from './utils/package';
 import { KaiyueConfig } from './kaiyue-config';
 
-const windowsRegisteredAppName = 'KaiyueMail';
+const windowsRegisteredAppName = 'Kaiyue Mail';
+const windowsMailtoProgId = 'KaiyueMail.Url.mailto';
+const windowsDefaultAppsUri = `ms-settings:defaultapps?registeredAppUser=${encodeURIComponent(
+  windowsRegisteredAppName
+)}`;
 
 interface DCH {
   available(): boolean;
@@ -32,11 +36,11 @@ export class DefaultClientHelperWindows implements DCH {
           `reg.exe query HKCU\\SOFTWARE\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\${scheme}\\UserChoice`,
           (err2, stdout2) => {
             output += stdout2.toString();
-            if (err1 || err2) {
+            if (err1 && err2) {
               callback(err1 || err2);
               return;
             }
-            callback(output.includes(windowsRegisteredAppName));
+            callback(output.toLowerCase().includes(windowsMailtoProgId.toLowerCase()));
           }
         );
       }
@@ -47,17 +51,15 @@ export class DefaultClientHelperWindows implements DCH {
     // On Windows 11 21H2+ (with April 2023 update), we can deep link directly to Mailspring's
     // default app settings page. On older Windows versions, this falls back to the main
     // Default Apps page, which is still better than opening a web browser.
-    shell
-      .openExternal(`ms-settings:defaultapps?registeredAppUser=${windowsRegisteredAppName}`)
-      .catch((err) => {
-        AppEnv.showErrorDialog({
-          title: localized('Failed to Open Settings'),
-          message: localized(
-            `${KaiyueConfig.brand.name} was unable to open Windows Settings.\n\n%@`,
-            err.message
-          ),
-        });
+    shell.openExternal(windowsDefaultAppsUri).catch((err) => {
+      AppEnv.showErrorDialog({
+        title: localized('Failed to Open Settings'),
+        message: localized(
+          `${KaiyueConfig.brand.name} was unable to open Windows Settings.\n\n%@`,
+          err.message
+        ),
       });
+    });
   }
 
   registerForURLScheme(scheme: string, callback = (error?: Error) => {}) {
@@ -94,17 +96,15 @@ export class DefaultClientHelperWindows implements DCH {
           if (response === 0) {
             // On Windows 11 21H2+ (with April 2023 update), this deep links directly to
             // Mailspring's default app settings. On older versions, falls back to Default Apps.
-            shell
-              .openExternal(`ms-settings:defaultapps?registeredAppUser=${windowsRegisteredAppName}`)
-              .catch((err) => {
-                AppEnv.showErrorDialog({
-                  title: localized('Failed to Open Settings'),
-                  message: localized(
-                    `${KaiyueConfig.brand.name} was unable to open Windows Settings.\n\n%@`,
-                    err.message
-                  ),
-                });
+            shell.openExternal(windowsDefaultAppsUri).catch((err) => {
+              AppEnv.showErrorDialog({
+                title: localized('Failed to Open Settings'),
+                message: localized(
+                  `${KaiyueConfig.brand.name} was unable to open Windows Settings.\n\n%@`,
+                  err.message
+                ),
               });
+            });
           }
         }
         callback(null);

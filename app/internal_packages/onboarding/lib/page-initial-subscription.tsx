@@ -1,8 +1,13 @@
-import { RetinaImg } from 'mailspring-component-kit';
-import { localized, localizedReactFragment, React } from 'mailspring-exports';
+import { React } from 'mailspring-exports';
 
-export default class InitialPreferencesPage extends React.Component {
-  static displayName = 'InitialPreferencesPage';
+const FEATURES = [
+  ['统一收件', '多个企业邮箱集中管理，重要邮件清晰可见。'],
+  ['高效处理', '稍后发送、稍后提醒与快捷操作随时可用。'],
+  ['安全可靠', '账户配置仅保存在本机，并通过加密连接访问。'],
+];
+
+export default class InitialSubscriptionPage extends React.Component {
+  static displayName = 'InitialSubscriptionPage';
 
   _onFinished = () => {
     require('electron').ipcRenderer.send('account-setup-successful');
@@ -10,131 +15,35 @@ export default class InitialPreferencesPage extends React.Component {
 
   render() {
     return (
-      <div className="page opaque initial-subscription" style={{ width: 900, height: 620 }}>
-        <h1 style={{ paddingTop: 100 }}>{localized(`Go further with Mailspring Pro`)}</h1>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            maxWidth: 750,
-            margin: 'auto',
-            textAlign: 'left',
-            marginTop: 40,
-          }}
-        >
-          <div>
-            <div className="pro-feature-ring" style={{ marginRight: 40 }}>
-              <RetinaImg name="pro-feature-ring.png" mode={RetinaImg.Mode.ContentPreserve} />
-              <div className="price">$8</div>
-              <div className="period">{localized(`Monthly`).toLocaleLowerCase()}</div>
-            </div>
-          </div>
-          <div className="basic-explanation">
-            <p>
-              {localizedReactFragment(
-                `You are using %@, which is free! You can try pro features like snooze, send later, read receipts and reminders a few times a week.`,
-                <strong>Mailspring Basic</strong>
-              )}
-            </p>
-            <p>
-              {localizedReactFragment(
-                `If you enjoy Mailspring, upgrade to Mailspring Pro from %@ to enable all these great features permanently:`,
-                <strong>{localized(`Preferences > Subscription`)}</strong>
-              )}
-            </p>
-            <div className="features">
-              <ul>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`Rich contact profiles`)}
-                </li>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`Follow-up reminders`)}
-                </li>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`Read Receipts`)}
-                </li>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`Link tracking`)}
-                </li>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`Powerful template support`)}
-                </li>
-              </ul>
-              <ul>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`Send Later`)}
-                </li>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`Company overviews`)}
-                </li>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`Snooze messages`)}
-                </li>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`Mailbox insights`)}
-                </li>
-                <li>
-                  <RetinaImg
-                    name="pro-feature-checkmark.png"
-                    style={{ paddingRight: 8 }}
-                    mode={RetinaImg.Mode.ContentDark}
-                  />
-                  {localized(`... and much more!`)}
-                </li>
-              </ul>
-            </div>
-          </div>
+      <main className="page opaque initial-subscription">
+        <div className="initial-subscription__brand" aria-hidden="true">
+          K
+        </div>
+        <p className="initial-subscription__eyebrow">凯越邮箱</p>
+        <h1>邮箱工作区已准备就绪</h1>
+        <p className="initial-subscription__lead">
+          账户与服务器配置已经完成。现在可以在一个安静、清晰的工作区里处理所有企业邮件。
+        </p>
+
+        <div className="initial-subscription__features">
+          {FEATURES.map(([title, description], index) => (
+            <section className="initial-subscription__feature" key={title}>
+              <span className="initial-subscription__feature-index" aria-hidden="true">
+                {index + 1}
+              </span>
+              <div>
+                <h2>{title}</h2>
+                <p>{description}</p>
+              </div>
+            </section>
+          ))}
         </div>
 
-        <button className="btn btn-large" style={{ marginTop: 50 }} onClick={this._onFinished}>
-          Finish Setup
+        <button className="btn btn-large btn-primary" onClick={this._onFinished}>
+          进入主邮箱
         </button>
-      </div>
+        <p className="initial-subscription__hint">后续可在设置中继续添加或调整邮箱账户</p>
+      </main>
     );
   }
 }

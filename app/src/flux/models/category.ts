@@ -76,6 +76,10 @@ Section: Models
 */
 export class Category extends Model {
   get displayName() {
+    if (this.role && LocalizedStringForRole[this.role]) {
+      return LocalizedStringForRole[this.role];
+    }
+
     const decoded = imapUtf7.decode(this.path) as string;
 
     if (decoded === 'Mailspring') {
@@ -89,9 +93,6 @@ export class Category extends Model {
     }
     if (decoded.startsWith('Mailspring/') || decoded.startsWith('Mailspring.')) {
       return decoded.substr(11);
-    }
-    if (decoded === 'INBOX') {
-      return 'Inbox';
     }
     return decoded;
   }

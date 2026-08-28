@@ -7,7 +7,10 @@ class SendingProgressBar extends React.Component<{ progress: number }> {
     if (0 < this.props.progress && this.props.progress < 99) {
       return (
         <div className="sending-progress" {...otherProps}>
-          <div className="filled" style={{ width: `${Math.min(100, this.props.progress)}%` }} />
+          <div
+            className="filled"
+            style={{ transform: `scaleX(${Math.min(100, this.props.progress) / 100})` }}
+          />
         </div>
       );
     } else {

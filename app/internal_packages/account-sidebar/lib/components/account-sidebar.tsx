@@ -20,8 +20,8 @@ export default class AccountSidebar extends React.Component<
 
   static containerRequired = false;
   static containerStyles = {
-    minWidth: DOMUtils.getWorkspaceCssNumberProperty('account-sidebar-min-width', 165),
-    maxWidth: DOMUtils.getWorkspaceCssNumberProperty('account-sidebar-max-width', 250),
+    minWidth: DOMUtils.getWorkspaceCssNumberProperty('account-sidebar-min-width', 190),
+    maxWidth: DOMUtils.getWorkspaceCssNumberProperty('account-sidebar-max-width', 300),
   };
 
   unsubscribers = [];
@@ -66,7 +66,7 @@ export default class AccountSidebar extends React.Component<
     const { accounts, sidebarAccountIds, userSections, standardSection } = this.state;
 
     return (
-      <Flexbox direction="column" style={{ order: 0, flexShrink: 1, flex: 1 }}>
+      <Flexbox direction="column" style={{ order: 0, flexShrink: 1, flex: 1, minWidth: 0 }}>
         <ScrollRegion className="account-sidebar" style={{ order: 2 }}>
           <AccountSwitcher accounts={accounts} sidebarAccountIds={sidebarAccountIds} />
           <nav className="account-sidebar-sections" aria-label={localized('Mailboxes')}>

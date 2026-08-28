@@ -142,7 +142,7 @@ export class AgendaView extends React.Component<MailspringCalendarViewProps, Age
     return (
       <div className={className}>
         <span className="agenda-day-name">{day.format('dddd')}</span>
-        <span className="agenda-day-date">{day.format('MMMM D')}</span>
+        <span className="agenda-day-date">{day.format('M月D日')}</span>
         {isToday && <span className="agenda-today-badge">{localized('Today')}</span>}
       </div>
     );
@@ -228,7 +228,7 @@ export class AgendaView extends React.Component<MailspringCalendarViewProps, Age
           {events.length > 0 ? (
             events.map((event) => this._renderEvent(event, dayKey))
           ) : (
-            <div className="agenda-no-events">{localized('No events')}</div>
+            <div className="agenda-no-events">暂无日程</div>
           )}
         </div>
       </div>
@@ -239,7 +239,7 @@ export class AgendaView extends React.Component<MailspringCalendarViewProps, Age
     const days = this._getEventsByDay();
     const { rangeStart, rangeEnd } = this._calculateRange();
 
-    const headerText = `${rangeStart.format('MMM D')} – ${rangeEnd.format('MMM D, YYYY')}`;
+    const headerText = `${rangeStart.format('M月D日')} – ${rangeEnd.format('YYYY年M月D日')}`;
 
     return (
       <div className="calendar-view agenda-view">

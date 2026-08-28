@@ -149,18 +149,18 @@ export class UnsubscribeHeader extends React.Component<
       return (
         <span className={className}>
           <span className="unsubscribe-error-message">{localized('Unsubscribe failed')}</span>
-          <a className="unsubscribe-retry" onClick={this._handleRetry}>
+          <button type="button" className="unsubscribe-retry" onClick={this._handleRetry}>
             {localized('Try again')}
-          </a>
+          </button>
         </span>
       );
     }
 
     // Idle state - show clickable link
     return (
-      <a className={className} onClick={this._handleClick}>
+      <button type="button" className={className} onClick={this._handleClick}>
         {localized('Unsubscribe')}
-      </a>
+      </button>
     );
   }
 }

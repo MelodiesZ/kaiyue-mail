@@ -22,8 +22,8 @@ class KaiyueAccountSettingsForm extends React.Component<KaiyueAccountSettingsFor
   static hideBackButton = true;
 
   static submitLabel = () => localized('登录');
-  static titleLabel = () => KaiyueConfig.brand.nameChinese;
-  static subtitleLabel = () => localized('输入企业邮箱和密码，服务器参数将自动配置。');
+  static titleLabel = () => localized('登录企业邮箱');
+  static subtitleLabel = () => localized('输入用户名和密码即可继续，服务器参数将自动配置。');
 
   static validateAccount = (account: Account) => {
     const errorFieldNames: string[] = [];
@@ -73,34 +73,52 @@ class KaiyueAccountSettingsForm extends React.Component<KaiyueAccountSettingsFor
   render() {
     return (
       <form className="settings kaiyue-login-form">
-        <div className="kaiyue-wordmark" aria-label={KaiyueConfig.brand.name}>
-          <span className="kaiyue-mark" aria-hidden="true">
-            K
-          </span>
-          <div>
-            <strong>{KaiyueConfig.brand.name}</strong>
+        <aside className="kaiyue-login-aside" aria-label={KaiyueConfig.brand.nameChinese}>
+          <div className="kaiyue-wordmark">
+            <span className="kaiyue-mark" aria-hidden="true">
+              K
+            </span>
+            <strong>{KaiyueConfig.brand.nameChinese}</strong>
+            <span className="kaiyue-english-name">{KaiyueConfig.brand.name}</span>
             <small>{KaiyueConfig.brand.company}</small>
           </div>
+          <div className="kaiyue-trust-line">
+            <span className="kaiyue-trust-icon" aria-hidden="true">
+              ✓
+            </span>
+            {localized('安全、专注的企业邮箱体验')}
+          </div>
+        </aside>
+        <div className="kaiyue-login-fields">
+          <FormField
+            field="emailAddress"
+            title={localized('邮箱')}
+            placeholder={localized('用户名或 name@kaiyuedrill.com')}
+            autoComplete="username"
+            {...this.props}
+          />
+          <div className="kaiyue-field-hint">
+            {localized('可只输入用户名，自动补全')} @{KaiyueConfig.mail.domain}
+          </div>
+          <FormField
+            field="settings.imap_password"
+            title={localized('密码')}
+            type="password"
+            placeholder={localized('请输入密码')}
+            autoComplete="current-password"
+            revealable
+            {...this.props}
+          />
+          {KaiyueConfig.features.allowOtherMailProviders && (
+            <button
+              type="button"
+              className="kaiyue-other-account"
+              onClick={() => OnboardingActions.moveToPage('account-choose')}
+            >
+              {localized('添加其他邮箱')}
+            </button>
+          )}
         </div>
-        <FormField field="emailAddress" title={localized('邮箱')} {...this.props} />
-        <div className="kaiyue-field-hint">
-          {localized('可只输入用户名，自动补全')} @{KaiyueConfig.mail.domain}
-        </div>
-        <FormField
-          field="settings.imap_password"
-          title={localized('密码')}
-          type="password"
-          {...this.props}
-        />
-        {KaiyueConfig.features.allowOtherMailProviders && (
-          <button
-            type="button"
-            className="kaiyue-other-account"
-            onClick={() => OnboardingActions.moveToPage('account-choose')}
-          >
-            {localized('添加其他邮箱')}
-          </button>
-        )}
       </form>
     );
   }

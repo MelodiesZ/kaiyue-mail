@@ -121,12 +121,12 @@ test('clicking expand/collapse all button toggles all messages', async () => {
 
   // The expand/collapse all button should be visible (canCollapse is true)
   const toggleButton = mainWindow.locator(
-    '.message-icons-wrap [aria-label="Expand All"], .message-icons-wrap [aria-label="Collapse All"]'
+    '.message-icons-wrap [aria-label="展开全部"], .message-icons-wrap [aria-label="全部折叠"]'
   );
   await expect(toggleButton.first()).toBeVisible({ timeout: 3_000 });
 
   // Click to expand all
-  const expandButton = mainWindow.locator('.message-icons-wrap [aria-label="Expand All"]');
+  const expandButton = mainWindow.locator('.message-icons-wrap [aria-label="展开全部"]');
   if ((await expandButton.count()) > 0) {
     await expandButton.click();
     await mainWindow.waitForTimeout(500);
@@ -135,8 +135,8 @@ test('clicking expand/collapse all button toggles all messages', async () => {
     const collapsedAfterExpand = await mainWindow.locator('.message-item-wrap.collapsed').count();
     expect(collapsedAfterExpand).toBe(0);
 
-    // Now the button label should say "Collapse All"
-    const collapseButton = mainWindow.locator('.message-icons-wrap [aria-label="Collapse All"]');
+    // Now the localized button label should switch to “全部折叠”.
+    const collapseButton = mainWindow.locator('.message-icons-wrap [aria-label="全部折叠"]');
     await expect(collapseButton).toBeVisible({ timeout: 3_000 });
 
     // Click again to collapse all

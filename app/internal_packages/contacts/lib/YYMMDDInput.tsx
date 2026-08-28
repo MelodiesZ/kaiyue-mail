@@ -1,4 +1,5 @@
 import React from 'react';
+import { localized } from 'mailspring-exports';
 
 interface YYMMDD {
   year: number;
@@ -27,16 +28,16 @@ export class YYMMDDInput extends React.Component<YYMMDDInputProps> {
 
     return (
       <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
-        <legend>Birthday</legend>
+        <legend>{localized('Birthday')}</legend>
         <div className="yymmdd-inputs" style={{ display: 'flex' }}>
           <div className="contact-edit-field">
             <input
               ref={this._year}
               type="number"
-              aria-label="Year"
-              defaultValue={`${year}`}
+              aria-label={localized('Year')}
+              defaultValue={year ? `${year}` : ''}
               style={{ width: 60, marginRight: 5 }}
-              placeholder="YYYY"
+              placeholder={localized('YYYY')}
               onBlur={this._onBlur}
             />
           </div>
@@ -49,10 +50,10 @@ export class YYMMDDInput extends React.Component<YYMMDDInputProps> {
               min={1}
               ref={this._month}
               style={{ width: 50, marginRight: 5 }}
-              aria-label="Month"
-              placeholder="MM"
+              aria-label={localized('Month')}
+              placeholder={localized('MM')}
               type="number"
-              defaultValue={`${month}`}
+              defaultValue={month ? `${month}` : ''}
               onBlur={this._onBlur}
             />
           </div>
@@ -64,11 +65,11 @@ export class YYMMDDInput extends React.Component<YYMMDDInputProps> {
               max={31}
               min={1}
               ref={this._day}
-              aria-label="Day"
-              placeholder="DD"
+              aria-label={localized('Day')}
+              placeholder={localized('DD')}
               type="number"
               style={{ width: 46 }}
-              defaultValue={`${day}`}
+              defaultValue={day ? `${day}` : ''}
               onBlur={this._onBlur}
             />
           </div>

@@ -22,9 +22,9 @@ export const DEFAULT_FONT_OPTIONS = [
 
 export const DEFAULT_FONT_FACE = 'sans-serif';
 export const DEFAULT_FONT_FACE_OPTIONS = [
-  { name: 'Sans Serif', value: 'sans-serif' },
-  { name: 'Serif', value: 'serif' },
-  { name: 'Fixed Width', value: 'monospace' },
+  { name: localized('Sans Serif'), value: 'sans-serif' },
+  { name: localized('Serif'), value: 'serif' },
+  { name: localized('Fixed Width'), value: 'monospace' },
   { name: 'Comic Sans MS', value: 'comic sans ms' },
   { name: 'Garamond', value: 'garamond' },
   { name: 'Georgia', value: 'georgia' },

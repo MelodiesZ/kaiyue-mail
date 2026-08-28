@@ -22,6 +22,8 @@ import {
 } from './week-view-helpers';
 import { MailspringCalendarViewProps } from './mailspring-calendar';
 import { getEventsWithDragPreview } from './calendar-drag-utils';
+import { horizontalCalendarViewShift } from './calendar-scroll-navigation';
+import { localized } from 'mailspring-exports';
 
 const BUFFER_DAYS = 7; // in each direction
 const DAYS_IN_VIEW = 7;
@@ -203,8 +205,21 @@ export class WeekView extends React.Component<
     );
   };
 
-  _onScrollCalendarArea = (_event: React.UIEvent) => {
-    // Placeholder for scroll handling - infinite scroll disabled for now
+  _onScrollCalendarArea = (event: React.UIEvent<HTMLDivElement>) => {
+    if (this._waitingForShift) {
+      return;
+    }
+
+    const wrap = event.currentTarget;
+    const shift = horizontalCalendarViewShift(wrap);
+    if (!shift) {
+      return;
+    }
+
+    // Re-render around the adjacent week, then componentDidUpdate moves the
+    // three-week strip back to its center without a visible jump.
+    this._waitingForShift = -shift * wrap.clientWidth;
+    this.props.onChangeFocusedMoment(moment(this.props.focusedMoment).add(shift, 'week'));
   };
 
   _renderEventGridLabels() {
@@ -233,8 +248,8 @@ export class WeekView extends React.Component<
     const range = this._calculateMomentRange();
 
     const headerText = [
-      range.visibleStart.format('MMMM D'),
-      range.visibleEnd.format('MMMM D YYYY'),
+      range.visibleStart.format('M月D日'),
+      range.visibleEnd.format('YYYY年M月D日'),
     ].join(' - ');
 
     const allDayOverlap = overlapForEvents(eventsByDay.allDay);
@@ -268,14 +283,14 @@ export class WeekView extends React.Component<
               onClick={this._onClickToday}
               style={{ position: 'absolute', left: 10 }}
             >
-              Today
+              {localized('Today')}
             </button>
           </HeaderControls>
 
           <div className="calendar-body-wrap">
             <div className="calendar-legend">
               <div className="date-label-legend" style={{ height: allDayBarHeight + 75 + 1 }}>
-                <span className="legend-text">All Day</span>
+                <span className="legend-text">{localized('All Day')}</span>
               </div>
               <div className="event-grid-legend-wrap" ref={this._legendWrapEl}>
                 <div className="event-grid-legend" style={{ height: totalHeight }}>

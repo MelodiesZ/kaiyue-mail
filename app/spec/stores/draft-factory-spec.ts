@@ -158,6 +158,22 @@ describe('DraftFactory', function draftFactory() {
         });
       });
 
+      it('should preserve CID inline images in the quoted message', () => {
+        fakeMessage1.body =
+          '<p>Inline logo</p><img src="cid:logo.123@example.com" alt="Company logo">';
+
+        waitsForPromise(() => {
+          return DraftFactory.createDraftForReply({
+            thread: fakeThread,
+            message: fakeMessage1,
+            type: 'reply',
+          }).then((draft) => {
+            expect(draft.body).toContain('src="cid:logo.123@example.com"');
+            expect(draft.body).toContain('alt="Company logo"');
+          });
+        });
+      });
+
       it("should address the message to the previous message's sender", () => {
         waitsForPromise(() => {
           return DraftFactory.createDraftForReply({

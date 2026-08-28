@@ -340,9 +340,14 @@ export class MultiselectList extends React.Component<MultiselectListProps, Multi
           event.stopPropagation();
         };
         return (
-          <div className="checkmark" onClick={toggle}>
-            <div className="inner" />
-          </div>
+          <button
+            type="button"
+            className="checkmark"
+            aria-label={localized('选择项目')}
+            onClick={toggle}
+          >
+            <span className="inner" />
+          </button>
         );
       },
     });

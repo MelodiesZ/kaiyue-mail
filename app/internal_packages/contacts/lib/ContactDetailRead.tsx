@@ -1,9 +1,10 @@
 import React from 'react';
-import { Account, Contact, AccountStore, ContactGroup } from 'mailspring-exports';
+import { Account, Contact, AccountStore, ContactGroup, localized } from 'mailspring-exports';
 import { ContactProfilePhoto, RetinaImg } from 'mailspring-component-kit';
 import * as Icons from './SVGIcons';
 import { Store } from './Store';
 import { ContactBase, ContactInteractorMetadata } from './ContactInfoMapping';
+import { contactLabel } from './ContactDetailEdit';
 
 export const ContactDetailRead = ({
   data,
@@ -27,7 +28,8 @@ export const ContactDetailRead = ({
           const group = groups.find((g) => g.id === gid);
           const label = group ? group.name : gid;
           return (
-            <div
+            <button
+              type="button"
               key={gid}
               className="group-membership"
               onClick={() => {
@@ -45,7 +47,7 @@ export const ContactDetailRead = ({
                 mode={RetinaImg.Mode.ContentDark}
               />
               {label}
-            </div>
+            </button>
           );
         })}
       </div>
@@ -98,10 +100,10 @@ const ContactAttributes = ({
               <Icons.Envelope />
             </span>
             <div>
-              <a href={`mailto:${item.value}`} title="Send email...">
+              <a href={`mailto:${item.value}`} title={localized('Send email…')}>
                 {item.value}
               </a>
-              {item.type && <div className="type">{item.type}</div>}
+              {item.type && <div className="type">{contactLabel(item.type)}</div>}
             </div>
           </div>
         ))}
@@ -115,10 +117,10 @@ const ContactAttributes = ({
               <Icons.Phone />
             </span>
             <div>
-              <a href={`tel:${item.value}`} title="Call...">
+              <a href={`tel:${item.value}`} title={localized('Call…')}>
                 {item.value}
               </a>
-              {item.type && <div className="type">{item.type}</div>}
+              {item.type && <div className="type">{contactLabel(item.type)}</div>}
             </div>
           </div>
         ))}
@@ -135,7 +137,7 @@ const ContactAttributes = ({
               <a href={`https://maps.google.com/?q=${encodeURIComponent(item.formattedValue)}`}>
                 {item.formattedValue}
               </a>
-              {item.type && <div className="type">{item.type}</div>}
+              {item.type && <div className="type">{contactLabel(item.type)}</div>}
             </div>
           </div>
         ))}
@@ -176,7 +178,7 @@ const ContactAttributes = ({
             </span>
             <div>
               {item.person}
-              {item.type && <div className="type">{item.type}</div>}
+              {item.type && <div className="type">{contactLabel(item.type)}</div>}
             </div>
           </div>
         ))}
@@ -190,10 +192,10 @@ const ContactAttributes = ({
               <Icons.Link />
             </span>
             <div>
-              <a href={`${item.value}`} title="Visit website...">
+              <a href={`${item.value}`} title={localized('Visit website…')}>
                 {item.value}
               </a>
-              {item.type && <div className="type">{item.type}</div>}
+              {item.type && <div className="type">{contactLabel(item.type)}</div>}
             </div>
           </div>
         ))}
@@ -210,7 +212,7 @@ const ContactAttributes = ({
       </div>
     )}
     <div className="contact-origin">
-      <div>{`${origin} (${account ? account.label : 'Unknown Account'})`}</div>
+      <div>{`${origin} (${account ? account.label : localized('Unknown Account')})`}</div>
     </div>
   </div>
 );

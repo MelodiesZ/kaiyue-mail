@@ -23,6 +23,20 @@ test.afterAll(async () => {
   await closeApp(electronApp, configDir);
 });
 
+test('hover quick actions visually cover the thread timestamp', async () => {
+  await clickSidebarFolder(mainWindow, 'Inbox');
+  await mainWindow.waitForTimeout(1_000);
+
+  const row = threads(mainWindow).first();
+  const timestamp = row.locator('.timestamp');
+  const hoverActions = row.locator('.list-column-HoverActions .inner');
+
+  await row.hover();
+  await expect(hoverActions).toBeVisible();
+  await expect(hoverActions).toHaveCSS('background-color', /^rgb\(/);
+  await expect(timestamp).toBeHidden();
+});
+
 // --- Star ---
 
 test('s creates a ChangeStarredTask', async () => {
@@ -217,7 +231,7 @@ test('v opens popover, type to filter, Escape closes it', async () => {
 
   // Type in the search field to filter folders
   const searchInput = popover.locator('input.search');
-  await searchInput.fill('Trash');
+  await searchInput.fill('回收站');
   await mainWindow.waitForTimeout(500);
 
   // Filtered list should be shorter and every visible item should match the filter
@@ -231,7 +245,7 @@ test('v opens popover, type to filter, Escape closes it', async () => {
     const displayName = await item.locator('.category-display-name').textContent();
     // Skip "Create new" items that show the search term in quotes
     if (displayName && !displayName.includes('create')) {
-      expect(displayName.toLowerCase()).toContain('trash');
+      expect(displayName).toContain('回收站');
     }
   }
 
@@ -256,15 +270,15 @@ test('v popover: filtering and pressing Enter moves to the matched folder', asyn
   const popover = mainWindow.locator('.category-picker-popover');
   await expect(popover).toBeVisible({ timeout: 10_000 });
 
-  // Filter to "Trash" — should match a single standard folder
+  // Filter to the localized trash folder — should match a single standard folder
   const searchInput = popover.locator('input.search');
-  await searchInput.fill('Trash');
+  await searchInput.fill('回收站');
   await mainWindow.waitForTimeout(500);
 
   // Verify the first visible category item is the Trash folder
   const firstItem = popover.locator('.category-item').first();
   const displayName = await firstItem.locator('.category-display-name').textContent();
-  expect(displayName).toContain('Trash');
+  expect(displayName).toContain('回收站');
 
   // Press Enter to select the auto-highlighted first item
   await mainWindow.keyboard.press('Enter');
@@ -345,14 +359,13 @@ test('h opens snooze popover with date options', async () => {
   const popover = mainWindow.locator('.snooze-popover');
   await expect(popover).toBeVisible({ timeout: 5_000 });
 
-  // Should have snooze items (Later Today, Tonight, Tomorrow, etc.)
+  // Should have the full localized snooze option grid.
   const snoozeItems = popover.locator('.snooze-item');
   const itemCount = await snoozeItems.count();
   expect(itemCount).toBeGreaterThanOrEqual(6); // 2 rows × 3 items
 
-  // Verify some expected labels are present
-  await expect(popover).toContainText('Tomorrow');
-  await expect(popover).toContainText('Next Week');
+  await expect(popover).toContainText('明天');
+  await expect(popover).toContainText('下周');
 
   // Close the popover with Escape
   await mainWindow.keyboard.press('Escape');
@@ -362,5 +375,5 @@ test('h opens snooze popover with date options', async () => {
 
 // --- Label picker ---
 // Note: The 'l' key (core:change-labels) only works with Gmail/Google accounts
-// that support labels (account.usesLabels()). The test fixture uses a Yahoo
+// that support labels (account.usesLabels()). The Kaiyue fixture uses a generic IMAP
 // account which uses folders, so the label picker cannot be tested here.

@@ -1,4 +1,6 @@
 import React from 'react';
+import moment from 'moment-timezone';
+import 'moment/locale/zh-cn';
 import { WorkspaceStore, ComponentRegistry, localized } from 'mailspring-exports';
 import { QuickEventButton } from './quick-event-button';
 import { MailspringCalendar } from './core/mailspring-calendar';
@@ -84,6 +86,8 @@ function adjustMenus() {
 }
 
 export function activate() {
+  const language = AppEnv.config.get('core.intl.language') || navigator.language || 'en-US';
+  moment.locale(language.toLowerCase());
   adjustMenus();
 
   ComponentRegistry.register(MailspringCalendar, {

@@ -3,115 +3,82 @@ import { _electron as electron } from 'playwright';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import Database from 'better-sqlite3';
+import {
+  KAIYUE_FIXTURE_ACCOUNT_ID,
+  openKaiyueFixtureDatabase,
+  seedKaiyueFixtureDatabase,
+} from './kaiyue-fixture';
 
 export const REPO_ROOT = path.resolve(__dirname, '..');
 export const APP_ROOT = path.join(REPO_ROOT, 'app');
 
-/**
- * Source config directory with the golden database and encrypted credentials.
- */
-const FIXTURE_DIR = '/Users/bengotow/Library/Application Support/Mailspring-dev-building-for-playwright';
-const FIXTURE_DB = path.join(FIXTURE_DIR, 'edgehill.db');
-
 // ─── Config & Launch ───────────────────────────────────────────────────────
 
 /**
- * Create a config directory with a config.json and a copy of the
- * golden database so the app launches with real data.
+ * Create an isolated Kaiyue config directory. The app migrates its database
+ * on first launch and launchApp() then seeds deterministic company data.
  */
 export function prepareTestConfigDir(): string {
   const dir = path.join(os.tmpdir(), `mailspring-e2e-${Date.now()}`);
   fs.mkdirSync(dir, { recursive: true });
 
-  const sourceConfigPath = path.join(FIXTURE_DIR, 'config.json');
-
-  // Copy the entire source config.json, then override specific keys.
-  // This preserves the encrypted credentials blob (needed for mailsync
-  // task processing) while letting us control workspace mode, keymap, etc.
-  // We clear the identity to prevent the "Please sign in" keychain dialog.
-  let config: any;
-  if (fs.existsSync(sourceConfigPath)) {
-    config = JSON.parse(fs.readFileSync(sourceConfigPath, 'utf-8'));
-    config['*'].core = {
-      ...config['*'].core,
-      themes: ['ui-light'],
-      disabledPackages: [
-        'message-view-on-github',
-        'personal-level-indicators',
-        'phishing-detection',
-        'nylas-private-salesforce',
-        'github-contact-card',
-        'keybase',
-        'composer-markdown',
-        'composer-scheduler',
-        'composer-mail-merge',
-      ],
-      workspace: { mode: 'split' },
-      keymapTemplate: 'Gmail',
-    };
-    delete config['*'].identity;
-  } else {
-    config = {
-      '*': {
-        env: 'production',
-        core: {
-          themes: ['ui-light'],
-          disabledPackages: [
-            'message-view-on-github',
-            'personal-level-indicators',
-            'phishing-detection',
-            'nylas-private-salesforce',
-            'github-contact-card',
-            'keybase',
-            'composer-markdown',
-            'composer-scheduler',
-            'composer-mail-merge',
-          ],
-          workspace: { mode: 'split' },
-          keymapTemplate: 'Gmail',
-        },
-        accounts: [
-          {
-            id: 'c30d589a',
-            metadata: [],
-            name: 'Ben Gotow',
-            provider: 'yahoo',
-            emailAddress: 'bengotow@yahoo.com',
-            settings: {
-              imap_host: 'imap.mail.yahoo.com',
-              imap_port: 993,
-              imap_username: 'bengotow@yahoo.com',
-              imap_security: 'SSL / TLS',
-              imap_allow_insecure_ssl: false,
-              smtp_host: 'smtp.mail.yahoo.com',
-              smtp_port: 465,
-              smtp_username: 'bengotow@yahoo.com',
-              smtp_security: 'SSL / TLS',
-              smtp_allow_insecure_ssl: false,
-              container_folder: '',
-            },
-            label: 'bengotow@yahoo.com',
-            autoaddress: { type: 'bcc', value: '' },
-            aliases: [],
-            syncState: 'ok',
-            authedAt: 1777692315.512,
-            color: '',
-            __cls: 'Account',
-          },
+  const config = {
+    '*': {
+      env: 'production',
+      core: {
+        theme: 'ui-light',
+        disabledPackages: [
+          'message-view-on-github',
+          'personal-level-indicators',
+          'phishing-detection',
+          'nylas-private-salesforce',
+          'github-contact-card',
+          'keybase',
+          'composer-markdown',
+          'composer-scheduler',
+          'composer-mail-merge',
         ],
-        accountsVersion: 2,
-        containerFolderDefault: '',
+        workspace: { mode: 'split' },
+        reading: { autoloadImages: false },
+        keymapTemplate: 'Gmail',
+        intl: { language: 'zh-CN' },
       },
-    };
-  }
+      accounts: [
+        {
+          id: KAIYUE_FIXTURE_ACCOUNT_ID,
+          metadata: [],
+          name: '凯越邮箱',
+          provider: 'imap',
+          emailAddress: 'design@kaiyuedrill.com',
+          settings: {
+            imap_host: 'mail.kaiyuedrill.com',
+            imap_port: 993,
+            imap_username: 'design@kaiyuedrill.com',
+            imap_security: 'SSL / TLS',
+            imap_allow_insecure_ssl: false,
+            smtp_host: 'mail.kaiyuedrill.com',
+            smtp_port: 465,
+            smtp_username: 'design@kaiyuedrill.com',
+            smtp_security: 'SSL / TLS',
+            smtp_allow_insecure_ssl: false,
+            container_folder: '',
+          },
+          label: 'design@kaiyuedrill.com',
+          autoaddress: { type: 'bcc', value: '' },
+          aliases: [],
+          syncState: 'ok',
+          authedAt: 1777692315.512,
+          color: '#1A3B70',
+          __cls: 'Account',
+        },
+      ],
+      accountsVersion: 2,
+      containerFolderDefault: '',
+      mailto: { 'prompted-about-default': true },
+    },
+  };
 
   fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify(config, null, 2));
-
-  // Copy the golden database
-  if (fs.existsSync(FIXTURE_DB)) {
-    fs.copyFileSync(FIXTURE_DB, path.join(dir, 'edgehill.db'));
-  }
 
   return dir;
 }
@@ -144,7 +111,7 @@ export async function waitForMainWindow(
         }
       }
     }
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
   }
   throw new Error(
     `Timed out after ${timeoutMs}ms waiting for main window. ` +
@@ -166,6 +133,17 @@ export async function launchApp(): Promise<{
 
   const mainWindow = await waitForMainWindow(electronApp);
 
+  // Migrations complete before the first renderer is ready. Populate the new
+  // database and reload once so every store observes the same fixture rows.
+  if (seedKaiyueFixtureDatabase(configDir)) {
+    await mainWindow.reload({ waitUntil: 'domcontentloaded' });
+    await mainWindow.locator('.item-compose').waitFor({ timeout: 15_000 });
+    // Built-in packages are activated on a short deferred timer. Waiting for
+    // that boundary prevents tests from interacting while the workspace sheet
+    // registry is still being rebuilt.
+    await mainWindow.waitForTimeout(3_000);
+  }
+
   // Auto-dismiss native Electron dialogs (sync error, credential issues, etc.)
   // so they don't block the renderer during tests. Must run after the main
   // window is ready to avoid "context destroyed" errors during init.
@@ -181,7 +159,7 @@ export async function launchApp(): Promise<{
 
   // Auto-dismiss any JavaScript dialogs (alert, confirm, prompt) that
   // Playwright detects, preventing "No dialog is showing" protocol errors.
-  mainWindow.on('dialog', dialog => dialog.dismiss().catch(() => {}));
+  mainWindow.on('dialog', (dialog) => dialog.dismiss().catch(() => {}));
 
   return { electronApp, mainWindow, configDir };
 }
@@ -190,7 +168,7 @@ export async function closeApp(electronApp: ElectronApplication, configDir: stri
   if (electronApp) {
     await electronApp.close();
     // Wait for OS to fully release the process and singleInstanceLock
-    await new Promise(r => setTimeout(r, 3_000));
+    await new Promise((r) => setTimeout(r, 3_000));
   }
   if (configDir && fs.existsSync(configDir)) {
     fs.rmSync(configDir, { recursive: true, force: true });
@@ -232,7 +210,16 @@ export async function isThreadStarred(page: Page, index = 0): Promise<boolean> {
 
 /** Click a sidebar folder by name */
 export async function clickSidebarFolder(page: Page, name: string) {
-  await page.locator(`.account-sidebar .item .name:has-text("${name}")`).first().click();
+  const localizedNames: Record<string, string> = {
+    Inbox: '收件箱',
+    Sent: '已发送邮件',
+    Spam: '垃圾邮件',
+    Archive: '归档',
+    Trash: '回收站',
+    Drafts: '草稿',
+  };
+  const displayName = localizedNames[name] || name;
+  await page.locator(`.account-sidebar .item .name:has-text("${displayName}")`).first().click();
 }
 
 // ─── Task Capture Helpers ─────────────────────────────────────────────
@@ -245,7 +232,10 @@ export async function clickSidebarFolder(page: Page, name: string) {
  * webContents.executeJavaScript(), bypassing Mailspring's
  * window.eval() security restriction.
  */
-export async function executeInRenderer(electronApp: ElectronApplication, code: string): Promise<any> {
+export async function executeInRenderer(
+  electronApp: ElectronApplication,
+  code: string
+): Promise<any> {
   return electronApp.evaluate(async ({ BrowserWindow }, js) => {
     for (const win of BrowserWindow.getAllWindows()) {
       if (win.webContents.getURL().includes('windowType%22%3A%22default')) {
@@ -263,7 +253,9 @@ export async function executeInRenderer(electronApp: ElectronApplication, code: 
  * Task data is stored in a hidden DOM element readable via locators.
  */
 export async function installTaskCapture(electronApp: ElectronApplication) {
-  await executeInRenderer(electronApp, `
+  await executeInRenderer(
+    electronApp,
+    `
     (function() {
       var el = document.createElement('div');
       el.id = '__test-captured-tasks';
@@ -294,7 +286,8 @@ export async function installTaskCapture(electronApp: ElectronApplication) {
         if (tasks && tasks.length) { tasks.forEach(captureTask); }
       });
     })();
-  `);
+  `
+  );
 }
 
 /** Get all captured tasks from the hidden DOM element */
@@ -326,7 +319,7 @@ export async function waitForCapturedTask(
     const tasks = await getCapturedTasks(page);
     const match = tasks.find(matcher);
     if (match) return match;
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 300));
   }
   return null;
 }
@@ -347,7 +340,9 @@ export async function waitForCapturedTask(
  * a specific menu action (Rename, Delete, New Subfolder, etc.).
  */
 export async function installMenuIntercept(electronApp: ElectronApplication) {
-  await executeInRenderer(electronApp, `
+  await executeInRenderer(
+    electronApp,
+    `
     (function() {
       window.__menuAutoClick = null;
 
@@ -387,7 +382,8 @@ export async function installMenuIntercept(electronApp: ElectronApplication) {
         }
       }, true);
     })();
-  `);
+  `
+  );
 }
 
 /**
@@ -425,7 +421,20 @@ export async function findComposer(
 ): Promise<Page | null> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    for (const page of electronApp.windows()) {
+    const windows = electronApp.windows();
+    const composerWindows = windows.filter((page) => {
+      try {
+        const loadSettings = new URL(page.url()).searchParams.get('loadSettings');
+        if (!loadSettings) return false;
+        return JSON.parse(decodeURIComponent(loadSettings)).windowType === 'composer';
+      } catch {
+        return false;
+      }
+    });
+
+    // A popout compose window is more specific than an inline reply left in the main window.
+    // Prefer it so callers that just opened a new message never bind to a stale inline composer.
+    for (const page of [...composerWindows, ...windows.filter((p) => !composerWindows.includes(p))]) {
       try {
         const count = await page.locator('.composer-inner-wrap').count();
         if (count > 0) return page;
@@ -433,7 +442,7 @@ export async function findComposer(
         // page may be closing
       }
     }
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
   }
   return null;
 }
@@ -459,9 +468,8 @@ export async function closeComposerWindows(electronApp: ElectronApplication) {
 // ─��─ SQLite Database Helpers ───────────────────────────────────────────────
 
 /** Open the test database (read-only) */
-export function openTestDB(configDir: string): Database.Database {
-  const dbPath = path.join(configDir, 'edgehill.db');
-  return new Database(dbPath, { readonly: true });
+export function openTestDB(configDir: string): any {
+  return openKaiyueFixtureDatabase(configDir, true);
 }
 
 /** Query Task objects from the database */
@@ -469,7 +477,7 @@ export function queryTasks(configDir: string): any[] {
   const db = openTestDB(configDir);
   try {
     const rows = db.prepare('SELECT data FROM Task ORDER BY rowid DESC').all() as any[];
-    return rows.map(r => JSON.parse(r.data));
+    return rows.map((r) => JSON.parse(r.data));
   } finally {
     db.close();
   }
@@ -489,7 +497,7 @@ export async function waitForTask(
     const tasks = queryTasks(configDir);
     const match = tasks.find(matcher);
     if (match) return match;
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
   }
   return null;
 }

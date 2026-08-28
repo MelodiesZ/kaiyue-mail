@@ -21,6 +21,14 @@ test('main workspace container is visible', async () => {
   await expect(mainWindow.locator('#sheet-container')).toBeVisible();
 });
 
+test('main window title uses the Kaiyue brand', async () => {
+  await expect(mainWindow).toHaveTitle('凯越邮箱');
+  const nativeTitle = await electronApp.evaluate(({ BrowserWindow }) => {
+    return BrowserWindow.getAllWindows()[0]?.getTitle();
+  });
+  expect(nativeTitle).toBe('凯越邮箱');
+});
+
 test('toolbar is rendered', async () => {
   await expect(mainWindow.locator('.sheet-toolbar')).toBeVisible();
 });
@@ -32,7 +40,7 @@ test('compose button is present in toolbar', async () => {
 test('sidebar is rendered with folder list', async () => {
   await expect(mainWindow.locator('.account-sidebar')).toBeVisible();
   const sidebar = mainWindow.locator('.account-sidebar');
-  for (const folder of ['Inbox', 'Sent', 'Trash', 'Drafts', 'Archive']) {
+  for (const folder of ['收件箱', '已发送邮件', '回收站', '草稿', '归档']) {
     await expect(sidebar.locator(`.item .name:has-text("${folder}")`).first()).toBeVisible();
   }
 });

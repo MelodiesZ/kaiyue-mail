@@ -93,7 +93,7 @@ export class HeaderControls extends React.Component<{
               onClick={() => this._changeView(buttonOptions.view)}
               disabled={buttonOptions.isDisabled}
             >
-              {buttonOptions.view}
+              {localized(buttonOptions.view)}
             </button>
           ))}
         </div>

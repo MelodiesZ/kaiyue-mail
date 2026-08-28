@@ -16,7 +16,7 @@ import { parseTemplate, stringifyTemplate, ParsedTemplate } from './template-fil
 
 // Support accented characters in template names
 // https://regex101.com/r/nD3eY8/1
-const INVALID_TEMPLATE_NAME_REGEX = /[^a-zA-Z\u00C0-\u017F0-9_\- ]+/g;
+const INVALID_TEMPLATE_NAME_REGEX = /[^\p{L}\p{N}_\- ]+/gu;
 
 export interface TemplateItem {
   id: string;
@@ -374,17 +374,13 @@ class TemplateStore extends MailspringStore {
 
   _welcomeTemplate(): Promise<{ name: string; path: string }> {
     const getTemplatePath = (name: string) => path.join(__dirname, '..', 'assets', `${name}.html`);
-    let welcomeName = localized('Welcome to Templates');
+    const welcomeName = localized('Welcome to Templates');
 
     return new Promise((resolve, reject) => {
       fs.exists(getTemplatePath(welcomeName), (exists) => {
-        if (!exists) {
-          welcomeName = 'Welcome to Templates';
-        }
-
         resolve({
           name: `${welcomeName}.html`,
-          path: getTemplatePath(welcomeName),
+          path: getTemplatePath(exists ? welcomeName : 'Welcome to Templates'),
         });
       });
     });

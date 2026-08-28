@@ -311,7 +311,7 @@ export function clampEnd(startUnix: number, endUnix: number, isAllDay: boolean):
 }
 
 /**
- * Format an event's time range for display (e.g., "12 – 1PM").
+ * Format an event's time range using the active locale (e.g., "10:00 – 11:00").
  * Only returns a string for events that are 1 hour or longer.
  * Returns null for shorter events or all-day events.
  */
@@ -329,33 +329,7 @@ export function formatEventTimeRange(
     return null;
   }
 
-  const startDate = new Date(startUnix * 1000);
-  const endDate = new Date(endUnix * 1000);
-
-  const formatTime = (date: Date, includeAmPm: boolean) => {
-    let hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    if (hours === 0) hours = 12;
-
-    let timeStr = String(hours);
-    if (minutes > 0) {
-      timeStr += ':' + String(minutes).padStart(2, '0');
-    }
-    if (includeAmPm) {
-      timeStr += ampm;
-    }
-    return timeStr;
-  };
-
-  const startAmPm = startDate.getHours() >= 12 ? 'PM' : 'AM';
-  const endAmPm = endDate.getHours() >= 12 ? 'PM' : 'AM';
-
-  // Only include AM/PM on start time if it differs from end time
-  const includeStartAmPm = startAmPm !== endAmPm;
-
-  return `${formatTime(startDate, includeStartAmPm)} – ${formatTime(endDate, true)}`;
+  return `${moment.unix(startUnix).format('LT')} – ${moment.unix(endUnix).format('LT')}`;
 }
 
 /**

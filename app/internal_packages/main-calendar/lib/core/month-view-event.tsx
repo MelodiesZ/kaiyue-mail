@@ -132,8 +132,6 @@ export class MonthViewEvent extends React.Component<MonthViewEventProps, MonthVi
       return;
     }
 
-    // Prevent text selection during drag
-    e.preventDefault();
     // Note: Don't call stopPropagation() - the event needs to bubble to
     // CalendarEventContainer so it can track _mouseIsDown state
 

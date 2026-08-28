@@ -196,22 +196,22 @@ export class EventSearchBar extends Component<Record<string, unknown>, EventSear
     if (event.isAllDay === true) {
       const first = moment(CalendarDateUtils.dayStartUnix(event.startDate) * 1000);
       if (event.startDate === event.endDate) {
-        return first.format('ddd, MMM D, YYYY');
+        return first.format('YYYY年M月D日 ddd');
       }
       const last = moment(CalendarDateUtils.dayStartUnix(event.endDate) * 1000);
-      return `${first.format('MMM D')} - ${last.format('MMM D, YYYY')}`;
+      return `${first.format('M月D日')} - ${last.format('YYYY年M月D日')}`;
     }
 
     const start = moment(event.start * 1000);
     const end = moment(event.end * 1000);
 
     if (start.isSame(end, 'day')) {
-      return `${start.format('ddd, MMM D')} \u00B7 ${start.format('h:mm A')} - ${end.format(
-        'h:mm A'
+      return `${start.format('M月D日 ddd')} \u00B7 ${start.format('HH:mm')} - ${end.format(
+        'HH:mm'
       )}`;
     }
 
-    return `${start.format('MMM D, h:mm A')} - ${end.format('MMM D, h:mm A')}`;
+    return `${start.format('M月D日 HH:mm')} - ${end.format('M月D日 HH:mm')}`;
   };
 
   _getCalendarColor = (calendarId: string): string => {
@@ -272,19 +272,26 @@ export class EventSearchBar extends Component<Record<string, unknown>, EventSear
             onKeyDown={this._onKeyDown}
           />
           {showX && (
-            <RetinaImg
-              name="searchclear.png"
-              className="search-accessory clear"
-              mode={RetinaImg.Mode.ContentDark}
+            <button
+              type="button"
+              className="event-search-clear"
+              aria-label={localized('Clear Search')}
               onMouseDown={this._onClearSearch}
-            />
+            >
+              <RetinaImg
+                name="searchclear.png"
+                className="search-accessory clear"
+                mode={RetinaImg.Mode.ContentDark}
+              />
+            </button>
           )}
           {suggestions.length > 0 && focused && (
             <div className="suggestions">
               {suggestions.map((event, idx) => {
                 const color = this._getCalendarColor(event.calendarId);
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={event.id}
                     className={`suggestion ${selectedIdx === idx ? 'selected' : ''}`}
                     onMouseDown={(e) => {
@@ -302,9 +309,14 @@ export class EventSearchBar extends Component<Record<string, unknown>, EventSear
                         <span className="suggestion-location">{event.location}</span>
                       )}
                     </span>
-                  </div>
+                  </button>
                 );
               })}
+            </div>
+          )}
+          {!loading && focused && query.length > 1 && suggestions.length === 0 && (
+            <div className="suggestions event-search-empty" role="status">
+              没有找到匹配的日程
             </div>
           )}
         </KeyCommandsRegion>

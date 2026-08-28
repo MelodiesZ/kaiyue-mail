@@ -43,9 +43,49 @@
     }
   </script>
   <style>
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: #17233a;
+      background: #f6f8fb;
+    }
+    body {
+      margin: 0 !important;
+      padding: 24px !important;
+      color: #17233a;
+      background: #ffffff !important;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    #the-doc {
+      min-width: 0;
+    }
+    #the-doc > :first-child {
+      margin-top: 0;
+    }
+    a {
+      color: #1a3b70;
+    }
+    pre,
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    pre {
+      overflow: auto;
+      padding: 16px;
+      border: 1px solid #dce3ec;
+      border-radius: 8px;
+      background: #f6f8fb;
+    }
+    img,
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
     .xlsx-content {
-      margin: -15px;
-      margin-bottom: 30px;
+      margin: -24px;
+      margin-bottom: 36px;
+      overflow: auto;
     }
     .xlsx-tabs {
       position: fixed;
@@ -54,34 +94,43 @@
       right: 0;
       display: flex;
       flex-direction: row;
-      height: 30px;
-      background: #98a7b9;
+      min-height: 36px;
+      padding: 0 8px;
+      background: #f1f4f8;
       overflow-x: auto;
       overflow-y: hidden;
       white-space: nowrap;
-      border-top: 1px solid #777;
+      border-top: 1px solid #dce3ec;
     }
     .xlsx-tabs .tab {
-      padding: 0 10px;
-      margin-right: 3px;
-      border-left: 1px solid #ddd;
-      background: #e2e2e2;
-      height: 26px;
-      line-height: 26px;
-      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-      color: #333;
+      height: 34px;
+      margin-right: 2px;
+      padding: 0 12px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      color: #526176;
+      background: transparent;
+      line-height: 34px;
       cursor: default;
       user-select: none;
     }
+    .xlsx-tabs .tab:hover {
+      color: #17233a;
+      background: #ffffff;
+    }
     .xlsx-tabs .tab.active {
-      background: white;
+      border-bottom-color: #1a3b70;
+      color: #1a3b70;
+      background: #ffffff;
     }
     .xlsx-content table {
       border-collapse: collapse;
+      min-width: 100%;
     }
     .xlsx-content td {
-      border: 1px solid #eee;
-      padding: 3px;
+      min-width: 72px;
+      padding: 6px 8px;
+      border: 1px solid #dce3ec;
     }
   </style>
 

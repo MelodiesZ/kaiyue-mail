@@ -4,6 +4,7 @@
 .account-sidebar {
   flex: 1;
   height: 100%;
+  border-right: 1px solid @border-color-divider;
   background-color: @source-list-bg;
 
   .item.deleted {
@@ -19,10 +20,99 @@
 
 .account-switcher {
   position: absolute;
-  top: 7px;
-  right: 17px;
+  top: 10px;
+  right: 12px;
   z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: @border-radius-base;
+  color: @text-color-subtle;
+  background: transparent;
+
+  &:hover {
+    background: darken(@source-list-bg, 3%);
+  }
+
+  &:focus-visible {
+    outline: 2px solid @accent-primary;
+    outline-offset: 1px;
+  }
+
   img {
     transform: rotateX(180deg);
+  }
+}
+
+.account-sidebar-sections {
+  min-height: 100%;
+  padding: 8px 8px 20px;
+  background: @source-list-bg;
+
+  .outline-view {
+    section {
+      margin-bottom: 14px;
+    }
+
+    .heading {
+      min-height: 32px;
+      padding: 8px 8px 5px;
+      color: @text-color-very-subtle;
+      font-size: @font-size-smaller;
+      font-weight: @font-weight-semi-bold;
+      letter-spacing: 0;
+    }
+
+    .item-container {
+      margin: 2px 0;
+      border-radius: @border-radius-base;
+    }
+
+    .item {
+      min-width: 0;
+      height: 34px;
+      padding: 0 9px;
+      border-radius: @border-radius-base;
+      color: @text-color-subtle;
+      line-height: 34px;
+      transition: color 150ms cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 150ms cubic-bezier(0.22, 1, 0.36, 1);
+
+      &:hover:not(.selected) {
+        color: @text-color;
+        background: darken(@source-list-bg, 3%);
+      }
+
+      &.selected {
+        color: @source-list-active-color;
+        background: @source-list-active-bg;
+        font-weight: @font-weight-semi-bold;
+
+        img.content-mask {
+          background-color: @source-list-active-color;
+        }
+      }
+
+      .item-count-box {
+        min-width: 22px;
+        padding: 1px 6px;
+        border-radius: 9px;
+        box-shadow: none;
+        color: @text-color-subtle;
+        background: rgba(23, 35, 58, 0.06);
+        font-size: @font-size-smaller;
+        line-height: 17px;
+        text-align: center;
+      }
+
+      &.selected .item-count-box {
+        color: @source-list-active-color;
+        background: rgba(26, 59, 112, 0.1);
+      }
+    }
   }
 }

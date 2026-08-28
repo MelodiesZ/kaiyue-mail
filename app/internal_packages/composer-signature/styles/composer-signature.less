@@ -324,3 +324,124 @@
     background: @background-primary;
   }
 }
+
+// Kaiyue signature settings.
+.preferences-wrap .preferences-signatures-container {
+  width: 100%;
+  max-width: 860px;
+
+  .empty-list {
+    display: flex;
+    min-height: 340px;
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    border-radius: @border-radius-large;
+    background: @background-primary;
+
+    .icon-signature {
+      height: 88px;
+    }
+
+    h2 {
+      margin: 16px 0 4px;
+      color: @text-color;
+      font-size: @font-size-h3;
+      font-weight: @font-weight-semi-bold;
+    }
+  }
+
+  .signature-list {
+    flex: 0 0 240px;
+    overflow: hidden;
+    border: 1px solid @border-color-divider;
+    border-radius: @border-radius-large;
+    background: @background-primary;
+
+    .editable-item {
+      padding: 10px 12px;
+    }
+
+    .list-item.selected,
+    .list-item.selected.focused {
+      color: @accent-primary;
+      background: #eaf1fb;
+    }
+  }
+
+  .signature-wrap {
+    gap: 8px;
+    margin-left: 16px;
+
+    .section {
+      border-radius: @border-radius-base;
+    }
+
+    .section.basic-info {
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+
+      input {
+        width: ~'min(100%, 360px)';
+        max-width: none;
+      }
+    }
+
+    textarea.raw-html {
+      min-height: 220px;
+      height: 32vh;
+      padding: 12px;
+      resize: vertical;
+    }
+
+    .signature-template-picker {
+      height: 68px;
+      border: 1px solid @border-color-divider;
+      border-radius: @border-radius-base;
+      background: @background-off-primary;
+
+      .option {
+        height: 58px;
+        margin: 4px 0 4px 4px;
+        border-radius: 4px;
+
+        &.active {
+          border-color: @accent-primary;
+          box-shadow: 0 0 0 1px @accent-primary;
+        }
+      }
+    }
+
+    .section.preview {
+      min-height: 160px;
+      padding: 16px;
+    }
+  }
+}
+
+@media (max-width: 720px) {
+  .preferences-wrap .preferences-signatures-container {
+    flex-direction: column;
+
+    .signature-list {
+      flex-basis: auto;
+      max-height: 200px;
+    }
+
+    .signature-wrap {
+      margin: 14px 0 0;
+
+      .section.basic-info {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .section.information .field {
+        width: 100%;
+      }
+    }
+  }
+}

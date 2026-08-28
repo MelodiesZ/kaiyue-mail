@@ -38,25 +38,26 @@ mailspring-workspace {
 }
 
 .sheet-stack-enter {
-  left: 30px;
   opacity: 0;
-  transition: all 0.125s ease-out;
+  transform: translateX(8px);
+  transition: opacity 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sheet-stack-enter.sheet-stack-enter-active {
-  left: 0;
   opacity: 1;
+  transform: translateX(0);
 }
 
 .sheet-stack-exit {
-  left: 0;
   opacity: 1;
-  transition: all 0.125s ease-in;
+  transform: translateX(0);
+  transition: opacity 120ms ease-out, transform 120ms ease-out;
 }
 
 .sheet-stack-exit.sheet-stack-exit-active {
-  left: 30px;
   opacity: 0;
+  transform: translateX(6px);
 }
 
 .toolbar-menu-control {
@@ -64,7 +65,7 @@ mailspring-workspace {
 }
 
 .toolbar-window-controls {
-  margin-top: 7px;
+  margin-top: 12px;
   margin-left: @spacing-half /*rtl:ignore */;
   order: -1000 /*rtl: 1000*/;
   min-width: 72px;
@@ -136,11 +137,8 @@ body.is-blurred {
     }
   }
   .sheet-toolbar-container {
-    background-image: linear-gradient(
-      to bottom,
-      lighten(@toolbar-background-color, 14%),
-      lighten(@toolbar-background-color, 14%)
-    );
+    background-image: none;
+    background-color: @toolbar-background-color;
 
     .btn.btn-toolbar {
       background: none;
@@ -159,26 +157,22 @@ body.is-blurred {
 }
 
 .sheet-toolbar-container {
-  background-image: -webkit-linear-gradient(
-    lighten(@toolbar-background-color, 10%) 0%,
-    lighten(@toolbar-background-color, 10%) 1.9%,
-    lighten(@toolbar-background-color, 9%) 2%,
-    @toolbar-background-color 100%
-  );
+  background-image: none;
+  background-color: @toolbar-background-color;
   color: @text-color-heading;
 }
 
 .sheet-toolbar {
   position: relative;
   -webkit-app-region: drag;
-  border-bottom: 1px solid darken(@toolbar-background-color, 9%);
+  border-bottom: 1px solid @border-color-divider;
   width: 100%;
-  height: 34px;
+  height: 46px;
 
   // prevent flexbox from ever, ever resizing toolbars, no matter
   // how much it thinks other content is being squished
-  min-height: 34px;
-  max-height: 34px;
+  min-height: 46px;
+  max-height: 46px;
 
   // cover up the vertical resizing separators, so the toolbar appears
   // to be one continuous bar.
@@ -202,7 +196,7 @@ body.is-blurred {
       left: 50%;
       transform: translateX(-50%);
       -webkit-app-region: drag;
-      line-height: 34px;
+      line-height: 46px;
       &:hover {
         cursor: default;
       }
@@ -210,6 +204,12 @@ body.is-blurred {
   }
 
   .item-back {
+    appearance: none;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
     order: -999;
     img.content-mask {
       background-color: @text-color-heading;
@@ -237,13 +237,23 @@ body.is-blurred {
   }
 
   .btn-toolbar {
-    margin-top: 5px;
+    margin-top: 7px;
     margin-left: @spacing-three-quarters;
     margin-right: 0;
     flex-shrink: 0;
-    line-height: 1.75em;
-    height: 1.75em;
-    box-shadow: 0 0.5px 0.05px rgba(0, 0, 0, 0.4), 0 -0.5px 0 rgba(0, 0, 0, 0.12);
+    min-height: 30px;
+    height: 30px;
+    line-height: 28px;
+    border-color: transparent;
+    box-shadow: none;
+    background: transparent;
+    transition: color 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 150ms cubic-bezier(0.22, 1, 0.36, 1);
+
+    &:hover {
+      border-color: transparent;
+      background: @background-secondary;
+    }
     img.content-mask {
       background-color: fade(@text-color-heading, 80%);
     }

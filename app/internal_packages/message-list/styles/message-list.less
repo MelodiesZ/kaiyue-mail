@@ -1,7 +1,7 @@
 @import 'ui-variables';
 @import 'ui-mixins';
 
-@message-max-width: 800px;
+@message-max-width: 920px;
 @message-spacing: 6px;
 
 .tag-picker {
@@ -119,8 +119,8 @@ body.platform-win32 {
 }
 
 #message-list.height-fix {
-  height: calc(~'100% - 35px');
-  min-height: calc(~'100% - 35px');
+  height: calc(~'100% - 41px');
+  min-height: calc(~'100% - 41px');
 }
 
 #message-list {
@@ -129,7 +129,7 @@ body.platform-win32 {
   position: relative;
   background: @background-secondary;
 
-  transition: all 125ms ease-in-out;
+  transition: background-color 125ms ease-in-out;
   width: 100%;
   height: 100%;
   min-height: 100%;
@@ -274,7 +274,6 @@ body.platform-win32 {
   }
 
   .message-item-wrap {
-    transition: height 0.1s;
     position: relative;
 
     margin: 0 auto;
@@ -433,8 +432,8 @@ body.platform-win32 {
     }
 
     .message-actions-wrap {
-      transition: opacity 100ms, width 150ms;
-      transition-delay: 50ms, 0ms;
+      transition: opacity 100ms;
+      transition-delay: 50ms;
       transition-timing-function: ease-in-out;
       opacity: 1;
       text-align: left;
@@ -443,6 +442,12 @@ body.platform-win32 {
     .message-actions-ellipsis {
       display: block;
       float: left;
+      appearance: none;
+      padding: 0;
+      border: 0;
+      color: inherit;
+      background: transparent;
+      font: inherit;
     }
 
     .message-actions {
@@ -614,6 +619,18 @@ body.platform-win32 {
       background-color: @download-hover-color;
     }
   }
+
+  .download-all-action {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+  }
 }
 
 .attachments-area {
@@ -627,6 +644,204 @@ body.platform-win32 {
   cursor: default;
 }
 
+// Kaiyue reading surface: one continuous document, not a stack of floating cards.
+#message-list {
+  color: @text-color;
+  background: @background-primary;
+
+  .messages-wrap .scroll-region-content-inner {
+    padding: 0;
+  }
+
+  .message-subject-wrap {
+    width: 100%;
+    margin: 0 auto;
+    padding: 22px 28px 14px;
+    border-bottom: 1px solid @border-color-divider;
+    line-height: 1.35;
+    background: @background-primary;
+  }
+
+  .message-subject {
+    color: @text-color;
+    font-size: 20px;
+    font-weight: @font-weight-semi-bold;
+    letter-spacing: -0.01em;
+  }
+
+  .message-icons-wrap {
+    gap: 4px;
+
+    > div {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      min-height: 30px;
+      margin-left: 0;
+      border-radius: @border-radius-base;
+
+      &:hover {
+        background: @background-secondary;
+      }
+    }
+  }
+
+  .message-list-headers {
+    border-bottom: 1px solid @border-color-divider;
+  }
+
+  .message-item-wrap {
+    padding-bottom: 0;
+
+    .message-item-white-wrap,
+    &.collapsed .message-item-white-wrap {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-bottom: 1px solid @border-color-divider;
+      border-radius: 0;
+      background: @background-primary;
+      box-shadow: none;
+    }
+
+    &.collapsed .message-item-white-wrap {
+      background: @background-off-primary;
+    }
+  }
+
+  .message-header {
+    padding-top: 20px;
+    font-size: @font-size-small;
+
+    .header-row,
+    .message-time,
+    .message-indicator {
+      color: @text-color-subtle;
+    }
+
+    .message-actions {
+      height: 30px;
+      margin-top: 0;
+      border-color: @border-color-divider;
+      border-radius: @border-radius-base;
+      background: @background-primary;
+
+      .btn-icon {
+        height: 28px;
+        padding: 0 9px;
+        border-right-color: @border-color-divider;
+      }
+    }
+  }
+
+  .message-participants {
+    .from-contact {
+      color: @text-color;
+      font-weight: @font-weight-semi-bold;
+    }
+
+    .from-label,
+    .to-label,
+    .reply-to-label,
+    .cc-label,
+    .bcc-label,
+    .to-contact,
+    .reply-to-contact,
+    .cc-contact,
+    .bcc-contact,
+    .to-everyone {
+      color: @text-color-subtle;
+    }
+  }
+
+  .message-item-area {
+    padding: 0 28px 26px;
+  }
+
+  .message-item-divider {
+    height: 1px;
+    border: 0;
+    background: @border-color-divider;
+  }
+
+  .minified-bundle {
+    .num-messages {
+      border-color: @border-color-divider;
+      border-radius: @border-radius-base;
+      color: @text-color-subtle;
+      background: @background-primary;
+    }
+
+    .msg-line {
+      border-color: @border-color-divider;
+      border-radius: @border-radius-small @border-radius-small 0 0;
+      background: @background-off-primary;
+      box-shadow: none;
+    }
+  }
+
+  .footer-reply-area-wrap {
+    margin: 16px 20px 20px;
+    border: 1px solid @border-color-divider;
+    border-radius: @border-radius-large;
+    color: @text-color-subtle;
+    background: @background-primary;
+    box-shadow: none;
+    transition: color 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 150ms cubic-bezier(0.22, 1, 0.36, 1);
+
+    &:hover {
+      border-color: #b8c3d0;
+      color: @text-color;
+      background: @background-off-primary;
+    }
+
+    &:focus-visible {
+      outline: 2px solid @accent-primary;
+      outline-offset: 2px;
+    }
+
+    .footer-reply-area {
+      padding: 14px 18px;
+    }
+  }
+}
+
+.nylas-attachment-item.file-attachment-item {
+  width: calc(~'100% - 16px');
+  min-width: 0;
+  margin: 0 8px 8px;
+
+  .inner,
+  .file-info-wrap,
+  .file-action-icon {
+    min-height: 44px;
+    height: 44px;
+  }
+
+  .file-info-wrap {
+    border-color: @border-color-divider;
+    border-radius: @border-radius-base 0 0 @border-radius-base;
+    background: @background-primary;
+  }
+
+  .file-action-icon {
+    border-color: @border-color-divider;
+    border-radius: 0 @border-radius-base @border-radius-base 0;
+    background: @background-primary;
+
+    &:hover {
+      background: @background-secondary;
+    }
+  }
+
+  .file-size {
+    color: @text-color-subtle;
+  }
+}
+
 //////////////////////////
 // message-participants //
 //////////////////////////
@@ -638,8 +853,6 @@ body.platform-win32 {
 .message-participants {
   z-index: 1;
   display: flex;
-  transition: padding-left 150ms;
-  transition-timing-function: ease-in-out;
 
   &.collapsed:hover {
     cursor: default;

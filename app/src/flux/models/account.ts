@@ -121,6 +121,20 @@ export class Account extends ModelWithMetadata {
 
   constructor(args: AttributeValues<typeof Account.attributes>) {
     super(args);
+    const configuredEmail = this.settings?.imap_username || this.settings?.smtp_username;
+    const persistedAddressIsInvalid =
+      !this.emailAddress || this.emailAddress === 'null' || /^null@/i.test(this.emailAddress);
+    if (
+      persistedAddressIsInvalid &&
+      configuredEmail &&
+      configuredEmail.includes('@') &&
+      !/^null@/i.test(configuredEmail)
+    ) {
+      this.emailAddress = configuredEmail;
+    }
+    if (!this.name || this.name === 'null') {
+      this.name = this.emailAddress?.split('@')[0] || '';
+    }
     this.aliases = this.aliases || [];
     this.label = this.label || this.emailAddress;
     this.syncState = this.syncState || Account.SYNC_STATE_OK;

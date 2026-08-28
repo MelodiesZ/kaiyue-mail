@@ -174,6 +174,13 @@ export class MailspringCalendar extends React.Component<
       invalidateThemeTextColorCache();
       this.setState((s) => ({ themeVersion: s.themeVersion + 1 }));
     });
+    if (process.env.PLAYWRIGHT) {
+      (window as any).__kaiyueCalendar = {
+        showEmptyState: () =>
+          this.setState({ calendars: [], calendarsLoaded: true, calendarListVisible: false }),
+        focusDate: (isoDate: string) => this.onChangeFocusedMoment(moment(isoDate)),
+      };
+    }
   }
 
   componentWillUnmount() {
@@ -182,6 +189,9 @@ export class MailspringCalendar extends React.Component<
     this._themeDisposable?.dispose();
     if (this._unlisten) {
       this._unlisten();
+    }
+    if (process.env.PLAYWRIGHT) {
+      delete (window as any).__kaiyueCalendar;
     }
   }
 
@@ -941,7 +951,7 @@ export class MailspringCalendar extends React.Component<
             'calendar:resize-event-right': () => this._onMoveSelectedEvent('right', true),
           }}
         >
-          {this.state.calendarListVisible && (
+          {this.state.calendarListVisible && !this._shouldShowEmptyState() && (
             <ResizableRegion
               className="calendar-source-list"
               initialWidth={200}

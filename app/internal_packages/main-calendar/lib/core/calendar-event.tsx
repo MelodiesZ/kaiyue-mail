@@ -1,7 +1,7 @@
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 import { InjectedComponentSet } from 'mailspring-component-kit';
-import { CalendarDateUtils } from 'mailspring-exports';
+import { CalendarDateUtils, localized } from 'mailspring-exports';
 import {
   EventOccurrence,
   isTimed,
@@ -258,9 +258,6 @@ export class CalendarEvent extends React.Component<CalendarEventProps, CalendarE
       return;
     }
 
-    // Prevent text selection during drag
-    e.preventDefault();
-
     // Calculate the time at the click position within this event
     const mouseTime = this._getMouseTime(e);
 
@@ -438,7 +435,7 @@ export class CalendarEvent extends React.Component<CalendarEventProps, CalendarE
         </span>
         {this._renderEventDetails()}
         {event.isRecurring && !event.isCancelled && !event.isException && <RecurringIcon />}
-        {event.isException && <span className="exception-tag">Modified</span>}
+        {event.isException && <span className="exception-tag">{localized('已修改')}</span>}
         <InjectedComponentSet
           className="event-injected-components"
           style={{ position: 'absolute' }}

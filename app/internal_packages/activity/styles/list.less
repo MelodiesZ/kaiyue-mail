@@ -47,6 +47,10 @@
   }
 
   .activity-summary-cta {
+    appearance: none;
+    width: 100%;
+    border: 0;
+    font: inherit;
     border-top: 1px solid @border-color-divider;
     border-bottom-right-radius: @border-radius-base;
     border-bottom-left-radius: @border-radius-base;
@@ -124,9 +128,9 @@
     background: @background-secondary;
     cursor: default;
     overflow-y: hidden;
-    transition-property: all;
-    transition-duration: 0.5s;
-    transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    transition-property: opacity, border-color, background-color;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     &:last-child {
       border-bottom: 1px solid @border-color-primary;
     }
@@ -146,6 +150,7 @@
     &.hidden {
       .activity-list-toggle-item {
         height: 0;
+        opacity: 0;
         &:last-child {
           border-bottom: none;
         }

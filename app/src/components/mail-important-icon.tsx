@@ -117,7 +117,17 @@ class MailImportantIcon extends React.Component<MailImportantIconProps, MailImpo
       title = localized('Mark as Important');
     }
 
-    return <div className={classes} title={title} onClick={this._onToggleImportant} />;
+    return (
+      <button
+        type="button"
+        className={classes}
+        title={title}
+        aria-label={title}
+        aria-pressed={this.state.isImportant}
+        disabled={!this.state.category}
+        onClick={this._onToggleImportant}
+      />
+    );
   }
 
   _onToggleImportant = (event: React.MouseEvent) => {

@@ -8,7 +8,6 @@ import { localized } from '../../intl';
 import { buildKaiyueMessageId } from '../../kaiyue-config';
 import { Contact } from '../models/contact';
 import { Message } from '../models/message';
-import MessageUtils from '../models/message-utils';
 import * as Utils from '../models/utils';
 import InlineStyleTransformer from '../../services/inline-style-transformer';
 import SanitizeTransformer from '../../services/sanitize-transformer';
@@ -42,13 +41,10 @@ class DraftFactory {
 
     const content = message.plaintext ? convertPlaintextToHTML(message.body) : message.body;
 
-    // TODO: Fix inline images
-    const cidRE = MessageUtils.cidRegexString;
-    const cidRegexp = new RegExp(`<img.*${cidRE}[\\s\\S]*?>`, 'igm');
-
-    // Be sure to match over multiple lines with [\s\S]*
-    // Regex explanation here: https://regex101.com/r/vO6eN2/1
-    let transformed = (content || '').replace(cidRegexp, '');
+    // CID is an allowed, non-network URI scheme in SanitizeTransformer. Keep
+    // inline images in quoted replies / forwards so their matching MIME parts
+    // can continue to render, while still sanitizing the surrounding HTML.
+    let transformed = content || '';
     transformed = await SanitizeTransformer.run(transformed);
     transformed = await InlineStyleTransformer.run(transformed);
     return transformed;

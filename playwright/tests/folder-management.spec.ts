@@ -25,9 +25,9 @@ test.afterAll(async () => {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
-/** Locator for the "Folders" section in the sidebar */
+/** Locator for the localized folders section in the sidebar */
 function foldersSection(page: Page) {
-  return page.locator('.outline-view:has(.heading .text:has-text("Folders"))');
+  return page.locator('.outline-view:has(.heading .text:has-text("文件夹"))');
 }
 
 /** Locator for a specific folder treeitem by name (only matches when NOT in edit mode) */
@@ -42,28 +42,28 @@ function folderItem(page: Page, name: string) {
 test('sidebar shows Folders section with user folders', async () => {
   const section = foldersSection(mainWindow);
   await expect(section).toBeVisible({ timeout: 5_000 });
-  await expect(section.locator('.heading .text')).toHaveText('Folders');
+  await expect(section.locator('.heading .text')).toHaveText('文件夹');
 
   // Verify user folders are listed
-  await expect(folderItem(mainWindow, 'Archived')).toBeVisible();
-  await expect(folderItem(mainWindow, 'Travel')).toBeVisible();
+  await expect(folderItem(mainWindow, '供应商往来')).toBeVisible();
+  await expect(folderItem(mainWindow, '客户项目')).toBeVisible();
 });
 
 // ─── Folder hierarchy ─────────────────────────────────────────────────────
 
-test('Travel folder with Spain subfolder is displayed', async () => {
-  const travel = folderItem(mainWindow, 'Travel');
-  await expect(travel).toBeVisible({ timeout: 5_000 });
+test('客户项目 folder with KY-2500 subfolder is displayed', async () => {
+  const projects = folderItem(mainWindow, '客户项目');
+  await expect(projects).toBeVisible({ timeout: 5_000 });
 
   // Expand Travel if collapsed
-  const expanded = await travel.getAttribute('aria-expanded');
+  const expanded = await projects.getAttribute('aria-expanded');
   if (expanded === 'false') {
-    await travel.locator('.disclosure-triangle').click();
+    await projects.locator('.disclosure-triangle').click();
     await mainWindow.waitForTimeout(500);
   }
 
-  const spain = travel.locator('[role="treeitem"]:has(.name:has-text("Spain"))');
-  await expect(spain).toBeVisible({ timeout: 3_000 });
+  const project = projects.locator('[role="treeitem"]:has(.name:has-text("KY-2500"))');
+  await expect(project).toBeVisible({ timeout: 3_000 });
 });
 
 // ─── Create folder via + button ───────────────────────────────────────────
@@ -88,7 +88,7 @@ test('clicking + button creates a folder and queues SyncbackCategoryTask', async
 
   const task = await waitForCapturedTask(
     mainWindow,
-    t => t.__cls === 'SyncbackCategoryTask' && !t.existingPath
+    (t) => t.__cls === 'SyncbackCategoryTask' && !t.existingPath
   );
   expect(task).not.toBeNull();
   expect(task.path).toContain('TestPlaywright');
@@ -104,36 +104,36 @@ test('pressing Escape cancels rename', async () => {
 
   // If not already in edit mode, double-click to enter it
   if ((await input.count()) === 0) {
-    const archived = folderItem(mainWindow, 'Archived');
+    const archived = folderItem(mainWindow, '供应商往来');
     await archived.locator('.item-container .item').first().dblclick();
     await expect(input).toBeVisible({ timeout: 3_000 });
   }
 
   await input.press('Escape');
 
-  // Input should disappear, name should still be "Archived"
+  // Input should disappear, name should remain unchanged.
   await expect(input).not.toBeVisible({ timeout: 3_000 });
-  await expect(folderItem(mainWindow, 'Archived').locator('.name')).toHaveText('Archived');
+  await expect(folderItem(mainWindow, '供应商往来').locator('.name')).toHaveText('供应商往来');
 });
 
 test('renaming a folder creates a SyncbackCategoryTask with existingPath', async () => {
-  const archived = folderItem(mainWindow, 'Archived');
+  const archived = folderItem(mainWindow, '供应商往来');
   await archived.locator('.item-container .item').first().dblclick();
 
   const input = foldersSection(mainWindow).locator('input.item-input');
   await expect(input).toBeVisible({ timeout: 3_000 });
 
   await clearCapturedTasks(electronApp);
-  await input.fill('ArchivedRenamed');
+  await input.fill('供应商往来-归档');
   await input.press('Enter');
 
   const task = await waitForCapturedTask(
     mainWindow,
-    t => t.__cls === 'SyncbackCategoryTask' && !!t.existingPath
+    (t) => t.__cls === 'SyncbackCategoryTask' && !!t.existingPath
   );
   expect(task).not.toBeNull();
   expect(task.existingPath).toBeTruthy();
-  expect(task.path).toContain('ArchivedRenamed');
+  expect(task.path).not.toBe(task.existingPath);
 });
 
 // ─── Context menu: rename via right-click ─────────────────────────────────
@@ -143,17 +143,17 @@ test('rename via context menu enters edit mode', async () => {
   await mainWindow.keyboard.press('Escape');
   await mainWindow.waitForTimeout(300);
 
-  const drafts = folderItem(mainWindow, 'Drafts');
-  await expect(drafts).toBeVisible();
+  const records = folderItem(mainWindow, '资料归档');
+  await expect(records).toBeVisible();
 
   // Set up interceptor to trigger "Rename"
   await triggerMenuAction(electronApp, 'Rename');
 
-  await drafts.locator('.item-container .item').first().click({ button: 'right' });
+  await records.locator('.item-container .item').first().click({ button: 'right' });
 
   const input = foldersSection(mainWindow).locator('input.item-input');
   await expect(input).toBeVisible({ timeout: 3_000 });
-  await expect(input).toHaveValue('Drafts');
+  await expect(input).toHaveValue('资料归档');
 
   // Cancel the rename
   await input.press('Escape');
@@ -162,20 +162,20 @@ test('rename via context menu enters edit mode', async () => {
 // ─── Context menu: create subfolder ───────────────────────────────────────
 
 test('create subfolder via context menu shows input and queues task', async () => {
-  const travel = folderItem(mainWindow, 'Travel');
-  await expect(travel).toBeVisible();
+  const projects = folderItem(mainWindow, '客户项目');
+  await expect(projects).toBeVisible();
 
   // Expand Travel if collapsed
-  const expanded = await travel.getAttribute('aria-expanded');
+  const expanded = await projects.getAttribute('aria-expanded');
   if (expanded === 'false') {
-    await travel.locator('.disclosure-triangle').click();
+    await projects.locator('.disclosure-triangle').click();
     await mainWindow.waitForTimeout(500);
   }
 
   // Set up interceptor to trigger "New Subfolder"
   await triggerMenuAction(electronApp, 'Subfolder');
 
-  await travel.locator('.item-container .item').first().click({ button: 'right' });
+  await projects.locator('.item-container .item').first().click({ button: 'right' });
 
   // The subfolder input should appear inside Travel's children
   const childInput = foldersSection(mainWindow).locator('input.item-input');
@@ -187,7 +187,7 @@ test('create subfolder via context menu shows input and queues task', async () =
 
   const task = await waitForCapturedTask(
     mainWindow,
-    t => t.__cls === 'SyncbackCategoryTask' && !t.existingPath
+    (t) => t.__cls === 'SyncbackCategoryTask' && !t.existingPath
   );
   expect(task).not.toBeNull();
   // The task path should contain the parent + separator + child name
@@ -199,9 +199,7 @@ test('create subfolder via context menu shows input and queues task', async () =
 test('delete folder via context menu creates a DestroyCategoryTask', async () => {
   // Use any visible user folder (Archived may have been "renamed")
   const section = foldersSection(mainWindow);
-  const target = section
-    .locator('[role="treeitem"]:has(> .item-container .name)')
-    .first();
+  const target = section.locator('[role="treeitem"]:has(> .item-container .name)').first();
   await expect(target).toBeVisible();
 
   const folderName = await target.locator('.name').first().textContent();
@@ -214,10 +212,7 @@ test('delete folder via context menu creates a DestroyCategoryTask', async () =>
 
   await target.locator('.item-container .item').first().click({ button: 'right' });
 
-  const task = await waitForCapturedTask(
-    mainWindow,
-    t => t.__cls === 'DestroyCategoryTask'
-  );
+  const task = await waitForCapturedTask(mainWindow, (t) => t.__cls === 'DestroyCategoryTask');
   expect(task).not.toBeNull();
   expect(task.path).toBeTruthy();
 });

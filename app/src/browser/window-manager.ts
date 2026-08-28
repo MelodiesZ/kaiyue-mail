@@ -288,7 +288,7 @@ export default class WindowManager {
     coreWinOpts[WindowManager.CALENDAR_WINDOW] = {
       windowKey: WindowManager.CALENDAR_WINDOW,
       windowType: WindowManager.CALENDAR_WINDOW,
-      title: localized('Calendar Preview'),
+      title: '凯越日历',
       width: Math.round(screenWidth * 0.75),
       height: Math.round(screenHeight * 0.75),
       toolbar: false,

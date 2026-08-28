@@ -45,8 +45,11 @@
 
 @list-bg: #333;
 @list-border: #383838;
+@list-hover-bg: lighten(@list-bg, 4%);
 @list-selected-color: @text-color-inverse;
 @list-focused-color: @text-color;
+@list-focused-bg: color-mix(in srgb, @accent-primary 28%, @list-bg);
+@list-focused-border: color-mix(in srgb, @accent-primary 65%, @list-bg);
 
 @toolbar-background-color: #121212;
 @panel-background-color: #121212;
@@ -69,7 +72,7 @@ img.content-light {
   box-shadow: 0 0 0.5px rgba(255, 255, 255, 0.28), 0 1px 1.5px rgba(255, 255, 255, 0.08);
 }
 
-.thread-list .list-item:not(.unread):not(.selected):not(.focused) {
+.thread-list .list-item:not(.unread):not(.selected):not(.focused):not(:hover) {
   color: #aaa;
 }
 

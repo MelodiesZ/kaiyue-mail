@@ -11,8 +11,8 @@
     padding-top: 32px;
     padding-bottom: 30px;
     color: white;
-    border-radius: 5px 5px 0 0;
-    background: linear-gradient(160deg, #7c80ee 0%, #666ee8 45%, #5558d8 100%)
+    border-radius: @border-radius-large @border-radius-large 0 0;
+    background: @accent-primary;
   }
   .header-text {
     color: white;
@@ -32,7 +32,7 @@
     }
   }
   .pro-description {
-    width: 275px;
+    width: ~'min(100%, 320px)';
     margin: 0 auto;
     padding-left: 0;
 

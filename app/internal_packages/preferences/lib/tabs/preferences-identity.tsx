@@ -38,9 +38,14 @@ class RefreshButton extends React.Component<Record<string, unknown>, { refreshin
 
   render() {
     return (
-      <div className={`refresh ${this.state.refreshing && 'spinning'}`} onClick={this._onClick}>
+      <button
+        type="button"
+        className={`refresh ${this.state.refreshing && 'spinning'}`}
+        aria-label={localized('Refresh')}
+        onClick={this._onClick}
+      >
         <RetinaImg name="ic-refresh.png" mode={RetinaImg.Mode.ContentIsMask} />
-      </div>
+      </button>
     );
   }
 }
@@ -210,7 +215,9 @@ class PreferencesIdentity extends React.Component<
             <br />
             {localizedReactFragment(
               `Upgrade to %@ to use all these great features permanently:`,
-              <a onClick={onLearnMore}>{localized('Mailspring Pro')}</a>
+              <button type="button" className="text-link" onClick={onLearnMore}>
+                {localized('Mailspring Pro')}
+              </button>
             )}
             <ExploreMailspringSmall />
           </div>
@@ -424,9 +431,9 @@ const IdentitySummary: React.FunctionComponent<{ identity: IIdentity }> = (props
             source="Preferences"
             campaign="Dashboard"
           />
-          <div className="btn minor-width" onClick={logout}>
+          <button type="button" className="btn minor-width" onClick={logout}>
             {localized('Sign Out')}
-          </div>
+          </button>
         </div>
       </div>
     </div>

@@ -566,12 +566,14 @@ export class CalendarEventPopover extends React.Component<
             <div className="expanded-section">
               <div className="section-header">
                 <span className="section-title">{localized('Invitees')}</span>
-                <span
+                <button
+                  type="button"
                   className="section-close"
+                  aria-label={localized('隐藏参与者')}
                   onClick={() => this.setState({ showInvitees: false })}
                 >
                   ×
-                </span>
+                </button>
               </div>
               <EventAttendeesInput
                 ref={this.attendeesInputRef}
@@ -581,9 +583,13 @@ export class CalendarEventPopover extends React.Component<
               />
             </div>
           ) : (
-            <div className="action-link" onClick={() => this.setState({ showInvitees: true })}>
+            <button
+              type="button"
+              className="action-link"
+              onClick={() => this.setState({ showInvitees: true })}
+            >
               {localized('Add Invitees')}
-            </div>
+            </button>
           )}
 
           {/* Notes section - collapsible */}
@@ -591,9 +597,14 @@ export class CalendarEventPopover extends React.Component<
             <div className="expanded-section">
               <div className="section-header">
                 <span className="section-title">{localized('Notes')}</span>
-                <span className="section-close" onClick={() => this.setState({ showNotes: false })}>
+                <button
+                  type="button"
+                  className="section-close"
+                  aria-label={localized('隐藏备注')}
+                  onClick={() => this.setState({ showNotes: false })}
+                >
                   ×
-                </span>
+                </button>
               </div>
               <textarea
                 ref={this.notesTextareaRef}
@@ -604,9 +615,13 @@ export class CalendarEventPopover extends React.Component<
               />
             </div>
           ) : (
-            <div className="action-link" onClick={() => this.setState({ showNotes: true })}>
+            <button
+              type="button"
+              className="action-link"
+              onClick={() => this.setState({ showNotes: true })}
+            >
               {localized('Add Notes or URL')}
-            </div>
+            </button>
           )}
 
           {/* Action buttons */}
@@ -634,11 +649,11 @@ class CalendarEventPopoverUnenditable extends React.Component<
 
     if (event.isAllDay === true) {
       const startMoment = moment(CalendarDateUtils.dayStartUnix(event.startDate) * 1000);
-      const date = startMoment.format('dddd, MMMM D'); // e.g. Tuesday, February 22
+      const date = startMoment.format('dddd，LL');
       const lastDay = moment(CalendarDateUtils.dayStartUnix(event.endDate) * 1000);
       return (
         <div>
-          {event.startDate === event.endDate ? date : `${date} – ${lastDay.format('MMMM D')}`}
+          {event.startDate === event.endDate ? date : `${date} – ${lastDay.format('LL')}`}
           <br />
           {localized('All day')}
         </div>
@@ -646,7 +661,7 @@ class CalendarEventPopoverUnenditable extends React.Component<
     }
 
     const startMoment = moment(event.start * 1000);
-    const date = startMoment.format('dddd, MMMM D'); // e.g. Tuesday, February 22
+    const date = startMoment.format('dddd，LL');
     const endMoment = moment(event.end * 1000);
     const timeRange = `${formatTime(startMoment)} - ${formatTime(endMoment)}`;
     return (
@@ -688,7 +703,7 @@ class CalendarEventPopoverUnenditable extends React.Component<
             <RetinaImg
               className="edit-icon"
               name="edit-icon.png"
-              title="Edit Item"
+              title={localized('编辑事件')}
               mode={RetinaImg.Mode.ContentIsMask}
               onClick={onEdit}
             />
@@ -812,9 +827,5 @@ function extractNotesFromDescription(description: string) {
 }
 
 function formatTime(momentTime: Moment) {
-  const min = momentTime.minutes();
-  if (min === 0) {
-    return momentTime.format('h A');
-  }
-  return momentTime.format('h:mm A');
+  return momentTime.format('LT');
 }

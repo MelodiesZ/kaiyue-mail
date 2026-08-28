@@ -429,13 +429,19 @@ class EditableList extends Component<EditableListProps, EditableListState> {
         onDoubleClick={(e) => onEdit(e, item, idx)}
       >
         {itemContent}
-        <RetinaImg
-          className="edit-icon"
-          name="edit-icon.png"
+        <button
+          type="button"
+          className="editable-list-edit"
           title={localized('Edit Item')}
-          mode={RetinaImg.Mode.ContentIsMask}
+          aria-label={localized('Edit Item')}
           onClick={(e) => onEdit(e, item, idx)}
-        />
+        >
+          <RetinaImg
+            className="edit-icon"
+            name="edit-icon.png"
+            mode={RetinaImg.Mode.ContentIsMask}
+          />
+        </button>
       </div>
     );
   };
@@ -447,7 +453,12 @@ class EditableList extends Component<EditableListProps, EditableListState> {
     });
     return (
       <div className="buttons-wrapper">
-        <div className="btn-editable-list" onClick={this._onCreateItem}>
+        <button
+          type="button"
+          className="btn-editable-list"
+          aria-label={localized('Add')}
+          onClick={this._onCreateItem}
+        >
           <svg
             width="12"
             height="12"
@@ -462,8 +473,14 @@ class EditableList extends Component<EditableListProps, EditableListState> {
               strokeLinecap="round"
             />
           </svg>
-        </div>
-        <div className={deleteClasses} onClick={this._onDeleteItem}>
+        </button>
+        <button
+          type="button"
+          className={deleteClasses}
+          aria-label={localized('Remove')}
+          disabled={!this._getSelectedItem()}
+          onClick={this._onDeleteItem}
+        >
           <svg
             width="12"
             height="12"
@@ -473,7 +490,7 @@ class EditableList extends Component<EditableListProps, EditableListState> {
           >
             <path d="M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
-        </div>
+        </button>
       </div>
     );
   };

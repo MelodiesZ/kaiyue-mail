@@ -175,9 +175,14 @@ class AppearanceModeSwitch extends React.Component<
         >
           {this._renderModeOptions()}
         </RovingTabIndexToolbar>
-        <div className={applyChangesClass} onClick={this._onApplyChanges}>
+        <button
+          type="button"
+          className={applyChangesClass}
+          disabled={!hasChanges}
+          onClick={this._onApplyChanges}
+        >
           {localized('Apply Layout')}
-        </div>
+        </button>
       </div>
     );
   }

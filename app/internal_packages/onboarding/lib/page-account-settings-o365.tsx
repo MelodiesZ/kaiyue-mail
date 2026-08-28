@@ -106,7 +106,9 @@ export default class AccountSettingsPageO365 extends React.Component<
           </button>
         </div>
         <div style={{ marginTop: 20 }}>
-          <a
+          <button
+            type="button"
+            className="onboarding-text-action"
             onClick={() => {
               if (this.state.sharedMailbox) {
                 // Came back here from the sign-in screen via "Change" — return to it.
@@ -117,7 +119,7 @@ export default class AccountSettingsPageO365 extends React.Component<
             }}
           >
             {localized('Cancel')}
-          </a>
+          </button>
         </div>
       </div>
     );
@@ -139,9 +141,13 @@ export default class AccountSettingsPageO365 extends React.Component<
             'Shared mailbox: %@',
             <strong>{this.state.sharedMailbox}</strong>
           )}
-          <a onClick={() => this.setState({ showSharedMailboxForm: true })}>
+          <button
+            type="button"
+            className="onboarding-text-action"
+            onClick={() => this.setState({ showSharedMailboxForm: true })}
+          >
             {localized('Change')}
-          </a>
+          </button>
         </div>
       </div>
     );

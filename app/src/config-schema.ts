@@ -324,7 +324,7 @@ export default {
           },
           undoSend: {
             type: 'number',
-            default: 5000,
+            default: 0,
             enum: [5000, 15000, 30000, 60000, 0],
             enumLabels: [
               `5 ${localized('seconds')}`,

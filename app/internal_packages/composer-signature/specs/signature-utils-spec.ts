@@ -66,6 +66,20 @@ describe('signature-utils', function () {
       expect(count).toEqual(1);
     });
 
+    it('replaces legacy and duplicate signature blocks without adding another one', function () {
+      const body =
+        "<div>kai'yue</div><signature>Sent from Kaiyue Mail</signature>" +
+        `<div>ai'ji</div><signature id="initial">Sent from Kaiyue Mail</signature>`;
+      const result = applySignature(body, {
+        id: 'initial',
+        body: '<div>Sent from Kaiyue Mail</div>',
+      });
+
+      expect((result.match(/<signature\b/g) || []).length).toEqual(1);
+      expect(result).toContain("<div>kai'yue</div>");
+      expect(result).toContain("<div>ai'ji</div>");
+    });
+
     it('does not add extra whitespace when replacing an existing signature', function () {
       const body = `<div>Hi</div>${sig('old-sig', '<p>Old</p>')}`;
       const result = applySignature(body, { id: 'new-sig', body: '<p>New</p>' });

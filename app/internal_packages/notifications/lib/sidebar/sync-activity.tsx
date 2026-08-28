@@ -50,7 +50,7 @@ export class SyncActivity extends React.Component<SyncActivityProps> {
         );
 
         if (folderComponents.length === 0) {
-          folderComponents = <div>Gathering folders...</div>;
+          folderComponents = <div>{localized('正在获取文件夹…')}</div>;
         }
 
         return (

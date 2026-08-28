@@ -19,15 +19,24 @@ mousetrap.prototype.stopCallback = (e: KeyboardEvent, element: HTMLElement, comb
 
   // Slate handles undo/redo itself in slate-react's `after` plugin but doesn't stop
   // propagation. Because of this, we need to make sure we do not fire core:undo or core:redo.
-  const target = e.target as HTMLElement;
+  const eventTarget =
+    e.target instanceof HTMLElement
+      ? e.target
+      : e.target instanceof Node
+        ? e.target.parentElement
+        : null;
+  const callbackTarget = element instanceof HTMLElement ? element : null;
+  const activeTarget =
+    document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const target = eventTarget || callbackTarget || activeTarget;
   const withinSlateEditor =
-    target.isContentEditable &&
+    !!target?.isContentEditable &&
     (target.hasAttribute('data-slate-editor') || target.closest('[data-slate-editor]'));
   if (withinSlateEditor && /(mod|command|ctrl)\+(z|y)/.test(combo)) {
     return true;
   }
 
-  const withinWebview = element.tagName === 'WEBVIEW';
+  const withinWebview = callbackTarget?.tagName === 'WEBVIEW';
   if (withinWebview) {
     return true;
   }
@@ -38,12 +47,21 @@ mousetrap.prototype.stopCallback = (e: KeyboardEvent, element: HTMLElement, comb
   // Also treat anything inside an open composer as text input so that focus
   // landing on composer chrome (footer, attachment area, between recipient
   // chips, etc.) doesn't let plain keys fall through to global shortcuts.
+  const isTextInputTarget = (candidate: HTMLElement | null) =>
+    !!candidate &&
+    (candidate.tagName === 'INPUT' ||
+      candidate.tagName === 'SELECT' ||
+      candidate.tagName === 'TEXTAREA' ||
+      candidate.isContentEditable ||
+      !!candidate.closest('.composer-outer-wrap'));
+  // Windows IMEs can retarget a character event to composer chrome (or even
+  // document.body) while the actual editable retains focus. Check both the
+  // event callback target and activeElement so plain characters never escape
+  // into Gmail-style global shortcuts during composition.
   const withinTextInput =
-    element.tagName === 'INPUT' ||
-    element.tagName === 'SELECT' ||
-    element.tagName === 'TEXTAREA' ||
-    element.isContentEditable ||
-    !!element.closest('.composer-outer-wrap');
+    isTextInputTarget(callbackTarget) ||
+    isTextInputTarget(eventTarget) ||
+    isTextInputTarget(activeTarget);
   if (withinTextInput) {
     const isPlainKey = !/(mod|command|ctrl)/.test(combo);
     const isReservedTextEditingShortcut = /(mod|command|ctrl)\+(a|x|c|v|left|right)/.test(combo);
@@ -57,8 +75,8 @@ mousetrap.prototype.stopCallback = (e: KeyboardEvent, element: HTMLElement, comb
   // withinTextInput runs first so that typing in an inline composer inside the tree
   // is handled correctly before we apply tree-specific logic.
   const withinTree =
-    !!element.closest('[role="tree"]') ||
-    !!element.closest('[data-usesarrowkeys]:has(:focus-visible)');
+    !!callbackTarget?.closest('[role="tree"]') ||
+    !!callbackTarget?.closest('[data-usesarrowkeys]:has(:focus-visible)');
   if (withinTree) {
     const isPlainKey = !/(mod|command|ctrl)/.test(combo);
     const isArrowKey = /(left|right|up|down)/.test(combo);

@@ -161,7 +161,7 @@ describe('ChangeFolderTask', function () {
     it('returns "Moved to <folder>" for a single thread', function () {
       const t1 = makeThread('t1', 'ac-1', [inbox]);
       const task = new ChangeFolderTask({ threads: [t1], folder: archive } as any);
-      expect(task.description()).toContain('archive');
+      expect(task.description()).toContain('Archive');
     });
 
     it('returns a plural message for multiple threads', function () {

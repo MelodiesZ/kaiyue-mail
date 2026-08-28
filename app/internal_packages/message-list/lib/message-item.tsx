@@ -111,10 +111,10 @@ export default class MessageItem extends React.Component<MessageItemProps, Messa
           <span>{`${this.props.message.files.length} ${localized('attachments')}`}</span>
         </div>
         <div className="separator">-</div>
-        <div className="download-all-action" onClick={this._onDownloadAll}>
+        <button type="button" className="download-all-action" onClick={this._onDownloadAll}>
           <RetinaImg name="ic-attachments-download-all.png" mode={RetinaImg.Mode.ContentIsMask} />
           <span>{localized('Download All')}</span>
-        </div>
+        </button>
       </div>
     );
   }
@@ -302,7 +302,19 @@ export default class MessageItem extends React.Component<MessageItemProps, Messa
     ) : null;
 
     return (
-      <div className={className} onClick={this._onToggleCollapsed}>
+      <div
+        className={className}
+        role="button"
+        tabIndex={0}
+        aria-label={localized('展开邮件')}
+        onClick={this._onToggleCollapsed}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            this._onToggleCollapsed();
+          }
+        }}
+      >
         <div className="message-item-white-wrap">
           <div className="message-item-area">
             <div className="collapsed-from">

@@ -8,6 +8,7 @@ import { webFrame } from 'electron';
 import * as Actions from '../actions';
 import MailspringStore from 'mailspring-store';
 import { Disposable } from 'event-kit';
+import KaiyueConfig from '../../kaiyue-config';
 
 let Sheet = {} as SheetSet;
 let Location = {};
@@ -112,17 +113,39 @@ class WorkspaceStore extends MailspringStore {
     this._sheetStack = [];
 
     if (AppEnv.isMainWindow()) {
+      const contactPanelEnabled =
+        !KaiyueConfig.features.disabledInternalPackages.includes('participant-profile');
+
+      // Keep the location available for package registration, even when the
+      // Kaiyue build intentionally omits the contact-profile column.
+      if (!contactPanelEnabled) {
+        (Location as any).MessageListSidebar = {
+          id: 'MessageListSidebar',
+          Toolbar: { id: 'MessageListSidebar:Toolbar' },
+        };
+      }
+
       this.defineSheet('Global');
       this.defineSheet(
         'Threads',
         { root: true },
         {
           list: ['RootSidebar', 'ThreadList'],
-          split: ['RootSidebar', 'ThreadList', 'MessageList', 'MessageListSidebar'],
-          splitVertical: ['RootSidebar', 'ThreadList', 'MessageListSidebar'],
+          split: contactPanelEnabled
+            ? ['RootSidebar', 'ThreadList', 'MessageList', 'MessageListSidebar']
+            : ['RootSidebar', 'ThreadList', 'MessageList'],
+          splitVertical: contactPanelEnabled
+            ? ['RootSidebar', 'ThreadList', 'MessageListSidebar']
+            : ['RootSidebar', 'ThreadList'],
         }
       );
-      this.defineSheet('Thread', {}, { list: ['MessageList', 'MessageListSidebar'] });
+      this.defineSheet(
+        'Thread',
+        {},
+        {
+          list: contactPanelEnabled ? ['MessageList', 'MessageListSidebar'] : ['MessageList'],
+        }
+      );
     } else {
       this.defineSheet('Global');
     }

@@ -334,6 +334,24 @@ describe('TokenizingTextField', function () {
     })
   );
 
+  describe('when an input method editor is composing text', function () {
+    it('does not submit the input when Enter confirms an IME candidate', function () {
+      this.completions = [participant4];
+      fireEvent.change(this.renderedInput, { target: { value: 'abc' } });
+      fireEvent.keyDown(this.renderedInput, { key: 'Enter', keyCode: 13, isComposing: true });
+      expect(this.propAdd).not.toHaveBeenCalled();
+      expect(this.renderedInput.value).toBe('abc');
+    });
+
+    it('does not submit an IME keydown reported with keyCode 229', function () {
+      this.completions = [participant4];
+      fireEvent.change(this.renderedInput, { target: { value: 'abc' } });
+      fireEvent.keyDown(this.renderedInput, { key: 'Enter', keyCode: 229 });
+      expect(this.propAdd).not.toHaveBeenCalled();
+      expect(this.renderedInput.value).toBe('abc');
+    });
+  });
+
   describe('when the user presses tab', function () {
     // Note: fireEvent creates real DOM events; we cannot inject spy functions
     // for preventDefault/stopPropagation. We test observable behavior instead.
@@ -498,6 +516,15 @@ describe('TokenizingTextField.Token', function () {
       fireEvent.change(tokenEditInput, { target: { value: 'new tag content' } });
       fireEvent.blur(tokenEditInput);
       expect(this.propEdit).toHaveBeenCalledWith(participant1, 'new tag content');
+    });
+
+    it('should keep editing when Enter confirms an IME candidate', function () {
+      fireEvent.dblClick(this.container.querySelector('.token'));
+      const tokenEditInput = this.container.querySelector('input');
+      fireEvent.change(tokenEditInput, { target: { value: 'new tag content' } });
+      fireEvent.keyDown(tokenEditInput, { key: 'Enter', keyCode: 13, isComposing: true });
+      expect(this.propEdit).not.toHaveBeenCalled();
+      expect(this.container.querySelector('input')).not.toBe(null);
     });
   });
 

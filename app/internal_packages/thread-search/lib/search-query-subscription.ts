@@ -8,12 +8,16 @@ import {
   MutableQuerySubscription,
 } from 'mailspring-exports';
 
+const INITIAL_SEARCH_RANGE = 200;
+const SEARCH_RANGE_OVERSCAN = 200;
+
 class SearchQuerySubscription extends MutableQuerySubscription<Thread> {
   _searchQuery: string;
   _accountIds: string[];
   _connections = [];
   _extDisposables = [];
   _searching = false;
+  _retainedRange = { start: 0, end: INITIAL_SEARCH_RANGE };
 
   constructor(searchQuery: string, accountIds: string[]) {
     super(null, { emitResultSet: true });
@@ -23,8 +27,28 @@ class SearchQuerySubscription extends MutableQuerySubscription<Thread> {
     _.defer(() => this.performSearch());
   }
 
-  replaceRange = () => {
-    // TODO
+  replaceRange = ({ start, end }: { start: number; end: number }) => {
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) {
+      return;
+    }
+
+    // Keep a generous window around the viewport. This makes scrolling feel
+    // immediate without loading every matching thread (and its messages) into
+    // memory. Unlike the previous fixed limit(1000), the window can advance
+    // through the complete local result set.
+    this._retainedRange = {
+      start: Math.max(0, Math.floor(start) - SEARCH_RANGE_OVERSCAN),
+      end: Math.max(INITIAL_SEARCH_RANGE, Math.ceil(end) + SEARCH_RANGE_OVERSCAN),
+    };
+
+    if (!this._query) {
+      return;
+    }
+
+    const next = this._query.clone().page(this._retainedRange.start, this._retainedRange.end);
+    if (!next.range().isEqual(this._query.range())) {
+      this.replaceQuery(next);
+    }
   };
 
   performSearch() {
@@ -49,7 +73,7 @@ class SearchQuerySubscription extends MutableQuerySubscription<Thread> {
     dbQuery = dbQuery
       .background()
       .order(Thread.attributes.lastMessageReceivedTimestamp.descending())
-      .limit(1000);
+      .page(this._retainedRange.start, this._retainedRange.end);
 
     this.replaceQuery(dbQuery);
   }

@@ -115,12 +115,17 @@ class PreferencesGeneral extends React.Component<{
 
         <div className="local-data">
           <h6>{localized('Local Data')}</h6>
-          <div className="btn" onClick={this._onResetEmailCache} style={{ marginLeft: 0 }}>
+          <button
+            type="button"
+            className="btn"
+            onClick={this._onResetEmailCache}
+            style={{ marginLeft: 0 }}
+          >
             {localized('Reset Cache')}
-          </div>
-          <div className="btn" onClick={this._onResetAccountsAndSettings}>
+          </button>
+          <button type="button" className="btn" onClick={this._onResetAccountsAndSettings}>
             {localized('Reset Accounts and Settings')}
-          </div>
+          </button>
         </div>
       </div>
     );

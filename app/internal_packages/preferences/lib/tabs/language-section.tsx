@@ -29,7 +29,7 @@ const LanguageSection = ({ config }: { config?: any; configSchema?: any }) => {
           style={{ marginLeft: 0, marginRight: 0 }}
         >
           <option key="auto" value="">
-            {localized('Automatic')} ({automatic.name})
+            {localized('Automatic')} ({localized(automatic.name)})
           </option>
           <option key="sep1" disabled />
           <option key="subtitle1" disabled>
@@ -37,7 +37,7 @@ const LanguageSection = ({ config }: { config?: any; configSchema?: any }) => {
           </option>
           {verified.map(({ key, name }) => (
             <option key={key} value={key}>
-              {name}
+              {localized(name)}
             </option>
           ))}
           <option key="sep2" disabled />
@@ -46,7 +46,7 @@ const LanguageSection = ({ config }: { config?: any; configSchema?: any }) => {
           </option>
           {experimental.map(({ key, name }) => (
             <option key={key} value={key}>
-              {name}
+              {localized(name)}
             </option>
           ))}
         </select>

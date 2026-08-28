@@ -3,7 +3,7 @@
 @snooze-quickaction-img: '../static/images/thread-list-quick-actions/ic-quickaction-snooze@2x.png';
 
 .thread-list .list-item .list-column-HoverActions .action.action-snooze {
-  background: url(@snooze-quickaction-img) center no-repeat, @background-gradient;
+  background: url(@snooze-quickaction-img) center no-repeat;
 }
 
 .snooze-button {
@@ -11,7 +11,8 @@
 }
 
 .snooze-popover {
-  color: fadeout(@btn-default-text-color, 20%);
+  min-width: 316px;
+  color: @text-color-subtle;
   display: flex;
   flex-direction: column;
 
@@ -23,9 +24,16 @@
       flex-direction: column;
       align-items: center;
 
-      padding: 15px 0;
-      cursor: default;
+      min-width: 0;
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      padding: 16px 8px;
+      cursor: pointer;
       width: 105px;
+      border-radius: 0;
       line-height: initial;
       text-align: initial;
 
@@ -33,15 +41,15 @@
         background-color: fadeout(@btn-default-text-color, 20%);
       }
       &:hover {
-        background-color: darken(@btn-default-bg-color, 5%);
-        color: fadeout(@btn-default-text-color, 10%);
+        background-color: #eaf1fb;
+        color: @accent-primary;
         img {
           background-color: fadeout(@btn-default-text-color, 10%);
         }
       }
       &:active {
-        background-color: darken(@btn-default-bg-color, 8%);
-        color: fadeout(@btn-default-text-color, 0%);
+        background-color: #dce9f8;
+        color: @accent-primary-dark;
         img {
           background-color: fadeout(@btn-default-text-color, 0%);
         }
@@ -60,6 +68,7 @@
     padding: @padding-large-vertical @padding-large-horizontal;
 
     input {
+      width: 100%;
       margin-bottom: 3px;
     }
   }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { isEqual } from 'underscore';
+import { localized } from 'mailspring-exports';
 
 interface ListEditorProps<T> {
   items: T[];
@@ -28,23 +29,27 @@ export class ListEditor<T> extends React.Component<ListEditorProps<T>> {
               </>
             ) : (
               <>
-                <div
+                <button
+                  type="button"
                   className="btn remove"
+                  aria-label={localized('Remove')}
                   onClick={() => {
                     onChange([...items.slice(0, idx), ...items.slice(idx + 1)]);
                   }}
                 >
-                  –
-                </div>
+                  <span aria-hidden="true">−</span>
+                </button>
                 {idx === items.length - 1 ? (
-                  <div
+                  <button
+                    type="button"
                     className="btn add"
+                    aria-label={localized('Add')}
                     onClick={() => {
                       onChange([...items, { ...itemTemplate }]);
                     }}
                   >
-                    +
-                  </div>
+                    <span aria-hidden="true">+</span>
+                  </button>
                 ) : (
                   <div className="add-spacer" />
                 )}

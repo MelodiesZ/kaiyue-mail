@@ -9,11 +9,13 @@
   pointer-events: none;
 
   .content {
-    height: 45px;
+    min-height: 44px;
     display: inline-block;
-    opacity: 0.9;
-    border-radius: @border-radius-base;
-    background: @gray-darker;
+    opacity: 1;
+    border: 1px solid fade(@white, 10%);
+    border-radius: 9px;
+    background: #17233a;
+    box-shadow: 0 10px 28px rgba(23, 35, 58, 0.2);
     white-space: nowrap;
     cursor: default;
     pointer-events: initial;
@@ -35,6 +37,7 @@
   }
 
   .action {
+    appearance: none;
     flex-shrink: 0;
     margin-right: 8px;
     white-space: nowrap;
@@ -43,6 +46,8 @@
     border-radius: 4px;
     border: 1px solid fade(@background-primary, 20%);
     cursor: pointer;
+    color: inherit;
+    font: inherit;
 
     img {
       background-color: @background-primary;
@@ -75,7 +80,7 @@ body.platform-win32 {
 .undo-redo-toast-fade-enter {
   opacity: 0.01;
   transform: translate3d(0, 10px, 0);
-  transition: all 0.15s ease-out;
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
 }
 
 .undo-redo-toast-fade-enter.undo-redo-toast-fade-enter-active {
@@ -86,7 +91,7 @@ body.platform-win32 {
 .undo-redo-toast-fade-exit {
   opacity: 1;
   transform: translate3d(0, 0, 0);
-  transition: all 0.15s ease-in;
+  transition: opacity 150ms ease-in, transform 150ms ease-in;
 }
 
 .undo-redo-toast-fade-exit.undo-redo-toast-fade-exit-active {

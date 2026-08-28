@@ -3,9 +3,7 @@
 .feature-usage-modal.send-later {
   @send-later-color: #777ff0;
   .feature-header {
-    @from: @send-later-color;
-    @to: lighten(@send-later-color, 10%);
-    background: linear-gradient(to top, @from, @to);
+    background: @send-later-color;
   }
   .feature-name {
     color: @send-later-color;
