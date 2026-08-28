@@ -1,5 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { EventEmitter } = require('node:events');
 const { Readable } = require('node:stream');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -7,12 +8,91 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const {
   NsisUpdateEngine,
+  createElectronNetRequestStream,
   isTrustedAuthenticodeSignature,
 } = require('../app/src/browser/nsis-update-engine');
 
 function jsonStream(value) {
   return Readable.from([Buffer.from(JSON.stringify(value))]);
 }
+
+test('uses Electron net for system-aware update downloads and follows secure redirects', async () => {
+  const requests = [];
+  const fakeNet = {
+    request(options) {
+      const request = new EventEmitter();
+      request.options = options;
+      request.headers = {};
+      request.redirectFollowed = false;
+      request.setHeader = (name, value) => {
+        request.headers[name] = value;
+      };
+      request.followRedirect = () => {
+        request.redirectFollowed = true;
+      };
+      request.abort = () => {};
+      request.end = () => {
+        queueMicrotask(() => {
+          request.emit(
+            'redirect',
+            302,
+            'GET',
+            'https://release-assets.githubusercontent.com/KaiyueMail-win32-x64-1.0.6.exe',
+            {}
+          );
+          assert.equal(request.redirectFollowed, true);
+          const response = new EventEmitter();
+          response.statusCode = 200;
+          response.headers = { 'content-length': '12' };
+          request.emit('response', response);
+          queueMicrotask(() => {
+            response.emit('data', Buffer.from('kaiyue-'));
+            response.emit('data', Buffer.from('update'));
+            response.emit('end');
+          });
+        });
+      };
+      requests.push(request);
+      return request;
+    },
+  };
+
+  const requestStream = createElectronNetRequestStream(fakeNet);
+  const stream = await requestStream(
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.0.6/KaiyueMail-win32-x64-1.0.6.exe'
+  );
+  const chunks = [];
+  for await (const chunk of stream) chunks.push(chunk);
+
+  assert.equal(Buffer.concat(chunks).toString(), 'kaiyue-update');
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].options.redirect, 'manual');
+  assert.equal(requests[0].headers.Accept, 'application/octet-stream, application/json');
+  assert.equal(requests[0].headers['User-Agent'], 'Kaiyue-Mail-Updater');
+});
+
+test('Electron net updater refuses redirects that leave HTTPS', async () => {
+  const fakeNet = {
+    request() {
+      const request = new EventEmitter();
+      request.setHeader = () => {};
+      request.followRedirect = () => assert.fail('insecure redirect must not be followed');
+      request.abort = () => {};
+      request.end = () => {
+        queueMicrotask(() =>
+          request.emit('redirect', 302, 'GET', 'http://downloads.example.test/update.exe', {})
+        );
+      };
+      return request;
+    },
+  };
+
+  const requestStream = createElectronNetRequestStream(fakeNet);
+  await assert.rejects(
+    requestStream('https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/update.exe'),
+    /must use HTTPS/
+  );
+});
 
 test('does not download an installer when the published version is not newer', async () => {
   const requested = [];
@@ -173,7 +253,10 @@ test('reports transferred bytes before a large installer reaches one percent', a
   const downloadPromise = engine.download(manifest);
   await firstChunkProcessedPromise;
 
-  assert.equal(progress.some((detail) => detail.percent === 0 && detail.transferred > 0), true);
+  assert.equal(
+    progress.some((detail) => detail.percent === 0 && detail.transferred > 0),
+    true
+  );
 
   releaseRemainingChunk();
   await downloadPromise;

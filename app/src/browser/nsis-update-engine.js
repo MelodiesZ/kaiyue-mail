@@ -5,7 +5,7 @@ const fs = require('fs');
 const https = require('https');
 const os = require('os');
 const path = require('path');
-const { Transform } = require('stream');
+const { PassThrough, Transform } = require('stream');
 const { pipeline } = require('stream/promises');
 const kaiyueConfig = require('../../kaiyue-config.json');
 
@@ -112,6 +112,109 @@ function requestHttpsStream(requestURL, redirectsRemaining = 5) {
     request.setTimeout(30000, () => request.destroy(new Error('Update request timed out.')));
     request.on('error', reject);
   });
+}
+
+function createElectronNetRequestStream(electronNet, options = {}) {
+  if (!electronNet || typeof electronNet.request !== 'function') {
+    throw new Error('Electron network adapter is unavailable.');
+  }
+  const timeoutMs = options.timeoutMs || 30000;
+  const maxRedirects = options.maxRedirects ?? 5;
+
+  return function requestElectronNetStream(requestURL) {
+    const parsed = requireHttps(requestURL, 'Update URL');
+    return new Promise((resolve, reject) => {
+      const output = new PassThrough();
+      let request;
+      let responseStarted = false;
+      let terminal = false;
+      let aborting = false;
+      let redirects = 0;
+      let inactivityTimer;
+
+      const clearInactivityTimer = () => {
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        inactivityTimer = undefined;
+      };
+      const fail = (error) => {
+        if (terminal) return;
+        terminal = true;
+        clearInactivityTimer();
+        if (!aborting && request) {
+          aborting = true;
+          request.abort();
+        }
+        if (responseStarted) output.destroy(error);
+        else reject(error);
+      };
+      const armInactivityTimer = () => {
+        clearInactivityTimer();
+        inactivityTimer = setTimeout(() => fail(new Error('Update request timed out.')), timeoutMs);
+        if (typeof inactivityTimer.unref === 'function') inactivityTimer.unref();
+      };
+
+      output.on('close', () => {
+        if (!terminal) fail(new Error('Update response stream was closed.'));
+      });
+
+      request = electronNet.request({
+        method: 'GET',
+        url: parsed.href,
+        redirect: 'manual',
+      });
+      request.setHeader('Accept', 'application/octet-stream, application/json');
+      request.setHeader('User-Agent', 'Kaiyue-Mail-Updater');
+      request.on('redirect', (_statusCode, _method, redirectURL) => {
+        redirects += 1;
+        if (redirects > maxRedirects) {
+          fail(new Error('Update server returned too many redirects.'));
+          return;
+        }
+        try {
+          requireHttps(redirectURL, 'Update redirect URL');
+        } catch (error) {
+          fail(error);
+          return;
+        }
+        armInactivityTimer();
+        try {
+          request.followRedirect();
+        } catch (error) {
+          fail(error);
+        }
+      });
+      request.on('response', (response) => {
+        const status = response.statusCode || 0;
+        if (status < 200 || status >= 300) {
+          fail(new Error(`Update server returned status ${status}.`));
+          return;
+        }
+
+        responseStarted = true;
+        resolve(output);
+        armInactivityTimer();
+        response.on('data', (chunk) => {
+          if (terminal) return;
+          armInactivityTimer();
+          output.write(Buffer.from(chunk));
+        });
+        response.on('end', () => {
+          if (terminal) return;
+          terminal = true;
+          clearInactivityTimer();
+          output.end();
+        });
+        response.on('aborted', () => fail(new Error('Update response was interrupted.')));
+        response.on('error', fail);
+      });
+      request.on('abort', () => {
+        if (!aborting) fail(new Error('Update request was aborted.'));
+      });
+      request.on('error', fail);
+      armInactivityTimer();
+      request.end();
+    });
+  };
 }
 
 const defaultAllowedPublishers = [
@@ -340,6 +443,7 @@ class NsisUpdateEngine extends EventEmitter {
 module.exports = {
   NsisUpdateEngine,
   compareVersions,
+  createElectronNetRequestStream,
   normalizeInstalledVersion,
   normalizeManifest,
   requestHttpsStream,

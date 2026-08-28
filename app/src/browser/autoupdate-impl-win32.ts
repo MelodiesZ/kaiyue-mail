@@ -1,7 +1,8 @@
 import AutoupdateImplBase from './autoupdate-impl-base';
 import { localized } from '../intl';
 
-const { NsisUpdateEngine } = require('./nsis-update-engine');
+const { net } = require('electron');
+const { NsisUpdateEngine, createElectronNetRequestStream } = require('./nsis-update-engine');
 
 export default class AutoupdateImplWin32 extends AutoupdateImplBase {
   version: string;
@@ -26,7 +27,9 @@ export default class AutoupdateImplWin32 extends AutoupdateImplBase {
   constructor(version: string) {
     super();
     this.version = version;
-    this.engine = new NsisUpdateEngine();
+    this.engine = new NsisUpdateEngine({
+      requestStream: createElectronNetRequestStream(net),
+    });
     this.engine.on('update-available', (update) => {
       this.availableUpdate = update;
       this.emit('update-available', {}, update);
