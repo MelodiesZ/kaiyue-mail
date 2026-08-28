@@ -7,6 +7,7 @@ import fs from 'fs';
 import { localized } from '../intl';
 import KaiyueConfig from '../kaiyue-config';
 import { AutoUpdateProvider, resolveAutoUpdateFeed } from './autoupdate-feed';
+import WindowsUpdater from './windows-updater';
 
 let autoUpdater = null;
 
@@ -28,6 +29,7 @@ export default class AutoUpdateManager extends EventEmitter {
   feedURL: string;
   releaseNotes: string;
   releaseVersion: string;
+  installingUpdate = false;
 
   constructor(version: string, config: import('../config').default, specMode: boolean) {
     super();
@@ -69,6 +71,10 @@ export default class AutoUpdateManager extends EventEmitter {
       version: this.version,
       id: this.config.get('identity.id') || 'anonymous',
       channel: this.preferredChannel,
+      distribution:
+        process.platform === 'win32' && !WindowsUpdater.existsSync()
+          ? ('nsis' as const)
+          : undefined,
     };
 
     // If we're on the x64 Mac build, but the machine has an Apple-branded
@@ -96,6 +102,9 @@ export default class AutoUpdateManager extends EventEmitter {
     if (process.platform === 'linux') {
       const Impl = require('./autoupdate-impl-base').default;
       autoUpdater = new Impl();
+    } else if (process.platform === 'win32' && !WindowsUpdater.existsSync()) {
+      const Impl = require('./autoupdate-impl-win32').default;
+      autoUpdater = new Impl(this.version);
     } else {
       autoUpdater = require('electron').autoUpdater;
     }
@@ -104,6 +113,16 @@ export default class AutoUpdateManager extends EventEmitter {
       if (this.specMode) return;
       console.error(`Error Downloading Update: ${error.message}`);
       this.setState(ErrorState);
+      if (this.installingUpdate) {
+        dialog.showMessageBox({
+          type: 'warning',
+          buttons: [localized('OK')],
+          icon: this.dialogIcon(),
+          message: localized('There was an error installing the update.'),
+          title: localized('Update Error'),
+          detail: error.message,
+        });
+      }
     });
 
     this.setAutoUpdaterFeedURL();
@@ -202,7 +221,20 @@ export default class AutoUpdateManager extends EventEmitter {
 
   install() {
     if (!autoUpdater) return;
-    autoUpdater.quitAndInstall();
+    this.installingUpdate = true;
+    try {
+      const result = autoUpdater.quitAndInstall();
+      if (result && typeof result.finally === 'function') {
+        result
+          .finally(() => {
+            this.installingUpdate = false;
+          })
+          .catch(() => {});
+      }
+    } catch (error) {
+      this.installingUpdate = false;
+      throw error;
+    }
   }
 
   dialogIcon() {

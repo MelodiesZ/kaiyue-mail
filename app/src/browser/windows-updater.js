@@ -384,6 +384,28 @@ exports.handleSquirrelUninstall = (app) => {
   // Spawn Update.exe to remove shortcuts (detached - won't block exit)
   spawnDetached(updateDotExe, ['--removeShortcut', exeName]);
 
+  let regPath = 'reg.exe';
+  if (process.env.SystemRoot) {
+    regPath = path.join(process.env.SystemRoot, 'System32', 'reg.exe');
+  }
+  const registrationKeys = [
+    'HKEY_CURRENT_USER\\SOFTWARE\\Classes\\kaiyuemail',
+    'HKEY_CURRENT_USER\\SOFTWARE\\Classes\\KaiyueMail.Url.mailto',
+    'HKEY_CURRENT_USER\\SOFTWARE\\Classes\\KaiyueMail.mailto',
+    'HKEY_CURRENT_USER\\SOFTWARE\\Clients\\Mail\\KaiyueMail',
+    'HKEY_CURRENT_USER\\SOFTWARE\\Clients\\Mail\\Kaiyue Mail',
+  ];
+  registrationKeys.forEach((key) => spawnDetached(regPath, ['delete', key, '/f']));
+  ['Kaiyue Mail', 'KaiyueMail'].forEach((valueName) =>
+    spawnDetached(regPath, [
+      'delete',
+      'HKEY_CURRENT_USER\\SOFTWARE\\RegisteredApplications',
+      '/v',
+      valueName,
+      '/f',
+    ])
+  );
+
   // Try to remove fallback shortcuts synchronously
   const startMenuPath = path.join(
     process.env.APPDATA,

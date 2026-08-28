@@ -152,14 +152,21 @@ async function sqliteMissingNanosleep() {
 }
 
 async function run() {
+  // Slate's last Mailspring-compatible plugins declare Immutable 3 as a peer,
+  // but the app uses Immutable 4 because all Immutable 3 releases have a
+  // published prototype-pollution vulnerability. Keep npm's peer exception
+  // scoped to this legacy application dependency tree; npm audit still runs
+  // independently and the editor is covered by the unit / Playwright suites.
+  const legacySlatePeerFlag = '--legacy-peer-deps';
+
   // run `npm install` in ./app with Electron NPM config
-  await npm(`install --no-audit`, { cwd: './app', env: 'electron' });
+  await npm(`install --no-audit ${legacySlatePeerFlag}`, { cwd: './app', env: 'electron' });
 
   // run `npm dedupe` in ./app with Electron NPM config
-  await npm(`dedupe --no-audit`, { cwd: './app', env: 'electron' });
+  await npm(`dedupe --no-audit ${legacySlatePeerFlag}`, { cwd: './app', env: 'electron' });
 
   // run `npm ls` in ./app - detects missing peer dependencies, etc.
-  await npm(`ls`, { cwd: './app', env: 'electron' });
+  await npm(`ls ${legacySlatePeerFlag}`, { cwd: './app', env: 'electron' });
 
   // if SQlite was not built with HAVE_NANOSLEEP, do not ship this build! We need nanosleep
   // support so that multiple processes can connect to the sqlite file at the same time.

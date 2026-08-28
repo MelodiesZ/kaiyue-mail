@@ -94,6 +94,10 @@ export default class Application extends EventEmitter {
         );
       } else if (err.toString().includes('spawn')) {
         message = localized(`Mailspring could not spawn the mailsync process. %@`, err.toString());
+      } else if ((err as any).isMissingRuntimeError) {
+        message = localized(
+          'Kaiyue Mail could not start its Windows mail service because required runtime components are missing. Reinstall Kaiyue Mail using the latest installer.'
+        );
       } else {
         message = localized(
           `We encountered a problem with your local email database. %@\n\nCheck that no other copies of Mailspring are running and click Rebuild to reset your local cache.`,
@@ -483,8 +487,6 @@ export default class Application extends EventEmitter {
     });
 
     this.on('application:install-update', () => {
-      this.quitting = true;
-      this.windowManager.cleanupBeforeAppQuit();
       this.autoUpdateManager.install();
     });
 

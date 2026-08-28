@@ -62,7 +62,7 @@ export default class UpdateNotification extends React.Component<
       <Notification
         priority="4"
         title={localized(
-          `An update to Mailspring is available %@`,
+          `A Kaiyue Mail update is ready %@`,
           version ? `(${version.replace('Mailspring', '').trim()})` : ''
         )}
         subtitle={localized('View changelog')}

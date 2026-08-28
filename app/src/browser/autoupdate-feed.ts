@@ -9,6 +9,7 @@ interface AutoUpdateFeedOptions {
   version: string;
   id?: string;
   channel?: string;
+  distribution?: 'squirrel' | 'nsis';
 }
 
 function releaseVersion(version: string) {
@@ -21,6 +22,9 @@ export function resolveAutoUpdateFeed(options: AutoUpdateFeedOptions): string | 
 
   if (options.provider === 'github') {
     if (!['darwin', 'win32'].includes(options.platform)) return null;
+    if (options.platform === 'win32' && options.distribution === 'nsis') {
+      return `https://github.com/${options.repository}/releases/latest/download/kaiyue-update-win32-${options.arch}.json`;
+    }
     return `${baseUrl}/${options.repository}/${options.platform}-${options.arch}/${releaseVersion(
       options.version
     )}`;

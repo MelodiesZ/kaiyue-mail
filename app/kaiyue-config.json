@@ -5,6 +5,7 @@
     "helperFolderName": "凯越",
     "company": "蒙阴县凯越工程机械有限公司",
     "companyEnglish": "Mengyin Kaiyue Construction Machinery Co., Ltd.",
+    "positioning": "自主研发企业邮件客户端",
     "primaryColor": "#1A3B70",
     "applicationId": "com.kaiyue.mail",
     "protocol": "kaiyuemail"
@@ -27,6 +28,7 @@
       "link-tracking",
       "open-tracking",
       "participant-profile",
+      "mode-switch",
       "thread-sharing",
       "translation"
     ]

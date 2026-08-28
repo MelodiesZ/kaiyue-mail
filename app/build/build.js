@@ -12,6 +12,7 @@ const fsPlus = require('fs-plus');
 const glob = require('glob');
 const _ = require('underscore');
 const TypeScript = require('typescript');
+const nodeAbi = require('node-abi');
 const { packager } = require('@electron/packager');
 
 const hostPlatform = process.platform;
@@ -33,6 +34,7 @@ const buildDir = path.join(appDir, 'build');
 const outputDir = path.join(appDir, 'dist');
 const tmpdir = path.resolve(os.tmpdir(), 'nylas-build');
 const packageJSON = require(path.join(appDir, 'package.json'));
+const rootPackageJSON = require(path.join(rootDir, 'package.json'));
 const kaiyueConfig = require(path.join(appDir, 'kaiyue-config.json'));
 const { compilerOptions } = require(path.join(appDir, 'tsconfig.json'));
 
@@ -124,10 +126,64 @@ function assertWindowsPEBinary(filePath, label) {
   }
 }
 
-function runInjectWindowsRuntimeBinaries({ buildPath, platform }) {
-  if (platform !== 'win32') return;
+function assertWindowsNativeModuleABI(filePath) {
+  const packagedElectronVersion = packageJSON.resolutions.electron;
+  const buildElectronVersion = rootPackageJSON.dependencies.electron;
+  if (packagedElectronVersion !== buildElectronVersion) {
+    throw new Error(
+      `Electron version mismatch: app expects ${packagedElectronVersion}, build uses ${buildElectronVersion}`
+    );
+  }
 
-  const mailsyncTarget = path.join(buildPath, 'mailsync.exe');
+  const expectedABI = Number(nodeAbi.getAbi(packagedElectronVersion, 'electron'));
+  const binaryText = fs.readFileSync(filePath).toString('latin1');
+  const match = binaryText.match(/node_register_module_v(\d+)/);
+  const actualABI = match ? Number(match[1]) : null;
+  if (actualABI !== expectedABI) {
+    throw new Error(
+      `better_sqlite3.node ABI mismatch: Electron ${packagedElectronVersion} requires ${expectedABI}, binary provides ${actualABI || 'unknown'}`
+    );
+  }
+}
+
+const windowsMailsyncRuntimeSentinels = [
+  'mailsync.exe',
+  'libcurl.dll',
+  'libxml2.dll',
+  'mailcore2.dll',
+  'libcrypto-3.dll',
+  'libetpan.dll',
+  'libsasl.dll',
+  'libssl-3.dll',
+  'tidy.dll',
+  'icudt78.dll',
+  'icuin78.dll',
+  'icuuc78.dll',
+  'msvcp140.dll',
+  'vcruntime140.dll',
+  'zlib1.dll',
+];
+
+function runInjectMailsyncRuntimeBinaries({ buildPath, platform }) {
+  const mailsyncRuntimeTarget = path.join(buildPath, 'mailspring-runtime');
+
+  if (platform !== 'win32') {
+    const mailsyncSource = path.join(buildPath, 'mailsync');
+    const mailsyncTarget = path.join(mailsyncRuntimeTarget, 'mailsync');
+    if (!fs.existsSync(mailsyncSource)) {
+      throw new Error(`mailsync is missing from the package staging directory: ${mailsyncSource}`);
+    }
+    fsExtra.ensureDirSync(mailsyncRuntimeTarget);
+    fsExtra.moveSync(mailsyncSource, mailsyncTarget, { overwrite: true });
+    console.log('---> Installed mailsync in the upstream-compatible runtime path');
+    return;
+  }
+
+  // The upstream release binary checks that its executable path contains the
+  // word `mailspring` and exits with code 2 otherwise. A branded installation
+  // directory cannot satisfy that contract, so preserve the upstream runtime
+  // identity in a dedicated child directory.
+  const mailsyncTarget = path.join(mailsyncRuntimeTarget, 'mailsync.exe');
   const sqliteTarget = path.join(
     buildPath,
     'node_modules',
@@ -139,15 +195,38 @@ function runInjectWindowsRuntimeBinaries({ buildPath, platform }) {
 
   if (hostPlatform !== 'win32') {
     const mailsyncSource = process.env.KAIYUE_WINDOWS_MAILSYNC_PATH;
+    const mailsyncRuntimeSource = process.env.KAIYUE_WINDOWS_MAILSYNC_RUNTIME_DIR;
     const sqliteSource = process.env.KAIYUE_WINDOWS_BETTER_SQLITE3_PATH;
-    if (!mailsyncSource || !sqliteSource) {
+    if ((!mailsyncRuntimeSource && !mailsyncSource) || !sqliteSource) {
       throw new Error(
-        'Cross-building Windows requires KAIYUE_WINDOWS_MAILSYNC_PATH and ' +
+        'Cross-building Windows requires KAIYUE_WINDOWS_MAILSYNC_RUNTIME_DIR (or ' +
+          'KAIYUE_WINDOWS_MAILSYNC_PATH with sibling DLLs) and ' +
           'KAIYUE_WINDOWS_BETTER_SQLITE3_PATH.'
       );
     }
-    fsExtra.copySync(path.resolve(mailsyncSource), mailsyncTarget);
+
+    const runtimeDir = path.resolve(
+      mailsyncRuntimeSource || path.dirname(path.resolve(mailsyncSource))
+    );
+    const runtimeFiles = fs
+      .readdirSync(runtimeDir)
+      .filter((name) => name.toLowerCase() === 'mailsync.exe' || name.toLowerCase().endsWith('.dll'));
+    fsExtra.ensureDirSync(mailsyncRuntimeTarget);
+    runtimeFiles.forEach((name) => {
+      fsExtra.copySync(path.join(runtimeDir, name), path.join(mailsyncRuntimeTarget, name));
+    });
     fsExtra.copySync(path.resolve(sqliteSource), sqliteTarget);
+  } else {
+    fsExtra.ensureDirSync(mailsyncRuntimeTarget);
+    fs.readdirSync(buildPath)
+      .filter(
+        (name) => name.toLowerCase() === 'mailsync.exe' || name.toLowerCase().endsWith('.dll')
+      )
+      .forEach((name) => {
+        fsExtra.moveSync(path.join(buildPath, name), path.join(mailsyncRuntimeTarget, name), {
+          overwrite: true,
+        });
+      });
   }
 
   const nonWindowsMailsync = path.join(buildPath, 'mailsync');
@@ -155,9 +234,12 @@ function runInjectWindowsRuntimeBinaries({ buildPath, platform }) {
     fs.unlinkSync(nonWindowsMailsync);
   }
 
-  assertWindowsPEBinary(mailsyncTarget, 'mailsync.exe');
+  windowsMailsyncRuntimeSentinels.forEach((name) => {
+    assertWindowsPEBinary(path.join(mailsyncRuntimeTarget, name), name);
+  });
   assertWindowsPEBinary(sqliteTarget, 'better_sqlite3.node');
-  console.log('---> Verified Windows mailsync and better-sqlite3 runtime binaries');
+  assertWindowsNativeModuleABI(sqliteTarget);
+  console.log('---> Verified complete Windows mailsync and better-sqlite3 runtime binaries');
 }
 
 function runWriteCommitHashIntoPackage({ buildPath }) {
@@ -300,6 +382,7 @@ function buildPackagerOptions() {
           'mailsync',
           'mailsync.exe',
           'mailsync.bin',
+          'mailspring-runtime/**',
           '*.so',
           '*.so.*',
           '*.dll',
@@ -392,10 +475,10 @@ function buildPackagerOptions() {
         }
       : undefined,
     win32metadata: {
-      CompanyName: kaiyueConfig.brand.companyEnglish,
-      FileDescription: kaiyueConfig.brand.name,
-      LegalCopyright: `Copyright (C) 2014-${new Date().getFullYear()} Foundry 376, LLC; modifications copyright (C) ${new Date().getFullYear()} ${kaiyueConfig.brand.companyEnglish}`,
-      ProductName: kaiyueConfig.brand.name,
+      CompanyName: kaiyueConfig.brand.company,
+      FileDescription: `${kaiyueConfig.brand.nameChinese}｜${kaiyueConfig.brand.positioning}`,
+      LegalCopyright: `Copyright (C) 2014-${new Date().getFullYear()} Foundry 376, LLC; modifications copyright (C) ${new Date().getFullYear()} ${kaiyueConfig.brand.company}`,
+      ProductName: `${kaiyueConfig.brand.nameChinese} (${kaiyueConfig.brand.name})`,
     },
     // NOTE: The following plist keys can NOT be set in the extra.plist since
     // they are manually overridden by electron-packager based on this config:
@@ -405,7 +488,7 @@ function buildPackagerOptions() {
     appBundleId: kaiyueConfig.brand.applicationId,
     afterCopy: [
       runCopyPlatformSpecificResources,
-      runInjectWindowsRuntimeBinaries,
+      runInjectMailsyncRuntimeBinaries,
       runWriteCommitHashIntoPackage,
       runUpdateSandboxHelperPermissions,
       runCopySymlinkedPackages,

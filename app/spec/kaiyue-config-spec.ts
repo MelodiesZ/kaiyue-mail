@@ -55,6 +55,10 @@ describe('KaiyueConfig', () => {
     expect(configSchema.core.properties.intl.properties.language.default).toBe('zh-CN');
   });
 
+  it('queues new messages immediately instead of imposing an undo-send delay', () => {
+    expect(configSchema.core.properties.sending.properties.undoSend.default).toBe(0);
+  });
+
   it('cannot activate upstream cloud feature packages', () => {
     const cloudPackages = [
       'activity',
@@ -62,6 +66,7 @@ describe('KaiyueConfig', () => {
       'link-tracking',
       'open-tracking',
       'participant-profile',
+      'mode-switch',
       'thread-sharing',
       'translation',
     ];
@@ -76,6 +81,8 @@ describe('KaiyueConfig', () => {
   it('ships independent application metadata', () => {
     expect(appPackage.name).toBe('kaiyue-mail');
     expect(appPackage.productName).toBe(KaiyueConfig.brand.name);
-    expect(appPackage.version).toBe('1.0.0');
+    expect(appPackage.version).toBe('1.0.2');
+    expect(KaiyueConfig.brand.company).toBe('蒙阴县凯越工程机械有限公司');
+    expect(KaiyueConfig.brand.positioning).toBe('自主研发企业邮件客户端');
   });
 });

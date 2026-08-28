@@ -37,20 +37,28 @@ GitHub Release 标签必须与应用版本完全对应，例如 `v1.0.1`。资�
 
 - Apple Silicon：`KaiyueMail-darwin-arm64-1.0.1.zip`
 - Intel macOS：`KaiyueMail-darwin-x64-1.0.1.zip`
-- Windows x64：`KaiyueMail-win32-x64-1.0.1.exe`
-- Windows Squirrel 完整包：`KaiyueMail-1.0.1-full.nupkg`
-- Windows Squirrel 清单：`RELEASES`
+- Windows x64 NSIS：`KaiyueMail-win32-x64-1.0.1.exe`
+- Windows SHA-256：`KaiyueMail-win32-x64-1.0.1.exe.sha256`
+- Windows NSIS 最新更新清单：`kaiyue-update-win32-x64.json`
+- 如果仍有旧 Squirrel 用户：`RELEASES`、`*-full.nupkg` 和对应 Squirrel Setup
 
 macOS 构建默认生成 `app/dist/KaiyueMail.zip`，上传前必须根据实际架构改为上述名称。Windows 的 `app/dist/KaiyueMailSetup.exe` 也必须改为上述 Release 名称。
 
-Windows 在线更新必须同时上传由 `electron-winstaller` 生成的 `.exe`、`RELEASES` 和 `*-full.nupkg`。如果另行生成 NSIS 安装包，它可用于首次手工安装，但不能作为自动更新资产。
+Windows NSIS 更新资产必须在安装包完成代码签名后生成：
+
+```powershell
+npm run release:windows-assets
+npm run release:verify-windows-assets
+```
+
+必须将版本化 NSIS 安装包、`.sha256` 和固定名称的 `kaiyue-update-win32-x64.json` 一起上传。客户端通过 GitHub 的 `releases/latest/download/` 路径读取该清单。如果早期版本曾用 Squirrel 安装，过渡期每个 Release 仍必须上传由 `electron-winstaller` 生成的 `RELEASES`、`*-full.nupkg` 和 Setup，否则这部分用户无法迁移。
 
 ## 4. 手工发布
 
 1. 提交版本号、发布说明和相关代码。
 2. 创建并推送对应标签，例如 `v1.0.1`。
 3. 在 GitHub 页面手工创建同名 Release。
-4. 上传已签名的 macOS x64、macOS arm64，以及 Windows x64 的 `.exe`、`RELEASES` 和 `*-full.nupkg` 资产。
+4. 上传已签名的 macOS x64、macOS arm64，以及 Windows x64 的 NSIS `.exe`、`.sha256`、`kaiyue-update-win32-x64.json`；如果需兼容旧 Squirrel 安装，同时上传对应三件套。
 5. 先保存为草稿，检查标签、版本号和资产名称，然后发布。不要标记为 prerelease。
 
 发布后，已安装客户端会在启动时检查更新，之后每 30 分钟再检查一次。

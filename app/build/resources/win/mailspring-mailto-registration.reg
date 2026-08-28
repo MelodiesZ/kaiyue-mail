@@ -1,5 +1,8 @@
 Windows Registry Editor Version 5.00
 
+[-{{HKEY_ROOT}}\SOFTWARE\Classes\KaiyueMail.mailto]
+[-{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\Kaiyue Mail]
+
 [{{HKEY_ROOT}}\SOFTWARE\Classes\kaiyuemail]
 @="URL:Kaiyue Mail Protocol"
 "URL Protocol"=""
@@ -11,7 +14,12 @@ Windows Registry Editor Version 5.00
 @="{{PROTOCOL_OPEN_COMMAND}}"
 
 [{{HKEY_ROOT}}\SOFTWARE\Classes\KaiyueMail.Url.mailto]
+@="URL:Kaiyue Mail MailTo Protocol"
 "FriendlyTypeName"="Kaiyue Mail URL"
+"URL Protocol"=""
+
+[{{HKEY_ROOT}}\SOFTWARE\Classes\KaiyueMail.Url.mailto\DefaultIcon]
+@="{{PATH_TO_APP_FOLDER}}\\Kaiyue Mail.exe,0"
 
 [{{HKEY_ROOT}}\SOFTWARE\Classes\KaiyueMail.Url.mailto\shell]
 
@@ -23,17 +31,16 @@ Windows Registry Editor Version 5.00
 
 [{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail]
 @="Kaiyue Mail"
-"LocalizedString"="@{{PATH_TO_ROOT_FOLDER}}\\Update.exe,-123"
 
 [{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\DefaultIcon]
-@="{{PATH_TO_APP_FOLDER}}\\Kaiyue Mail.exe,1"
+@="{{PATH_TO_APP_FOLDER}}\\Kaiyue Mail.exe,0"
 
 [{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Capabilities]
 "ApplicationName"="Kaiyue Mail"
 "ApplicationDescription"="Secure enterprise email client for Mengyin Kaiyue Construction Machinery Co., Ltd."
 
 [{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Capabilities\StartMenu]
-"Mail"="Kaiyue Mail"
+"Mail"="KaiyueMail"
 
 [{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Capabilities\URLAssociations]
 "mailto"="KaiyueMail.Url.mailto"
@@ -42,9 +49,10 @@ Windows Registry Editor Version 5.00
 
 [{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Protocols\mailto]
 @="URL:MailTo Protocol"
+"URL Protocol"=""
 
 [{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Protocols\mailto\DefaultIcon]
-@="{{PATH_TO_APP_FOLDER}}\\Kaiyue Mail.exe,1"
+@="{{PATH_TO_APP_FOLDER}}\\Kaiyue Mail.exe,0"
 
 [{{HKEY_ROOT}}\SOFTWARE\Clients\Mail\KaiyueMail\Protocols\mailto\shell]
 
@@ -61,7 +69,8 @@ Windows Registry Editor Version 5.00
 @="{{APP_OPEN_COMMAND}}"
 
 [{{HKEY_ROOT}}\SOFTWARE\RegisteredApplications]
-"KaiyueMail"="Software\\Clients\\Mail\\KaiyueMail\\Capabilities"
+"Kaiyue Mail"="Software\\Clients\\Mail\\KaiyueMail\\Capabilities"
+"KaiyueMail"=-
 
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache]
