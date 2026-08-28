@@ -41,6 +41,7 @@ RequestExecutionLevel user
 
 Name "${PRODUCT_NAME}"
 Caption "${PRODUCT_NAME} 安装程序"
+SetFont "Microsoft YaHei UI" 9
 OutFile "${OUTPUT_FILE}"
 InstallDir "$LOCALAPPDATA\Programs\Kaiyue Mail"
 InstallDirRegKey HKCU "${PRODUCT_KEY}" "InstallLocation"
@@ -65,16 +66,19 @@ VIAddVersionKey /LANG=2052 "LegalCopyright" "Copyright © 2026 ${PRODUCT_PUBLISH
 !define MUI_UNICON "..\resources\win\kaiyue-mail.ico"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "assets\installer-sidebar.bmp"
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP "assets\installer-sidebar.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP_STRETCH "FitControl"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP_STRETCH "FitControl"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT
 !define MUI_HEADERIMAGE_BITMAP "assets\installer-header.bmp"
+!define MUI_HEADERIMAGE_BITMAP_STRETCH "FitControl"
 !define MUI_BGCOLOR "FFFFFF"
 !define MUI_TEXTCOLOR "17233A"
 !define MUI_INSTFILESPAGE_COLORS "17233A F6F8FB"
 !define MUI_ABORTWARNING
 
-!define MUI_WELCOMEPAGE_TITLE "欢迎安装凯越邮箱"
-!define MUI_WELCOMEPAGE_TEXT "蒙阴县凯越工程机械有限公司自主研发。$\r$\n企业邮件客户端$\r$\n$\r$\n为企业邮件办公而生：安全、专注、高效。$\r$\n$\r$\n安装大约需要一分钟。$\r$\n继续前，请保存草稿并退出凯越邮箱。"
+!define MUI_WELCOMEPAGE_TITLE "欢迎使用凯越邮箱"
+!define MUI_WELCOMEPAGE_TEXT "蒙阴县凯越工程机械有限公司自主研发的企业邮件客户端。$\r$\n$\r$\n安全处理企业往来，专注邮件协作，高效完成日常工作。$\r$\n$\r$\n安装约需一分钟。继续前，请保存草稿并退出正在运行的凯越邮箱。"
 !insertmacro MUI_PAGE_WELCOME
 
 !define MUI_DIRECTORYPAGE_TEXT_TOP "选择凯越邮箱的安装位置。建议保留默认路径。"
@@ -105,6 +109,7 @@ LangString DESC_DesktopShortcut ${LANG_SIMPCHINESE} "在桌面创建凯越邮箱
 Var DesktopShortcutCheckbox
 Var CreateDesktopShortcut
 Var OptionsTitleFont
+Var OptionsBodyFont
 Var IsUpdate
 Var ParentPid
 Var InstallPayloadDir
@@ -151,24 +156,35 @@ Function InstallOptionsPage
   ${If} $0 == error
     Abort
   ${EndIf}
+  SetCtlColors $0 17233A F6F8FB
 
   CreateFont $OptionsTitleFont "Microsoft YaHei UI" 13 600
-  ${NSD_CreateLabel} 0 4u 100% 24u "保持邮件触手可及"
+  CreateFont $OptionsBodyFont "Microsoft YaHei UI" 9 400
+
+  ${NSD_CreateLabel} 0 8u 100% 24u "保持邮件触手可及"
   Pop $1
   SendMessage $1 ${WM_SETFONT} $OptionsTitleFont 1
-  SetCtlColors $1 1A3B70 FFFFFF
+  SetCtlColors $1 1A3B70 F6F8FB
 
-  ${NSD_CreateLabel} 0 34u 100% 34u "凯越邮箱会添加到开始菜单。您还可以选择在桌面创建快捷方式。"
+  ${NSD_CreateLabel} 0 38u 100% 28u "凯越邮箱会添加到开始菜单，也可以在桌面创建快捷方式。"
   Pop $1
-  SetCtlColors $1 526176 FFFFFF
+  SendMessage $1 ${WM_SETFONT} $OptionsBodyFont 1
+  SetCtlColors $1 526176 F6F8FB
 
-  ${NSD_CreateCheckbox} 0 86u 100% 18u "$(DESC_DesktopShortcut)"
+  ${NSD_CreateLabel} 0 74u 100% 1u ""
+  Pop $1
+  SetCtlColors $1 DCE3EC DCE3EC
+
+  ${NSD_CreateCheckbox} 0 92u 100% 20u "$(DESC_DesktopShortcut)"
   Pop $DesktopShortcutCheckbox
+  SendMessage $DesktopShortcutCheckbox ${WM_SETFONT} $OptionsBodyFont 1
+  SetCtlColors $DesktopShortcutCheckbox 17233A F6F8FB
   ${NSD_SetState} $DesktopShortcutCheckbox $CreateDesktopShortcut
 
-  ${NSD_CreateLabel} 0 132u 100% 28u "账户和邮件数据保存在当前用户目录；卸载时默认保留。"
+  ${NSD_CreateLabel} 0 138u 100% 28u "账户和邮件数据保存在当前用户目录，卸载时默认保留。"
   Pop $1
-  SetCtlColors $1 6B788B FFFFFF
+  SendMessage $1 ${WM_SETFONT} $OptionsBodyFont 1
+  SetCtlColors $1 6B788B F6F8FB
 
   nsDialogs::Show
 FunctionEnd

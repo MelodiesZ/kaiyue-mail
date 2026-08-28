@@ -24,17 +24,15 @@ const canonicalProductIcon = path.join(
   'branding',
   'kaiyue-mail-icon.png'
 );
-const installerProductIcon = path.join(
-  installerDir,
-  'assets',
-  'kaiyue-mail-icon.png'
-);
+const installerProductIcon = path.join(installerDir, 'assets', 'kaiyue-mail-icon.png');
 const required = [
   path.join(packageDir, 'Kaiyue Mail.exe'),
   path.join(packageDir, 'resources', 'app.asar'),
   path.join(appDir, 'build', 'resources', 'win', 'kaiyue-mail.ico'),
   canonicalProductIcon,
   installerProductIcon,
+  path.join(installerDir, 'assets', 'installer-sidebar-background-v2.png'),
+  path.join(installerDir, 'assets', 'installer-sidebar-background-v2.prompt.md'),
   path.join(installerDir, 'assets', 'installer-sidebar.bmp'),
   path.join(installerDir, 'assets', 'installer-header.bmp'),
 ];
@@ -59,13 +57,7 @@ if (process.platform !== 'win32') {
     process.execPath,
     [
       path.join(__dirname, 'verify-windows-runtime-dependencies.js'),
-      path.join(
-        packageDir,
-        'resources',
-        'app.asar.unpacked',
-        'mailspring-runtime',
-        'mailsync.exe'
-      ),
+      path.join(packageDir, 'resources', 'app.asar.unpacked', 'mailspring-runtime', 'mailsync.exe'),
     ],
     { cwd: rootDir, stdio: 'inherit' }
   );

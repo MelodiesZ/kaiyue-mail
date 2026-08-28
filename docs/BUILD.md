@@ -43,6 +43,15 @@ npm run build:windows-installer
 
 输出为 `app/dist/KaiyueMailSetup.exe`。正式分发前仍需使用公司的 Windows 代码签名证书签名。
 
+安装器视觉源文件固定存放在 `app/build/windows-installer/assets/`。左侧独立底图是 `installer-sidebar-background-v2.png`，对应生成提示词和约束保存在 `installer-sidebar-background-v2.prompt.md`；品牌文字、图标和排版由 `installer-sidebar.svg` 精确叠加，页头使用 `installer-header.svg`。发布时实际嵌入的是 3 倍分辨率、24 位的 `installer-sidebar.bmp`（492×942）和 `installer-header.bmp`（450×171），用于避免 Windows 150%/200% 高 DPI 缩放把低分辨率素材拉糊。修改源图后，在 macOS 安装 `librsvg` 与 `ffmpeg`，再重新生成并提交 BMP：
+
+```bash
+brew install librsvg ffmpeg
+npm run artwork:windows-installer
+```
+
+不要直接用截图替换 BMP，也不要把文字交给生成模型渲染；生成图只作为无文字背景，正式 Logo 和公司信息始终由 SVG 输出。Windows 包校验会检查位图尺寸、色深、规范图标和安装选项页的统一背景色，防止模糊素材或白色文字块再次进入发布包。
+
 客户端会自动识别安装方式：旧 Squirrel 安装保持 Electron `autoUpdater`，NSIS 或便携版使用 GitHub Release 中的最新更新清单。NSIS 路径会在下载后核对大小、SHA-256、Authenticode 状态和公司发布者，在安装前还会再次校验文件，然后以 `/S /UPDATE /PARENT_PID=<pid>` 启动安装器。安装器会等待客户端退出，将新版本完整解压到临时目录后再切换；切换失败会恢复原版本。它同时保留原安装目录与桌面快捷方式偏好，更新完成后自动重启凯越邮箱。
 
 ### 在 macOS 上交叉构建 Windows 便携版

@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="150" height="57" viewBox="0 0 150 57">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="450" height="171" viewBox="0 0 150 57">
   <defs>
-    <clipPath id="app-icon-clip"><rect x="91" y="10" width="36" height="36" rx="8"/></clipPath>
+    <clipPath id="app-icon-clip"><rect x="102" y="8" width="40" height="40" rx="9"/></clipPath>
   </defs>
   <rect width="150" height="57" fill="#FFFFFF"/>
-  <image x="91" y="10" width="36" height="36" xlink:href="kaiyue-mail-icon.png" clip-path="url(#app-icon-clip)"/>
-  <circle cx="135" cy="17" r="3" fill="#D6A756"/>
-  <text x="82" y="52" fill="#526176" font-family="Segoe UI, sans-serif" font-size="7">KAIYUE MAIL</text>
+  <rect x="94" y="13" width="2" height="30" rx="1" fill="#DCE3EC"/>
+  <image x="102" y="8" width="40" height="40" xlink:href="kaiyue-mail-icon.png" clip-path="url(#app-icon-clip)"/>
+  <rect x="102" y="52" width="40" height="1" fill="#2F6FED" opacity=".65"/>
 </svg>

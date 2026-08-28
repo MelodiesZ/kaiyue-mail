@@ -23,6 +23,18 @@ function requirePE(filePath, label) {
   }
 }
 
+function readBmpMetadata(filePath) {
+  const bitmap = fs.readFileSync(filePath);
+  if (bitmap.subarray(0, 2).toString('ascii') !== 'BM') {
+    throw new Error(`Installer artwork is not a Windows bitmap: ${filePath}`);
+  }
+  return {
+    width: bitmap.readInt32LE(18),
+    height: Math.abs(bitmap.readInt32LE(22)),
+    bitsPerPixel: bitmap.readUInt16LE(28),
+  };
+}
+
 const exePath = path.join(appDir, 'Kaiyue Mail.exe');
 const resourcesDir = path.join(appDir, 'resources');
 const asarPath = path.join(resourcesDir, 'app.asar');
@@ -76,7 +88,9 @@ const notificationUtils = asar
   .toString();
 const defaultClientHelper = asar.extractFile(asarPath, 'src/default-client-helper.js').toString();
 const windowsUpdater = asar.extractFile(asarPath, 'src/browser/windows-updater.js').toString();
-const autoUpdateManager = asar.extractFile(asarPath, 'src/browser/autoupdate-manager.js').toString();
+const autoUpdateManager = asar
+  .extractFile(asarPath, 'src/browser/autoupdate-manager.js')
+  .toString();
 const nsisUpdateEngine = asar.extractFile(asarPath, 'src/browser/nsis-update-engine.js').toString();
 const mainWindowHTML = asar.extractFile(asarPath, 'static/index.html').toString();
 const migrationWindowHTML = asar.extractFile(asarPath, 'static/db-migration.html').toString();
@@ -100,6 +114,12 @@ const installerSidebarSvg = fs.readFileSync(
 const installerHeaderSvg = fs.readFileSync(
   path.join(__dirname, 'windows-installer', 'assets', 'installer-header.svg'),
   'utf8'
+);
+const installerSidebarBitmap = readBmpMetadata(
+  path.join(__dirname, 'windows-installer', 'assets', 'installer-sidebar.bmp')
+);
+const installerHeaderBitmap = readBmpMetadata(
+  path.join(__dirname, 'windows-installer', 'assets', 'installer-header.bmp')
 );
 
 const checks = {
@@ -168,9 +188,27 @@ const checks = {
     installerScript.includes('!define MUI_ICON "..\\resources\\win\\kaiyue-mail.ico"') &&
     installerSidebarSvg.includes('kaiyue-mail-icon.png') &&
     installerHeaderSvg.includes('kaiyue-mail-icon.png'),
+  nsisHighDpiArtwork:
+    installerSidebarBitmap.width === 492 &&
+    installerSidebarBitmap.height === 942 &&
+    installerSidebarBitmap.bitsPerPixel === 24 &&
+    installerHeaderBitmap.width === 450 &&
+    installerHeaderBitmap.height === 171 &&
+    installerHeaderBitmap.bitsPerPixel === 24 &&
+    installerSidebarSvg.includes('installer-sidebar-background-v2.png') &&
+    installerScript.includes('MUI_WELCOMEFINISHPAGE_BITMAP_STRETCH "FitControl"') &&
+    installerScript.includes('MUI_HEADERIMAGE_BITMAP_STRETCH "FitControl"'),
+  nsisPolishedTypographyAndSurface:
+    installerScript.includes('SetFont "Microsoft YaHei UI" 9') &&
+    installerScript.includes('SetCtlColors $0 17233A F6F8FB') &&
+    installerScript.includes('SetCtlColors $1 1A3B70 F6F8FB') &&
+    installerScript.includes('SetCtlColors $DesktopShortcutCheckbox 17233A F6F8FB') &&
+    !installerScript.includes('SetCtlColors $1 1A3B70 FFFFFF') &&
+    !installerScript.includes('SetCtlColors $1 526176 FFFFFF') &&
+    !installerScript.includes('SetCtlColors $1 6B788B FFFFFF'),
   nsisWelcomeCopyLayout:
-    installerScript.includes('蒙阴县凯越工程机械有限公司自主研发。$\\r$\\n企业邮件客户端') &&
-    installerScript.includes('安装大约需要一分钟。$\\r$\\n继续前，请保存草稿并退出凯越邮箱。'),
+    installerScript.includes('蒙阴县凯越工程机械有限公司自主研发的企业邮件客户端。') &&
+    installerScript.includes('安装约需一分钟。继续前，请保存草稿并退出正在运行的凯越邮箱。'),
   nsisVersionFromPackage:
     installerScript.includes('!ifndef PRODUCT_VERSION') &&
     installerScript.includes('VIProductVersion "${PRODUCT_VERSION_QUAD}"') &&
@@ -183,7 +221,7 @@ const checks = {
     installerScript.includes('StrCpy $InstallPayloadDir "$INSTDIR.update"') &&
     installerScript.includes('Rename "$PreviousInstallDir" "$INSTDIR"') &&
     installerScript.includes('"DesktopShortcut"') &&
-    installerScript.includes("Exec '\"$INSTDIR\\${PRODUCT_EXE}\"'"),
+    installerScript.includes('Exec \'"$INSTDIR\\${PRODUCT_EXE}"\''),
 };
 
 const failed = Object.entries(checks)

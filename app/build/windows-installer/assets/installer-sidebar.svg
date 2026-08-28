@@ -1,16 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="164" height="314" viewBox="0 0 164 314">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="492" height="942" viewBox="0 0 164 314">
   <defs>
-    <clipPath id="app-icon-clip"><rect x="22" y="32" width="54" height="54" rx="11"/></clipPath>
+    <clipPath id="app-icon-clip"><rect x="20" y="24" width="52" height="52" rx="11"/></clipPath>
+    <linearGradient id="top-shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#071A36" stop-opacity=".36"/>
+      <stop offset=".62" stop-color="#071A36" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#071A36" stop-opacity=".28"/>
+    </linearGradient>
   </defs>
-  <rect width="164" height="314" fill="#1A3B70"/>
-  <image x="22" y="32" width="54" height="54" xlink:href="kaiyue-mail-icon.png" clip-path="url(#app-icon-clip)"/>
-  <circle cx="129" cy="52" r="3" fill="#D6A756"/>
-  <circle cx="137" cy="52" r="3" fill="#FFFFFF" opacity=".55"/>
-  <text x="22" y="118" fill="#FFFFFF" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="21" font-weight="700">凯越邮箱</text>
-  <text x="22" y="143" fill="#D8E3F2" font-family="Segoe UI, sans-serif" font-size="11" font-weight="600">KAIYUE MAIL</text>
-  <line x1="22" y1="168" x2="142" y2="168" stroke="#FFFFFF" stroke-opacity=".2"/>
-  <text x="22" y="196" fill="#FFFFFF" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="12">安全 · 专注 · 高效</text>
-  <text x="22" y="255" fill="#C7D6EA" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="9">蒙阴县凯越工程机械</text>
-  <text x="22" y="270" fill="#C7D6EA" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="9">有限公司自主研发</text>
-  <text x="22" y="289" fill="#FFFFFF" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="10" font-weight="600">企业邮件客户端</text>
+  <image width="164" height="314" xlink:href="installer-sidebar-background-v2.png" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="164" height="314" fill="url(#top-shade)"/>
+
+  <image x="20" y="24" width="52" height="52" xlink:href="kaiyue-mail-icon.png" clip-path="url(#app-icon-clip)"/>
+  <rect x="20" y="91" width="20" height="2" rx="1" fill="#36A9FF"/>
+  <rect x="44" y="91" width="6" height="2" rx="1" fill="#D6A756"/>
+
+  <text x="20" y="119" fill="#FFFFFF" font-family="PingFang SC, Microsoft YaHei UI, sans-serif" font-size="20" font-weight="700">凯越邮箱</text>
+  <text x="20" y="141" fill="#C9DCF4" font-family="SF Pro Display, Segoe UI, sans-serif" font-size="10" font-weight="600" letter-spacing="1.25">KAIYUE MAIL</text>
+
+  <line x1="20" y1="160" x2="144" y2="160" stroke="#B9D7FA" stroke-opacity=".34"/>
+  <text x="20" y="183" fill="#FFFFFF" font-family="PingFang SC, Microsoft YaHei UI, sans-serif" font-size="11.5" font-weight="500">安全 · 专注 · 高效</text>
+  <text x="20" y="204" fill="#BFD3EC" font-family="PingFang SC, Microsoft YaHei UI, sans-serif" font-size="8.5">让企业邮件更简单</text>
+
+  <text x="20" y="269" fill="#FFFFFF" font-family="PingFang SC, Microsoft YaHei UI, sans-serif" font-size="10.5" font-weight="600">自主研发企业邮件客户端</text>
+  <text x="20" y="291" fill="#BFD3EC" font-family="PingFang SC, Microsoft YaHei UI, sans-serif" font-size="8">蒙阴县凯越工程机械有限公司</text>
 </svg>

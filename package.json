@@ -83,6 +83,7 @@
     "test:update": "node --test scripts/nsis-update-engine.test.js scripts/prepare-windows-update-assets.test.js scripts/update-ui-policy.test.js",
     "test-window": "node scripts/test.js --test=window",
     "test:e2e": "npx playwright test --config playwright/playwright.config.ts",
+    "artwork:windows-installer": "node app/build/generate-windows-installer-artwork.js",
     "build:windows-installer": "node app/build/build-windows-installer.js",
     "signing:windows:internal:create": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/windows/New-KaiyueMailInternalCertificate.ps1",
     "signing:windows:internal:app": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/windows/Sign-KaiyueMailWindows.ps1 -Mode App",
