@@ -2,7 +2,7 @@
   "name": "kaiyue-mail",
   "productName": "Kaiyue Mail",
   "desktopName": "KaiyueMail.desktop",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "upstreamVersion": "1.23.0",
   "repository": {
     "type": "git",
