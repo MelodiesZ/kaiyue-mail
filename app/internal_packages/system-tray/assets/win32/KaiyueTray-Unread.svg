@@ -1,6 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <rect x="1" y="1" width="30" height="30" rx="7" fill="#075bd8" stroke="#ffffff" stroke-width="1.5"/>
-  <rect x="6" y="9" width="20" height="14" rx="2.5" fill="#ffffff"/>
-  <path d="M7.5 10.5 16 17l8.5-6.5" fill="none" stroke="#075bd8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="25" cy="7" r="5" fill="#ffd60a" stroke="#ffffff" stroke-width="1.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <image x="1" y="4.75" width="30" height="22.5" preserveAspectRatio="none" href="KaiyueTray-Mail.svg" xlink:href="KaiyueTray-Mail.svg"/>
+  <circle cx="26" cy="6" r="4.5" fill="#F2B01E" stroke="#FFFFFF" stroke-width="1.5"/>
 </svg>
