@@ -58,6 +58,45 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/windows/Build-Ka
 
 无时间戳的签名会在代码签名证书到期后失效，仅建议用于隔离网络。
 
+## 当前 macOS 发布机的固定签名记录
+
+> 本节只记录定位信息和公开指纹，不记录 PFX 密码或私钥内容。源码仓库为公开仓库，绝对不得将 `Private-KEEP-SECRET` 复制到项目目录。
+
+`v1.0.5` 起正在使用的签名链是 `InternalSigning-Rotation-v2`，不是旧的 `InternalSigning`。
+
+- 发布机：当前 macOS 用户账户。
+- 固定目录：`$HOME/Library/Application Support/KaiyueMail/InternalSigning-Rotation-v2`
+- 日常签名 PFX：`Private-KEEP-SECRET/KaiyueMail-Code-Signing.pfx`
+- 根证书私钥备份：`Private-KEEP-SECRET/KaiyueMail-Internal-Root-CA.pfx`
+- 公开部署包目录：`Deployment-PUBLIC`
+- PFX 密码：macOS 登录钥匙串的通用密码条目 `KaiyueMail Internal Signing PFX v2`，账户名为当前 macOS 用户。
+- 根证书 SHA-256：`1A:24:2D:33:56:68:C4:A0:6C:91:2C:40:E1:73:CA:7A:FC:2A:EE:FE:86:1C:31:67:AE:03:C9:1F:7D:7C:4D:66`
+- 发布者证书 SHA-256：`C6:69:BE:5A:B9:1A:B2:FC:7B:A3:83:0D:A8:B1:3B:58:98:C7:D0:DA:3E:62:0C:34:EF:39:BF:42:DC:72:D8:86`
+- 发布者证书有效期：2026-08-28 至 2031-08-27（UTC）。
+
+发布前必须用以下方式核对指纹：
+
+```bash
+SIGNING_ROOT="$HOME/Library/Application Support/KaiyueMail/InternalSigning-Rotation-v2"
+
+/opt/homebrew/bin/openssl x509 \
+  -inform DER \
+  -in "$SIGNING_ROOT/Deployment-PUBLIC/KaiyueMail-Internal-Root-CA.cer" \
+  -noout -fingerprint -sha256 -subject -dates
+
+security find-generic-password \
+  -a "$USER" \
+  -s 'KaiyueMail Internal Signing PFX v2' \
+  -w \
+  | /opt/homebrew/bin/openssl pkcs12 \
+      -in "$SIGNING_ROOT/Private-KEEP-SECRET/KaiyueMail-Code-Signing.pfx" \
+      -clcerts -nokeys -passin stdin -legacy \
+  | /opt/homebrew/bin/openssl x509 \
+      -noout -fingerprint -sha256 -subject -issuer -dates
+```
+
+密码必须通过标准输入管道传给签名工具，不得写入命令行、`.env`、Markdown、脚本或 GitHub Secret。私钥目录权限应为 `700`，PFX 文件权限应为 `600`。另外必须把整个 `InternalSigning-Rotation-v2` 目录备份到公司控制的加密离线介质；网盘、GitHub Release 和下载服务器只能保存 `Deployment-PUBLIC`。
+
 ## 4. 上传 GitHub Release
 
 一键命令成功后，上传 `app\dist` 中的：

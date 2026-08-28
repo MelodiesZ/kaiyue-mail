@@ -25,6 +25,9 @@ certs
 **/*.pvk
 **/*.cer
 **/build/resources/certs
+**/Private-KEEP-SECRET/
+**/.signing-password*
+**/.pfx-password*
 
 ##### Misc swap files
 **/*.swp

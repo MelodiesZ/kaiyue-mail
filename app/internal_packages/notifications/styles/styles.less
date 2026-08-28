@@ -144,6 +144,24 @@
 
 .modal:has(> .kaiyue-update-dialog) {
   overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, @accent-primary, transparent 88%) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    0 24px 70px rgba(23, 35, 58, 0.22),
+    0 4px 16px rgba(23, 35, 58, 0.1) !important;
+  transition:
+    width 180ms ease-out,
+    height 180ms ease-out,
+    transform 180ms ease-out !important;
+
+  &:has(> .kaiyue-update-dialog.is-compact) {
+    width: 480px !important;
+    height: 360px !important;
+  }
+
+  &:has(> .kaiyue-update-dialog.state-checking) {
+    height: 320px !important;
+  }
 
   > .modal-close {
     position: absolute;
@@ -167,7 +185,13 @@
   background: @background-primary;
   border-radius: @border-radius-large;
 
+  &.is-compact {
+    justify-content: flex-start;
+    padding: 32px 36px 26px;
+  }
+
   .update-dialog-brand-mark {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -181,6 +205,24 @@
     background: @accent-primary;
     border-radius: 13px;
     box-shadow: 0 8px 20px color-mix(in srgb, @accent-primary, transparent 72%);
+
+    span {
+      position: relative;
+      z-index: 1;
+    }
+
+    &.is-checking::after {
+      position: absolute;
+      top: -7px;
+      left: -7px;
+      width: 62px;
+      height: 62px;
+      content: '';
+      border: 2px solid color-mix(in srgb, @accent-primary, transparent 82%);
+      border-top-color: @accent-primary;
+      border-radius: 50%;
+      animation: kaiyue-update-spin 1s linear infinite;
+    }
   }
 
   .update-dialog-heading {
@@ -232,6 +274,67 @@
     color: @text-color;
     line-height: 1.65;
     white-space: pre-wrap;
+  }
+
+  .update-dialog-checking-status,
+  .update-dialog-latest-result {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding: 18px;
+    background: color-mix(in srgb, @accent-primary, @background-primary 95%);
+    border: 1px solid color-mix(in srgb, @accent-primary, transparent 86%);
+    border-radius: 14px;
+
+    > div {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    strong {
+      color: @text-color-heading;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    span:not(.update-dialog-spinner):not(.update-dialog-result-icon) {
+      color: @text-color-subtle;
+      font-size: @font-size-smaller;
+      line-height: 1.5;
+    }
+  }
+
+  .update-dialog-spinner {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border: 3px solid color-mix(in srgb, @accent-primary, transparent 80%);
+    border-top-color: @accent-primary;
+    border-radius: 50%;
+    animation: kaiyue-update-spin 0.85s linear infinite;
+  }
+
+  .update-dialog-latest-result {
+    background: color-mix(in srgb, @color-success, @background-primary 94%);
+    border-color: color-mix(in srgb, @color-success, transparent 82%);
+  }
+
+  .update-dialog-result-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    background: @color-success;
+    border-radius: 50%;
+    box-shadow: 0 6px 16px color-mix(in srgb, @color-success, transparent 72%);
   }
 
   .update-dialog-download {
@@ -304,6 +407,20 @@
       height: 36px;
       margin: 0;
     }
+
+    &.update-dialog-actions-centered {
+      justify-content: stretch;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@keyframes kaiyue-update-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

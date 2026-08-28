@@ -33,6 +33,7 @@ export default class AutoUpdateManager extends EventEmitter {
   downloadProgress = { percent: 0, transferred: 0, total: 0 };
   updateError = '';
   installingUpdate = false;
+  manualCheck = false;
 
   constructor(version: string, config: import('../config').default, specMode: boolean) {
     super();
@@ -134,10 +135,12 @@ export default class AutoUpdateManager extends EventEmitter {
 
     autoUpdater.on('checking-for-update', () => {
       this.setState(CheckingState);
+      this.emitUpdateStateEvent();
     });
 
     autoUpdater.on('update-not-available', () => {
       this.setState(NoUpdateAvailableState);
+      this.emitUpdateStateEvent();
     });
 
     autoUpdater.on('update-available', (_event, update) => {
@@ -247,16 +250,28 @@ export default class AutoUpdateManager extends EventEmitter {
       releaseNotes: this.releaseNotes,
       downloadProgress: this.downloadProgress,
       error: this.updateError,
+      currentVersion: this.version,
+      manualCheck: this.manualCheck,
     };
   }
 
   check({ hidePopups }: { hidePopups?: boolean } = {}) {
-    if (!autoUpdater || !this.feedURL) return;
+    this.manualCheck = !hidePopups;
     this.updateError = '';
+    if (!autoUpdater || !this.feedURL) {
+      if (this.manualCheck) {
+        this.updateError = '更新服务暂时不可用，请稍后重试。';
+        this.setState(ErrorState);
+        this.emitUpdateStateEvent();
+      }
+      return;
+    }
     this.updateFeedURL();
-    if (!hidePopups) {
-      autoUpdater.once('update-not-available', this.onUpdateNotAvailable);
-      autoUpdater.once('error', this.onUpdateError);
+    if (this.manualCheck) {
+      // Give explicit checks immediate UI feedback. Some providers perform
+      // network setup before emitting their own `checking-for-update` event.
+      this.setState(CheckingState);
+      this.emitUpdateStateEvent();
     }
     autoUpdater.checkForUpdates();
   }
@@ -264,6 +279,7 @@ export default class AutoUpdateManager extends EventEmitter {
   download() {
     if (!autoUpdater || this.state !== UpdateAvailableState) return;
     if (typeof autoUpdater.downloadUpdate !== 'function') return;
+    this.manualCheck = false;
     this.setState(DownloadingState);
     this.emitUpdateStateEvent();
     autoUpdater.downloadUpdate();
@@ -297,28 +313,4 @@ export default class AutoUpdateManager extends EventEmitter {
     if (!fs.existsSync(iconPath)) return undefined;
     return nativeImage.createFromPath(iconPath);
   }
-
-  onUpdateNotAvailable = () => {
-    autoUpdater.removeListener('error', this.onUpdateError);
-    dialog.showMessageBox({
-      type: 'info',
-      buttons: [localized('OK')],
-      icon: this.dialogIcon(),
-      message: localized('No update available.'),
-      title: localized('No update available.'),
-      detail: localized(`您正在使用最新版本的凯越邮箱 (%@)。`, this.version),
-    });
-  };
-
-  onUpdateError = (event: Electron.Event, message: string) => {
-    autoUpdater.removeListener('update-not-available', this.onUpdateNotAvailable);
-    dialog.showMessageBox({
-      type: 'warning',
-      buttons: [localized('OK')],
-      icon: this.dialogIcon(),
-      message: localized('There was an error checking for updates.'),
-      title: localized('Update Error'),
-      detail: message,
-    });
-  };
 }

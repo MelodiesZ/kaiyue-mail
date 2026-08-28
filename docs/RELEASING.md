@@ -23,6 +23,8 @@ npm run release:check
 
 ## 2. 验证与构建
 
+在当前 macOS 发布机上签名 Windows 产物前，必须先按 [Windows 内部代码签名与在线更新](WINDOWS-INTERNAL-SIGNING.md#当前-macos-发布机的固定签名记录) 核对 `InternalSigning-Rotation-v2` 的固定路径和证书指纹。不得因为一时找不到文件而重新生成证书。
+
 ```bash
 npm run typecheck
 npm run test:release

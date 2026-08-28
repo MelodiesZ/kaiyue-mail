@@ -34,8 +34,22 @@ export default class UpdateNotification extends React.Component<
         this.setState(state);
         this._showUpdateDialog(details || state.details);
       }),
-      AppEnv.onUpdateStateChanged(() => {
-        this.setState(this.getStateFromStores());
+      AppEnv.onUpdateStateChanged((details) => {
+        const nextState = details
+          ? {
+              updateState: details.state,
+              version: details.releaseVersion,
+              details,
+            }
+          : this.getStateFromStores();
+        this.setState(nextState);
+        if (
+          details &&
+          details.manualCheck &&
+          ['checking', 'no-update-available', 'error'].includes(details.state)
+        ) {
+          this._showUpdateDialog(details);
+        }
       })
     );
     this.modalUnlisten = ModalStore.listen(() => {

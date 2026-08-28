@@ -6,6 +6,7 @@ import React from 'react';
 let stubUpdaterState = null;
 let stubUpdaterReleaseVersion = null;
 let stubUpdaterReleaseNotes = null;
+let stubUpdaterManualCheck = false;
 let ipcSendArgs = null;
 let updateDialogStyles = null;
 
@@ -29,6 +30,8 @@ const patched = proxyquire('../lib/items/update-notification', {
           releaseVersion: stubUpdaterReleaseVersion,
           releaseNotes: stubUpdaterReleaseNotes || 'A new version is available!',
           downloadProgress: { percent: 0, transferred: 0, total: 1024 },
+          currentVersion: '1.0.5',
+          manualCheck: stubUpdaterManualCheck,
         }),
       },
     }),
@@ -48,6 +51,7 @@ describe('UpdateNotification', function describeBlock() {
     stubUpdaterState = 'idle';
     stubUpdaterReleaseVersion = undefined;
     stubUpdaterReleaseNotes = undefined;
+    stubUpdaterManualCheck = false;
     ipcSendArgs = null;
     const stylesheetPath = require('path').resolve(__dirname, '../styles/styles.less');
     const stylesheet = AppEnv.themes.cssContentsOfStylesheet(stylesheetPath);
@@ -74,6 +78,34 @@ describe('UpdateNotification', function describeBlock() {
       spyOn(AppEnv, 'onUpdateAvailable').andCallThrough();
       render(<UpdateNotification />);
       expect(AppEnv.onUpdateAvailable).toHaveBeenCalled();
+    });
+
+    it('should immediately show a branded waiting dialog for a manual update check', () => {
+      render(<UpdateNotification />);
+
+      AppEnv.updateStateChanged({
+        state: 'checking',
+        currentVersion: '1.0.5',
+        manualCheck: true,
+      });
+
+      const dialog = document.querySelector('.kaiyue-update-dialog') as HTMLElement;
+      expect(dialog).not.toEqual(null);
+      expect(dialog.classList.contains('state-checking')).toEqual(true);
+      expect(dialog.textContent).toContain('正在检查更新');
+      expect(dialog.getAttribute('aria-busy')).toEqual('true');
+    });
+
+    it('should keep background update checks silent', () => {
+      render(<UpdateNotification />);
+
+      AppEnv.updateStateChanged({
+        state: 'checking',
+        currentVersion: '1.0.5',
+        manualCheck: false,
+      });
+
+      expect(document.querySelector('.kaiyue-update-dialog')).toEqual(null);
     });
   });
 
@@ -147,6 +179,34 @@ describe('UpdateNotification', function describeBlock() {
       });
 
       expect(document.querySelector('.kaiyue-update-dialog').textContent).toContain('更新已准备好');
+    });
+
+    it('should transition the manual waiting dialog to a polished latest-version result', () => {
+      render(<UpdateNotification />);
+
+      AppEnv.updateStateChanged({
+        state: 'checking',
+        currentVersion: '1.0.5',
+        manualCheck: true,
+      });
+      AppEnv.updateStateChanged({
+        state: 'no-update-available',
+        currentVersion: '1.0.5',
+        manualCheck: true,
+      });
+
+      const dialog = document.querySelector('.kaiyue-update-dialog') as HTMLElement;
+      expect(dialog.classList.contains('state-no-update-available')).toEqual(true);
+      expect(dialog.textContent).toContain('已是最新版本');
+      expect(dialog.textContent).toContain('1.0.5');
+      expect(dialog.querySelector('.update-dialog-result-icon')).not.toEqual(null);
+      const modal = dialog.closest('.modal') as HTMLElement;
+      const primaryButton = dialog.querySelector('.btn-emphasis') as HTMLElement;
+      expect(window.getComputedStyle(modal).borderRadius).toEqual('18px');
+      expect(modal.scrollHeight <= modal.clientHeight).toEqual(true);
+      expect(
+        primaryButton.getBoundingClientRect().bottom <= dialog.getBoundingClientRect().bottom
+      ).toEqual(true);
     });
 
     it('should keep the downloading actions inside the modal without overflow', () => {
