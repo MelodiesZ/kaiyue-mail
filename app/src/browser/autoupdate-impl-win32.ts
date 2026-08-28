@@ -24,6 +24,7 @@ export default class AutoupdateImplWin32 extends AutoupdateImplBase {
   };
   pendingCheck?: Promise<void>;
   pendingDownload?: Promise<void>;
+  feedURLs: string[] = [];
 
   constructor(version: string) {
     super();
@@ -44,8 +45,12 @@ export default class AutoupdateImplWin32 extends AutoupdateImplBase {
     return true;
   }
 
-  setFeedURL(feedURL: string | { url: string }) {
-    super.setFeedURL(typeof feedURL === 'string' ? feedURL : feedURL.url);
+  setFeedURL(feedURL: string | string[] | { url: string }) {
+    const values = Array.isArray(feedURL)
+      ? feedURL
+      : [typeof feedURL === 'string' ? feedURL : feedURL.url];
+    this.feedURLs = values.filter(Boolean);
+    super.setFeedURL(this.feedURLs[0] || '');
   }
 
   checkForUpdates() {
@@ -53,7 +58,7 @@ export default class AutoupdateImplWin32 extends AutoupdateImplBase {
 
     this.emit('checking-for-update');
     this.pendingCheck = this.engine
-      .check(this.feedURL, this.version)
+      .check(this.feedURLs.length ? this.feedURLs : [this.feedURL], this.version)
       .then((availableUpdate) => {
         if (!availableUpdate) {
           this.emit('update-not-available');

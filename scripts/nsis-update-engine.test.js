@@ -252,6 +252,34 @@ test('checks for a newer version before downloading and reports download progres
   ]);
 });
 
+test('falls back to GitHub when the company mirror manifest is unavailable', async () => {
+  const mirrorManifest = 'https://download.kaiyue-ai.com/kaiyue-update-win32-x64.json';
+  const githubManifest =
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json';
+  const requested = [];
+  const engine = new NsisUpdateEngine({
+    requestStream: async (requestUrl) => {
+      requested.push(requestUrl);
+      if (requestUrl === mirrorManifest) throw new Error('mirror unavailable');
+      return jsonStream({
+        schemaVersion: 1,
+        version: '1.0.6',
+        url: 'https://download.kaiyue-ai.com/v1.0.6/KaiyueMail-win32-x64-1.0.6.exe',
+        fallbackUrls: [
+          'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.0.6/KaiyueMail-win32-x64-1.0.6.exe',
+        ],
+        sha256: 'a'.repeat(64),
+        size: 10,
+      });
+    },
+  });
+
+  const result = await engine.check([mirrorManifest, githubManifest], '1.0.6');
+
+  assert.equal(result, null);
+  assert.deepEqual(requested, [mirrorManifest, githubManifest]);
+});
+
 test('reports transferred bytes before a large installer reaches one percent', async (t) => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
   t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));

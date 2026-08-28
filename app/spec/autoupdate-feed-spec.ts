@@ -27,20 +27,22 @@ describe('GitHub Releases update feed', () => {
     ).toBe('https://update.electronjs.org/MelodiesZ/kaiyue-mail/win32-x64/2.0.0');
   });
 
-  it('uses the signed installer manifest for Windows NSIS installations', () => {
+  it('uses the company mirror first for Windows NSIS installations', () => {
     expect(
       resolveAutoUpdateFeed({
         provider: 'github',
         repository: 'MelodiesZ/kaiyue-mail',
         feedUrl: 'https://update.electronjs.org',
+        downloadBaseUrl: 'https://download.kaiyue-ai.com/',
         platform: 'win32',
         arch: 'x64',
         version: '2.0.0',
         distribution: 'nsis',
       })
-    ).toBe(
-      'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json'
-    );
+    ).toEqual([
+      'https://download.kaiyue-ai.com/kaiyue-update-win32-x64.json',
+      'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json',
+    ]);
   });
 
   it('does not configure the public Electron update service on Linux', () => {

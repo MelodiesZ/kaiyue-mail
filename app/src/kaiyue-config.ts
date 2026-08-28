@@ -31,6 +31,7 @@ export const KaiyueConfig = Object.freeze({
     provider: env.KAIYUE_UPDATE_PROVIDER || defaults.updater.provider,
     repository: env.KAIYUE_UPDATE_REPOSITORY || defaults.updater.repository,
     feedUrl: env.KAIYUE_UPDATE_FEED_URL || defaults.updater.feedUrl,
+    downloadBaseUrl: env.KAIYUE_UPDATE_DOWNLOAD_BASE_URL || defaults.updater.downloadBaseUrl,
   }),
   upstream: Object.freeze(defaults.upstream),
 });

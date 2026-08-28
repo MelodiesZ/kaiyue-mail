@@ -80,7 +80,7 @@
     "typecheck": "./node_modules/.bin/tsc -p app/tsconfig.json --noEmit",
     "test": "node scripts/test.js --test",
     "test:release": "node --test scripts/check-release-version.test.js scripts/prepare-windows-update-assets.test.js",
-    "test:update": "node --test scripts/nsis-update-engine.test.js scripts/prepare-windows-update-assets.test.js",
+    "test:update": "node --test scripts/nsis-update-engine.test.js scripts/prepare-windows-update-assets.test.js scripts/update-ui-policy.test.js",
     "test-window": "node scripts/test.js --test=window",
     "test:e2e": "npx playwright test --config playwright/playwright.config.ts",
     "build:windows-installer": "node app/build/build-windows-installer.js",

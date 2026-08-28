@@ -4,6 +4,7 @@ interface AutoUpdateFeedOptions {
   provider: AutoUpdateProvider;
   repository: string;
   feedUrl: string;
+  downloadBaseUrl?: string;
   platform: NodeJS.Platform;
   arch: string;
   version: string;
@@ -17,13 +18,17 @@ function releaseVersion(version: string) {
   return match ? match[1] : version;
 }
 
-export function resolveAutoUpdateFeed(options: AutoUpdateFeedOptions): string | null {
+export function resolveAutoUpdateFeed(options: AutoUpdateFeedOptions): string | string[] | null {
   const baseUrl = options.feedUrl.replace(/\/$/, '');
 
   if (options.provider === 'github') {
     if (!['darwin', 'win32'].includes(options.platform)) return null;
     if (options.platform === 'win32' && options.distribution === 'nsis') {
-      return `https://github.com/${options.repository}/releases/latest/download/kaiyue-update-win32-${options.arch}.json`;
+      const githubManifest = `https://github.com/${options.repository}/releases/latest/download/kaiyue-update-win32-${options.arch}.json`;
+      const downloadBaseUrl = `${options.downloadBaseUrl || ''}`.replace(/\/$/, '');
+      return downloadBaseUrl
+        ? [`${downloadBaseUrl}/kaiyue-update-win32-${options.arch}.json`, githubManifest]
+        : githubManifest;
     }
     return `${baseUrl}/${options.repository}/${options.platform}-${options.arch}/${releaseVersion(
       options.version

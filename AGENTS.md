@@ -14,3 +14,9 @@
 - Windows releases from `v1.0.5` onward must continue using the `InternalSigning-Rotation-v2` certificate chain. Never generate or rotate the certificate merely because the signing files were not found at first.
 - On the current macOS release machine, read the fixed non-secret locator, certificate fingerprints, Keychain service name, and verification procedure in `docs/WINDOWS-INTERNAL-SIGNING.md` under “当前 macOS 发布机的固定签名记录” before signing.
 - Signing private keys and passwords must remain outside the repository. Never copy `Private-KEEP-SECRET`, PFX/P12 files, passwords, or private keys into the project, Git history, release assets, the download mirror, or chat output.
+
+## Windows update mirror continuity rule
+
+- Windows NSIS clients must check `https://download.kaiyue-ai.com/kaiyue-update-win32-x64.json` first and fall back to the matching GitHub `releases/latest/download/` asset when the company mirror is unavailable.
+- Every Windows release must deploy the exact generated manifest to `/www/wwwroot/kaiyue-mail/kaiyue-update-win32-x64.json` as well as the GitHub Release. Verify that the public mirror returns HTTP 200 and is byte-identical before publishing.
+- Follow the complete mirror order and verification checklist in `docs/RELEASING.md`; do not publish a manifest before its versioned installer mirror is live and verified.

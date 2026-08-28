@@ -209,6 +209,28 @@ describe('UpdateNotification', function describeBlock() {
       ).toEqual(true);
     });
 
+    it('should transition a failed manual check to the branded error dialog', () => {
+      render(<UpdateNotification />);
+
+      AppEnv.updateStateChanged({
+        state: 'checking',
+        currentVersion: '1.0.6',
+        manualCheck: true,
+      });
+      AppEnv.updateStateChanged({
+        state: 'error',
+        currentVersion: '1.0.6',
+        manualCheck: true,
+        error: 'Update request timed out.',
+      });
+
+      const dialog = document.querySelector('.kaiyue-update-dialog') as HTMLElement;
+      expect(dialog.classList.contains('state-error')).toEqual(true);
+      expect(dialog.textContent).toContain('检查更新失败');
+      expect(dialog.textContent).toContain('Update request timed out.');
+      expect(dialog.textContent).toContain('重新检查');
+    });
+
     it('should keep the downloading actions inside the modal without overflow', () => {
       stubUpdaterState = 'update-available';
       stubUpdaterReleaseVersion = '1.0.5';

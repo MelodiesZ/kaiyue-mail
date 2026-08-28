@@ -344,13 +344,35 @@ class NsisUpdateEngine extends EventEmitter {
 
   async check(feedURL, currentVersion) {
     if (!this.requestStream) throw new Error('NSIS updater request adapter is unavailable.');
-    requireHttps(feedURL, 'Update feed URL');
-    const manifest = normalizeManifest(await readJsonStream(await this.requestStream(feedURL)));
-    if (compareVersions(manifest.version, normalizeInstalledVersion(currentVersion)) <= 0) {
-      return null;
+    const feedURLs = Array.isArray(feedURL) ? feedURL : [feedURL];
+    if (!feedURLs.length || feedURLs.length > 4) {
+      throw new Error('Update feed URLs are invalid.');
     }
-    this.emit('update-available', manifest);
-    return manifest;
+    let lastError;
+    for (let index = 0; index < feedURLs.length; index += 1) {
+      const currentFeedURL = requireHttps(feedURLs[index], 'Update feed URL').href;
+      try {
+        const manifest = normalizeManifest(
+          await readJsonStream(await this.requestStream(currentFeedURL))
+        );
+        if (compareVersions(manifest.version, normalizeInstalledVersion(currentVersion)) <= 0) {
+          return null;
+        }
+        this.emit('update-available', manifest);
+        return manifest;
+      } catch (error) {
+        lastError = error;
+        const nextURL = feedURLs[index + 1];
+        if (nextURL) {
+          this.emit('manifest-retry', {
+            failedURL: currentFeedURL,
+            nextURL,
+            error: error.message,
+          });
+        }
+      }
+    }
+    throw lastError;
   }
 
   async download(manifest) {

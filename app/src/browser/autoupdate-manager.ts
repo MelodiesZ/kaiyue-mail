@@ -1,9 +1,7 @@
 /* eslint global-require: 0*/
-import { app, dialog, nativeImage } from 'electron';
+import { app } from 'electron';
 import { EventEmitter } from 'events';
-import path from 'path';
 import os from 'os';
-import fs from 'fs';
 import { localized } from '../intl';
 import KaiyueConfig from '../kaiyue-config';
 import { AutoUpdateProvider, resolveAutoUpdateFeed } from './autoupdate-feed';
@@ -28,6 +26,7 @@ export default class AutoUpdateManager extends EventEmitter {
   specMode: boolean;
   preferredChannel: string;
   feedURL: string;
+  feedURLs: string[] = [];
   releaseNotes: string;
   releaseVersion: string;
   downloadProgress = { percent: 0, transferred: 0, total: 0 };
@@ -67,6 +66,7 @@ export default class AutoUpdateManager extends EventEmitter {
   updateFeedURL = () => {
     if (!KaiyueConfig.updater.enabled || !KaiyueConfig.updater.feedUrl) {
       this.feedURL = '';
+      this.feedURLs = [];
       return;
     }
     const params = {
@@ -90,13 +90,19 @@ export default class AutoUpdateManager extends EventEmitter {
       }
     }
 
-    this.feedURL =
-      resolveAutoUpdateFeed({
-        provider: KaiyueConfig.updater.provider as AutoUpdateProvider,
-        repository: KaiyueConfig.updater.repository,
-        feedUrl: KaiyueConfig.updater.feedUrl,
-        ...params,
-      }) || '';
+    const resolvedFeed = resolveAutoUpdateFeed({
+      provider: KaiyueConfig.updater.provider as AutoUpdateProvider,
+      repository: KaiyueConfig.updater.repository,
+      feedUrl: KaiyueConfig.updater.feedUrl,
+      downloadBaseUrl: KaiyueConfig.updater.downloadBaseUrl,
+      ...params,
+    });
+    this.feedURLs = resolvedFeed
+      ? Array.isArray(resolvedFeed)
+        ? resolvedFeed
+        : [resolvedFeed]
+      : [];
+    this.feedURL = this.feedURLs[0] || '';
     if (autoUpdater) {
       this.setAutoUpdaterFeedURL();
     }
@@ -119,16 +125,6 @@ export default class AutoUpdateManager extends EventEmitter {
       this.updateError = error.message;
       this.setState(ErrorState);
       this.emitUpdateStateEvent();
-      if (this.installingUpdate) {
-        dialog.showMessageBox({
-          type: 'warning',
-          buttons: [localized('OK')],
-          icon: this.dialogIcon(),
-          message: localized('There was an error installing the update.'),
-          title: localized('Update Error'),
-          detail: error.message,
-        });
-      }
     });
 
     this.setAutoUpdaterFeedURL();
@@ -205,7 +201,9 @@ export default class AutoUpdateManager extends EventEmitter {
 
   setAutoUpdaterFeedURL() {
     if (!autoUpdater || !this.feedURL) return;
-    if (process.platform === 'darwin' || process.platform === 'win32') {
+    if (process.platform === 'win32' && !WindowsUpdater.existsSync()) {
+      autoUpdater.setFeedURL(this.feedURLs);
+    } else if (process.platform === 'darwin' || process.platform === 'win32') {
       autoUpdater.setFeedURL({ url: this.feedURL });
     } else {
       autoUpdater.setFeedURL(this.feedURL);
@@ -301,16 +299,5 @@ export default class AutoUpdateManager extends EventEmitter {
       this.installingUpdate = false;
       throw error;
     }
-  }
-
-  dialogIcon() {
-    const iconPath = path.join(
-      global.application.resourcePath,
-      'static',
-      'images',
-      'mailspring.png'
-    );
-    if (!fs.existsSync(iconPath)) return undefined;
-    return nativeImage.createFromPath(iconPath);
   }
 }
