@@ -57,6 +57,8 @@ npm run release:verify-windows-assets
 
 `app/kaiyue-config.json` 的 `updater.downloadBaseUrl` 指向凯越自有下载站。生成的清单以该地址为主下载地址，并保留 GitHub Release 作为失败回退。发布前必须：
 
+下载域名通过阿里云 ESA 对外提供标准 HTTPS 443，ESA 到宝塔源站使用 HTTPS 3447。`downloadBaseUrl` 不要追加 `:3447`；该端口仅用于 ESA 回源。
+
 1. 将签名后的版本化 EXE 和 `.sha256` 上传到下载站的 `v<version>/` 目录，例如 `/www/wwwroot/kaiyue-mail/v1.0.6/`。
 2. 在服务器重新计算 SHA-256，并确认与本地 `.sha256` 完全一致。
 3. 确认镜像 URL 使用受信任的 HTTPS 证书，`HEAD` 返回正确的 `Content-Length`，Range 请求返回 `206 Partial Content`。
