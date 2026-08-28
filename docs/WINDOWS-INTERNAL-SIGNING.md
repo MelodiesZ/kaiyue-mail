@@ -38,6 +38,8 @@ Windows NSIS 安装包内置了公开根证书 `app/build/windows-installer/cert
 3. 如果同一证书已存在，直接继续，不重复导入。
 4. 证书校验或导入失败时中止安装，避免产生无法安全更新的客户端。
 
+证书文件校验和导入使用 Windows .NET 原生 `X509Store(CurrentUser, Root)` API，不依赖 `Import-Certificate` 或 `Cert:` PowerShell PKI 模块。这样可兼容由 32 位 NSIS 启动 PowerShell 的 64 位 Windows 环境；不要改回依赖 PKI 模块的实现。
+
 公开根证书可以进入源码仓库，但根证书私钥和代码签名私钥绝对不得进入仓库。卸载凯越邮箱时默认保留根证书，以免影响同一用户下的重装和版本回退。
 
 ### 已安装的旧客户端（一次性过渡）

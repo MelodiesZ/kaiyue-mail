@@ -29,7 +29,15 @@ test('Windows installer embeds only the pinned public root certificate', () => {
   assert.match(installerSource, /KaiyueMail-Internal-Root-CA\.cer/);
   assert.match(installerSource, /Install-KaiyueMailInternalRoot\.ps1/);
   assert.match(installerSource, /-NonInteractive/);
-  assert.match(trustScript, /Cert:\\CurrentUser\\Root/);
+  assert.match(trustScript, /X509Store/);
+  assert.match(trustScript, /StoreName\]::Root/);
+  assert.match(trustScript, /StoreLocation\]::CurrentUser/);
+  assert.match(trustScript, /OpenFlags\]::ReadWrite/);
+  assert.match(trustScript, /\.Add\(\$certificate\)/);
+  assert.match(trustScript, /SHA256\]::Create\(\)/);
+  assert.doesNotMatch(trustScript, /Get-FileHash/);
+  assert.doesNotMatch(trustScript, /Import-Certificate/);
+  assert.doesNotMatch(trustScript, /Cert:\\CurrentUser\\Root/);
   assert.doesNotMatch(installerSource, /LocalMachine/);
   assert.doesNotMatch(trustScript, /LocalMachine/);
 });

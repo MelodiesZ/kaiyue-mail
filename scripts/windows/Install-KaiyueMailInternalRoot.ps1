@@ -12,7 +12,15 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $resolvedCertificatePath = (Resolve-Path -LiteralPath $CertificatePath).Path
-$actualFileSha256 = (Get-FileHash -LiteralPath $resolvedCertificatePath -Algorithm SHA256).Hash
+$sha256 = [System.Security.Cryptography.SHA256]::Create()
+$certificateStream = [System.IO.File]::OpenRead($resolvedCertificatePath)
+try {
+  $actualFileSha256 = [System.BitConverter]::ToString($sha256.ComputeHash($certificateStream)).Replace('-', '')
+}
+finally {
+  $certificateStream.Dispose()
+  $sha256.Dispose()
+}
 if ($actualFileSha256 -ne $ExpectedFileSha256.ToUpperInvariant()) {
   throw 'The internal root certificate file does not match the company deployment bundle.'
 }
@@ -40,14 +48,32 @@ if (-not $NonInteractive) {
   }
 }
 
-$existing = Get-ChildItem Cert:\CurrentUser\Root | Where-Object { $_.Thumbprint -eq $certificate.Thumbprint }
-if (-not $existing) {
-  Import-Certificate -FilePath $resolvedCertificatePath -CertStoreLocation 'Cert:\CurrentUser\Root' | Out-Null
-}
+$store = New-Object System.Security.Cryptography.X509Certificates.X509Store(
+  [System.Security.Cryptography.X509Certificates.StoreName]::Root,
+  [System.Security.Cryptography.X509Certificates.StoreLocation]::CurrentUser
+)
+try {
+  $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+  $existing = $store.Certificates.Find(
+    [System.Security.Cryptography.X509Certificates.X509FindType]::FindByThumbprint,
+    $certificate.Thumbprint,
+    $false
+  )
+  if ($existing.Count -eq 0) {
+    $store.Add($certificate)
+  }
 
-$installed = Get-ChildItem Cert:\CurrentUser\Root | Where-Object { $_.Thumbprint -eq $certificate.Thumbprint }
-if (-not $installed) {
-  throw 'Windows did not install the Kaiyue Mail internal root certificate.'
+  $installed = $store.Certificates.Find(
+    [System.Security.Cryptography.X509Certificates.X509FindType]::FindByThumbprint,
+    $certificate.Thumbprint,
+    $false
+  )
+  if ($installed.Count -eq 0) {
+    throw 'Windows did not install the Kaiyue Mail internal root certificate.'
+  }
+}
+finally {
+  $store.Close()
 }
 
 Write-Host 'Kaiyue Mail internal update trust is installed for this Windows user.' -ForegroundColor Green
