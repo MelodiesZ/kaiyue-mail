@@ -400,10 +400,10 @@ class NsisUpdateEngine extends EventEmitter {
         return await this.downloadFromURL(manifest, installerURLs[index]);
       } catch (error) {
         lastError = error;
-        // Every fallback URL is required to serve the exact same SHA-256. Once
-        // the bytes pass size and digest validation, a local trust failure
-        // cannot be repaired by downloading those same bytes from another
-        // host. Stop here instead of wasting a second full installer download.
+        // Use fallback hosts for connection failures and interrupted transfers.
+        // A byte-complete integrity or local trust failure is non-retryable:
+        // downloading the same 200 MB installer again hides a publishing issue
+        // and wastes bandwidth instead of giving the user an actionable error.
         if (error && error.retryable === false) throw error;
         const nextURL = installerURLs[index + 1];
         if (nextURL) {
@@ -458,7 +458,12 @@ class NsisUpdateEngine extends EventEmitter {
       transform(chunk, _encoding, callback) {
         size += chunk.length;
         if (size > manifest.size) {
-          callback(new Error('Downloaded update exceeds the size declared by the manifest.'));
+          callback(
+            new NonRetryableUpdateError(
+              'ERR_UPDATE_SIZE_MISMATCH',
+              '更新镜像返回的安装包大小异常。为避免重复下载，已停止更新；请稍后重试。'
+            )
+          );
           return;
         }
         hash.update(chunk);
@@ -478,7 +483,10 @@ class NsisUpdateEngine extends EventEmitter {
       if (size !== manifest.size)
         throw new Error('Downloaded update size does not match manifest.');
       if (digest !== manifest.sha256) {
-        throw new Error('Downloaded update SHA-256 does not match manifest.');
+        throw new NonRetryableUpdateError(
+          'ERR_UPDATE_INTEGRITY_MISMATCH',
+          '更新镜像已完整下载，但安装包完整性校验失败。为避免重复下载，已停止更新；请稍后重试。'
+        );
       }
       fs.renameSync(partialPath, installerPath);
       if (
@@ -499,6 +507,14 @@ class NsisUpdateEngine extends EventEmitter {
       };
     } catch (error) {
       fs.rmSync(updateDirectory, { recursive: true, force: true });
+      if (error && error.retryable !== false && size >= manifest.size) {
+        const completedDownloadError = new NonRetryableUpdateError(
+          'ERR_UPDATE_COMPLETED_VALIDATION_FAILED',
+          '更新镜像已下载完成，但最终校验未能完成。为避免重复下载，已停止更新；请稍后重试。'
+        );
+        completedDownloadError.cause = error;
+        throw completedDownloadError;
+      }
       throw error;
     }
   }

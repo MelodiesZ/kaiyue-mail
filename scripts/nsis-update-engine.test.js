@@ -240,7 +240,7 @@ test('does not redownload a byte-identical fallback after signature validation f
   assert.equal(progress.filter((detail) => detail.percent === 100).length, 1);
 });
 
-test('retries a byte-complete mirror download when its digest is corrupted', async (t) => {
+test('does not redownload a byte-complete mirror response when its digest is corrupted', async (t) => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
   t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));
   const expectedInstaller = Buffer.from('signed-kaiyue-installer');
@@ -259,17 +259,24 @@ test('retries a byte-complete mirror download when its digest is corrupted', asy
     verifyAuthenticode: async () => true,
   });
 
-  const result = await engine.download({
-    version: '1.0.8',
-    url: mirrorURL,
-    fallbackUrls: [githubURL],
-    sha256: crypto.createHash('sha256').update(expectedInstaller).digest('hex'),
-    size: expectedInstaller.length,
-    notes: '',
-  });
+  await assert.rejects(
+    engine.download({
+      version: '1.0.8',
+      url: mirrorURL,
+      fallbackUrls: [githubURL],
+      sha256: crypto.createHash('sha256').update(expectedInstaller).digest('hex'),
+      size: expectedInstaller.length,
+      notes: '',
+    }),
+    (error) => {
+      assert.equal(error.code, 'ERR_UPDATE_INTEGRITY_MISMATCH');
+      assert.equal(error.retryable, false);
+      assert.match(error.message, /避免重复下载/);
+      return true;
+    }
+  );
 
-  assert.deepEqual(fs.readFileSync(result.filePath), expectedInstaller);
-  assert.deepEqual(requested, [mirrorURL, githubURL]);
+  assert.deepEqual(requested, [mirrorURL]);
 });
 
 test('checks for a newer version before downloading and reports download progress', async (t) => {
@@ -464,7 +471,12 @@ test('stops a download as soon as it exceeds the manifest size', async (t) => {
       'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json',
       '1.0.1'
     ),
-    /exceeds the size/
+    (error) => {
+      assert.equal(error.code, 'ERR_UPDATE_SIZE_MISMATCH');
+      assert.equal(error.retryable, false);
+      assert.match(error.message, /避免重复下载/);
+      return true;
+    }
   );
 });
 
