@@ -201,6 +201,77 @@ test('falls back to GitHub when the primary update mirror cannot download the in
   ]);
 });
 
+test('does not redownload a byte-identical fallback after signature validation fails', async (t) => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
+  t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));
+  const installer = Buffer.from('downloaded-completely-but-signature-is-not-trusted');
+  const mirrorURL = 'https://download.kaiyue-ai.com/v1.0.8/KaiyueMail-win32-x64-1.0.8.exe';
+  const githubURL =
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.0.8/KaiyueMail-win32-x64-1.0.8.exe';
+  const requested = [];
+  const progress = [];
+  const engine = new NsisUpdateEngine({
+    tempRoot,
+    requestStream: async (requestUrl) => {
+      requested.push(requestUrl);
+      return Readable.from([installer]);
+    },
+    verifyAuthenticode: async () => false,
+  });
+  engine.on('download-progress', (detail) => progress.push(detail));
+
+  await assert.rejects(
+    engine.download({
+      version: '1.0.8',
+      url: mirrorURL,
+      fallbackUrls: [githubURL],
+      sha256: crypto.createHash('sha256').update(installer).digest('hex'),
+      size: installer.length,
+      notes: '',
+    }),
+    (error) => {
+      assert.equal(error.code, 'ERR_UPDATE_SIGNATURE_NOT_TRUSTED');
+      assert.match(error.message, /内部信任证书/);
+      return true;
+    }
+  );
+
+  assert.deepEqual(requested, [mirrorURL]);
+  assert.equal(progress.filter((detail) => detail.percent === 100).length, 1);
+});
+
+test('retries a byte-complete mirror download when its digest is corrupted', async (t) => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
+  t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));
+  const expectedInstaller = Buffer.from('signed-kaiyue-installer');
+  const corruptedInstaller = Buffer.from(expectedInstaller);
+  corruptedInstaller[0] ^= 0xff;
+  const mirrorURL = 'https://download.kaiyue-ai.com/v1.0.8/KaiyueMail-win32-x64-1.0.8.exe';
+  const githubURL =
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.0.8/KaiyueMail-win32-x64-1.0.8.exe';
+  const requested = [];
+  const engine = new NsisUpdateEngine({
+    tempRoot,
+    requestStream: async (requestUrl) => {
+      requested.push(requestUrl);
+      return Readable.from([requestUrl === mirrorURL ? corruptedInstaller : expectedInstaller]);
+    },
+    verifyAuthenticode: async () => true,
+  });
+
+  const result = await engine.download({
+    version: '1.0.8',
+    url: mirrorURL,
+    fallbackUrls: [githubURL],
+    sha256: crypto.createHash('sha256').update(expectedInstaller).digest('hex'),
+    size: expectedInstaller.length,
+    notes: '',
+  });
+
+  assert.deepEqual(fs.readFileSync(result.filePath), expectedInstaller);
+  assert.deepEqual(requested, [mirrorURL, githubURL]);
+});
+
 test('checks for a newer version before downloading and reports download progress', async (t) => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
   t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));

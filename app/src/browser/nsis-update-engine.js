@@ -11,6 +11,15 @@ const kaiyueConfig = require('../../kaiyue-config.json');
 
 const STABLE_VERSION = /^(\d+)\.(\d+)\.(\d+)$/;
 
+class NonRetryableUpdateError extends Error {
+  constructor(code, message) {
+    super(message);
+    this.name = 'NonRetryableUpdateError';
+    this.code = code;
+    this.retryable = false;
+  }
+}
+
 function compareVersions(left, right) {
   const leftMatch = `${left || ''}`.match(STABLE_VERSION);
   const rightMatch = `${right || ''}`.match(STABLE_VERSION);
@@ -391,6 +400,11 @@ class NsisUpdateEngine extends EventEmitter {
         return await this.downloadFromURL(manifest, installerURLs[index]);
       } catch (error) {
         lastError = error;
+        // Every fallback URL is required to serve the exact same SHA-256. Once
+        // the bytes pass size and digest validation, a local trust failure
+        // cannot be repaired by downloading those same bytes from another
+        // host. Stop here instead of wasting a second full installer download.
+        if (error && error.retryable === false) throw error;
         const nextURL = installerURLs[index + 1];
         if (nextURL) {
           this.emit('download-retry', {
@@ -471,7 +485,10 @@ class NsisUpdateEngine extends EventEmitter {
         !this.verifyAuthenticode ||
         !(await this.verifyAuthenticode(installerPath, this.allowedPublishers))
       ) {
-        throw new Error('Downloaded update does not have a valid trusted code signature.');
+        throw new NonRetryableUpdateError(
+          'ERR_UPDATE_SIGNATURE_NOT_TRUSTED',
+          '更新包已下载并通过完整性校验，但 Windows 无法信任其代码签名。请先安装凯越邮箱内部信任证书，然后重试更新。'
+        );
       }
       return {
         filePath: installerPath,
@@ -516,4 +533,5 @@ module.exports = {
   requestHttpsStream,
   verifyAuthenticode,
   isTrustedAuthenticodeSignature,
+  NonRetryableUpdateError,
 };
