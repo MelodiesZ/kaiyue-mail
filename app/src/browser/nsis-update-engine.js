@@ -255,6 +255,19 @@ const defaultAllowedPublishers = [
   kaiyueConfig.brand.companyEnglish,
 ].filter(Boolean);
 
+function normalizeDistinguishedNameValue(value) {
+  let normalized = `${value || ''}`.replace(/""/g, '"').trim();
+  const outerQuotePairs = [
+    ['“', '”'],
+    ['‘', '’'],
+  ];
+  const matchingPair = outerQuotePairs.find(
+    ([opening, closing]) => normalized.startsWith(opening) && normalized.endsWith(closing)
+  );
+  if (matchingPair) normalized = normalized.slice(1, -1).trim();
+  return normalized.toLowerCase();
+}
+
 function hasAllowedAuthenticodePublisher(signature, allowedPublishers) {
   if (!signature) return false;
   const subjectValues = [];
@@ -263,7 +276,7 @@ function hasAllowedAuthenticodePublisher(signature, allowedPublishers) {
     /(?:^|,\s*)[a-z][a-z\d.]*=(?:"((?:[^"]|"")*)"|(.+?))(?=,\s*[a-z][a-z\d.]*=|$)/gi;
   let match;
   while ((match = fieldPattern.exec(subject))) {
-    subjectValues.push((match[1] || match[2] || '').replace(/""/g, '"').trim().toLowerCase());
+    subjectValues.push(normalizeDistinguishedNameValue(match[1] || match[2] || ''));
   }
   const trustedPublishers = allowedPublishers
     .map((publisher) => `${publisher || ''}`.trim().toLowerCase())
