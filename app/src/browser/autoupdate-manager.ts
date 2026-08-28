@@ -15,6 +15,7 @@ const IdleState = 'idle';
 const CheckingState = 'checking';
 const DownloadingState = 'downloading';
 const UpdateAvailableState = 'update-available';
+const UpdateReadyState = 'update-ready';
 const NoUpdateAvailableState = 'no-update-available';
 const UnsupportedState = 'unsupported';
 const ErrorState = 'error';
@@ -29,6 +30,8 @@ export default class AutoUpdateManager extends EventEmitter {
   feedURL: string;
   releaseNotes: string;
   releaseVersion: string;
+  downloadProgress = { percent: 0, transferred: 0, total: 0 };
+  updateError = '';
   installingUpdate = false;
 
   constructor(version: string, config: import('../config').default, specMode: boolean) {
@@ -112,7 +115,9 @@ export default class AutoUpdateManager extends EventEmitter {
     autoUpdater.on('error', (error) => {
       if (this.specMode) return;
       console.error(`Error Downloading Update: ${error.message}`);
+      this.updateError = error.message;
       this.setState(ErrorState);
+      this.emitUpdateStateEvent();
       if (this.installingUpdate) {
         dialog.showMessageBox({
           type: 'warning',
@@ -135,8 +140,27 @@ export default class AutoUpdateManager extends EventEmitter {
       this.setState(NoUpdateAvailableState);
     });
 
-    autoUpdater.on('update-available', () => {
+    autoUpdater.on('update-available', (_event, update) => {
+      if (update && typeof update === 'object' && update.version) {
+        this.releaseNotes = update.notes || localized('A new version is available!');
+        this.releaseVersion = update.version;
+        this.downloadProgress = { percent: 0, transferred: 0, total: update.size || 0 };
+        this.setState(UpdateAvailableState);
+        this.emitUpdateAvailableEvent();
+        this.emitUpdateStateEvent();
+        return;
+      }
       this.setState(DownloadingState);
+    });
+
+    autoUpdater.on('download-progress', (_event, detail) => {
+      this.downloadProgress = {
+        percent: detail.percent || 0,
+        transferred: detail.transferred || 0,
+        total: detail.total || 0,
+      };
+      this.setState(DownloadingState);
+      this.emitUpdateStateEvent();
     });
 
     autoUpdater.on(
@@ -144,8 +168,14 @@ export default class AutoUpdateManager extends EventEmitter {
       (_event: Electron.Event, releaseNotes: string, releaseVersion: string) => {
         this.releaseNotes = releaseNotes;
         this.releaseVersion = releaseVersion;
-        this.setState(UpdateAvailableState);
+        this.downloadProgress = {
+          percent: 100,
+          transferred: this.downloadProgress.total,
+          total: this.downloadProgress.total,
+        };
+        this.setState(UpdateReadyState);
         this.emitUpdateAvailableEvent();
+        this.emitUpdateStateEvent();
       }
     );
 
@@ -160,7 +190,7 @@ export default class AutoUpdateManager extends EventEmitter {
     //check every 30 minutes
     setInterval(
       () => {
-        if ([UpdateAvailableState, UnsupportedState].includes(this.state)) {
+        if ([UpdateAvailableState, UpdateReadyState, UnsupportedState].includes(this.state)) {
           console.log('Skipping update check... update ready to install, or updater unavailable.');
           return;
         }
@@ -190,6 +220,14 @@ export default class AutoUpdateManager extends EventEmitter {
     );
   }
 
+  emitUpdateStateEvent() {
+    global.application.windowManager.sendToAllWindows(
+      'update-state-changed',
+      {},
+      this.getReleaseDetails()
+    );
+  }
+
   setState(state: string) {
     if (this.state === state) {
       return;
@@ -204,19 +242,31 @@ export default class AutoUpdateManager extends EventEmitter {
 
   getReleaseDetails() {
     return {
+      state: this.state,
       releaseVersion: this.releaseVersion,
       releaseNotes: this.releaseNotes,
+      downloadProgress: this.downloadProgress,
+      error: this.updateError,
     };
   }
 
   check({ hidePopups }: { hidePopups?: boolean } = {}) {
     if (!autoUpdater || !this.feedURL) return;
+    this.updateError = '';
     this.updateFeedURL();
     if (!hidePopups) {
       autoUpdater.once('update-not-available', this.onUpdateNotAvailable);
       autoUpdater.once('error', this.onUpdateError);
     }
     autoUpdater.checkForUpdates();
+  }
+
+  download() {
+    if (!autoUpdater || this.state !== UpdateAvailableState) return;
+    if (typeof autoUpdater.downloadUpdate !== 'function') return;
+    this.setState(DownloadingState);
+    this.emitUpdateStateEvent();
+    autoUpdater.downloadUpdate();
   }
 
   install() {

@@ -193,13 +193,14 @@ export default class ApplicationMenu {
       case 'idle':
       case 'error':
       case 'no-update-available':
+      case 'update-available':
         checkForUpdateItem.visible = true;
         break;
       case 'checking':
       case 'downloading':
         downloadingUpdateItem.visible = true;
         break;
-      case 'update-available':
+      case 'update-ready':
         installUpdateItem.visible = true;
         break;
       default:

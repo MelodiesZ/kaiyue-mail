@@ -40,6 +40,8 @@ export default class WindowEventHandler {
 
     ipcRenderer.on('update-available', (event, detail) => AppEnv.updateAvailable(detail));
 
+    ipcRenderer.on('update-state-changed', (event, detail) => AppEnv.updateStateChanged(detail));
+
     ipcRenderer.on('browser-window-focus', () => {
       document.body.classList.remove('is-blurred');
       window.dispatchEvent(new Event('browser-window-focus'));

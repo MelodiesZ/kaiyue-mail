@@ -82,6 +82,57 @@ test('prepares a newer installer only after hash, size, and signature validation
   assert.deepEqual(signatures, [result.filePath]);
 });
 
+test('checks for a newer version before downloading and reports download progress', async (t) => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
+  t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));
+  const installer = Buffer.from('signed-kaiyue-installer');
+  const installerURL =
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.0.2/KaiyueMail-win32-x64-1.0.2.exe';
+  const requested = [];
+  const engine = new NsisUpdateEngine({
+    tempRoot,
+    requestStream: async (requestUrl) => {
+      requested.push(requestUrl);
+      if (requestUrl === installerURL) {
+        return Readable.from([installer.subarray(0, 8), installer.subarray(8)]);
+      }
+      return jsonStream({
+        schemaVersion: 1,
+        version: '1.0.2',
+        url: installerURL,
+        sha256: crypto.createHash('sha256').update(installer).digest('hex'),
+        size: installer.length,
+        notes: '企业邮箱安全更新',
+      });
+    },
+    verifyAuthenticode: async () => true,
+  });
+  const progress = [];
+  engine.on('download-progress', (detail) => progress.push(detail));
+
+  const update = await engine.check(
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json',
+    '1.0.1'
+  );
+
+  assert.equal(update.version, '1.0.2');
+  assert.equal(update.notes, '企业邮箱安全更新');
+  assert.deepEqual(requested, [
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json',
+  ]);
+
+  const prepared = await engine.download(update);
+
+  assert.deepEqual(fs.readFileSync(prepared.filePath), installer);
+  assert.equal(progress.at(-1).percent, 100);
+  assert.equal(progress.at(-1).transferred, installer.length);
+  assert.equal(progress.at(-1).total, installer.length);
+  assert.deepEqual(requested, [
+    'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json',
+    installerURL,
+  ]);
+});
+
 test('launches only an unchanged prepared installer as a detached silent update', async (t) => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
   t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));

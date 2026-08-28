@@ -141,3 +141,145 @@
   background-color: rgba(0, 0, 0, 0.2);
   box-shadow: none;
 }
+
+.kaiyue-update-dialog {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 34px 36px 28px;
+  color: @text-color;
+  background: @background-primary;
+  border-radius: @border-radius-large;
+
+  .update-dialog-brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 18px;
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    background: @accent-primary;
+    border-radius: 13px;
+    box-shadow: 0 8px 20px color-mix(in srgb, @accent-primary, transparent 72%);
+  }
+
+  .update-dialog-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+
+    h2 {
+      margin: 0;
+      color: @text-color-heading;
+      font-size: 21px;
+      font-weight: 650;
+      line-height: 1.3;
+    }
+  }
+
+  .update-dialog-version {
+    flex: none;
+    padding: 4px 9px;
+    color: @accent-primary;
+    font-size: @font-size-smaller;
+    font-weight: 600;
+    background: color-mix(in srgb, @accent-primary, transparent 90%);
+    border-radius: 999px;
+  }
+
+  .update-dialog-notes {
+    margin-top: 22px;
+    padding: 16px 18px;
+    background: @background-secondary;
+    border: 1px solid @border-color-divider;
+    border-radius: @border-radius-large;
+  }
+
+  .update-dialog-section-label {
+    margin-bottom: 8px;
+    color: @text-color-subtle;
+    font-size: @font-size-smaller;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .update-dialog-notes-content {
+    max-height: 112px;
+    overflow: auto;
+    color: @text-color;
+    line-height: 1.65;
+    white-space: pre-wrap;
+  }
+
+  .update-dialog-download {
+    margin-top: 22px;
+  }
+
+  .update-dialog-progress-copy,
+  .update-dialog-progress-size {
+    display: flex;
+    justify-content: space-between;
+    color: @text-color-subtle;
+    font-size: @font-size-smaller;
+  }
+
+  .update-dialog-progress-copy strong {
+    color: @text-color;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .update-dialog-progress-track {
+    height: 8px;
+    margin: 10px 0 8px;
+    overflow: hidden;
+    background: color-mix(in srgb, @accent-primary, transparent 88%);
+    border-radius: 999px;
+  }
+
+  .update-dialog-progress-fill {
+    height: 100%;
+    background: @accent-primary;
+    border-radius: inherit;
+    transition: width 180ms ease-out;
+  }
+
+  .update-dialog-status {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 20px;
+    padding: 14px 16px;
+    line-height: 1.5;
+    border-radius: @border-radius-large;
+
+    &.success {
+      color: @color-success;
+      background: color-mix(in srgb, @color-success, transparent 91%);
+    }
+
+    &.error {
+      color: @color-error;
+      background: color-mix(in srgb, @color-error, transparent 92%);
+    }
+  }
+
+  .update-dialog-actions {
+    position: absolute;
+    right: 36px;
+    bottom: 28px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+
+    .btn {
+      min-width: 96px;
+      height: 36px;
+      margin: 0;
+    }
+  }
+}

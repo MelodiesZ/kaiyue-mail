@@ -1000,6 +1000,14 @@ export default class AppEnvConstructor {
     this.emitter.emit('update-available', details);
   }
 
+  onUpdateStateChanged(callback) {
+    return this.emitter.on('update-state-changed', callback);
+  }
+
+  updateStateChanged(details) {
+    this.emitter.emit('update-state-changed', details);
+  }
+
   // Lets multiple components register beforeUnload callbacks.
   // The callbacks are expected to return either true or false.
   //

@@ -13,13 +13,27 @@ export default class AutoupdateImplWin32 extends AutoupdateImplBase {
     sha256: string;
     size: number;
   };
+  availableUpdate?: {
+    version: string;
+    url: string;
+    notes: string;
+    sha256: string;
+    size: number;
+  };
   pendingCheck?: Promise<void>;
+  pendingDownload?: Promise<void>;
 
   constructor(version: string) {
     super();
     this.version = version;
     this.engine = new NsisUpdateEngine();
-    this.engine.on('update-available', () => this.emit('update-available'));
+    this.engine.on('update-available', (update) => {
+      this.availableUpdate = update;
+      this.emit('update-available', {}, update);
+    });
+    this.engine.on('download-progress', (detail) => {
+      this.emit('download-progress', {}, detail);
+    });
   }
 
   supportsUpdates() {
@@ -35,12 +49,24 @@ export default class AutoupdateImplWin32 extends AutoupdateImplBase {
 
     this.emit('checking-for-update');
     this.pendingCheck = this.engine
-      .prepare(this.feedURL, this.version)
-      .then((update) => {
-        if (!update) {
+      .check(this.feedURL, this.version)
+      .then((availableUpdate) => {
+        if (!availableUpdate) {
           this.emit('update-not-available');
-          return;
         }
+      })
+      .catch(this.emitError)
+      .finally(() => {
+        this.pendingCheck = undefined;
+      });
+  }
+
+  downloadUpdate() {
+    if (!this.availableUpdate || this.pendingDownload || this.preparedUpdate) return;
+
+    this.pendingDownload = this.engine
+      .download(this.availableUpdate)
+      .then((update) => {
         this.preparedUpdate = update;
         this.emit(
           'update-downloaded',
@@ -51,7 +77,7 @@ export default class AutoupdateImplWin32 extends AutoupdateImplBase {
       })
       .catch(this.emitError)
       .finally(() => {
-        this.pendingCheck = undefined;
+        this.pendingDownload = undefined;
       });
   }
 

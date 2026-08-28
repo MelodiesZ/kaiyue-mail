@@ -219,7 +219,7 @@ class NsisUpdateEngine extends EventEmitter {
     this.processId = dependencies.processId || process.pid;
   }
 
-  async prepare(feedURL, currentVersion) {
+  async check(feedURL, currentVersion) {
     if (!this.requestStream) throw new Error('NSIS updater request adapter is unavailable.');
     requireHttps(feedURL, 'Update feed URL');
     const manifest = normalizeManifest(await readJsonStream(await this.requestStream(feedURL)));
@@ -227,6 +227,13 @@ class NsisUpdateEngine extends EventEmitter {
       return null;
     }
     this.emit('update-available', manifest);
+    return manifest;
+  }
+
+  async download(manifest) {
+    if (!manifest || typeof manifest.url !== 'string') {
+      throw new Error('A checked NSIS update manifest is required.');
+    }
 
     const updateDirectory = fs.mkdtempSync(path.join(this.tempRoot, 'KaiyueMailUpdate-'));
     const partialPath = path.join(
@@ -236,6 +243,17 @@ class NsisUpdateEngine extends EventEmitter {
     const installerPath = partialPath.slice(0, -5);
     const hash = crypto.createHash('sha256');
     let size = 0;
+    let lastReportedPercent = -1;
+    const reportProgress = () => {
+      const percent = Math.min(100, Math.floor((size / manifest.size) * 100));
+      if (percent === lastReportedPercent) return;
+      lastReportedPercent = percent;
+      this.emit('download-progress', {
+        percent,
+        transferred: size,
+        total: manifest.size,
+      });
+    };
     const verifier = new Transform({
       transform(chunk, _encoding, callback) {
         size += chunk.length;
@@ -244,11 +262,13 @@ class NsisUpdateEngine extends EventEmitter {
           return;
         }
         hash.update(chunk);
+        reportProgress();
         callback(null, chunk);
       },
     });
 
     try {
+      reportProgress();
       await pipeline(
         await this.requestStream(manifest.url),
         verifier,
@@ -278,6 +298,11 @@ class NsisUpdateEngine extends EventEmitter {
       fs.rmSync(updateDirectory, { recursive: true, force: true });
       throw error;
     }
+  }
+
+  async prepare(feedURL, currentVersion) {
+    const manifest = await this.check(feedURL, currentVersion);
+    return manifest ? this.download(manifest) : null;
   }
 
   async install(update) {

@@ -486,6 +486,10 @@ export default class Application extends EventEmitter {
       this.autoUpdateManager.check();
     });
 
+    this.on('application:download-update', () => {
+      this.autoUpdateManager.download();
+    });
+
     this.on('application:install-update', () => {
       this.autoUpdateManager.install();
     });
