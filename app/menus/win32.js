@@ -208,11 +208,6 @@ module.exports = {
     },
     { type: 'separator' },
     {
-      role: 'help',
-      label: localized('Help') + '...',
-      command: 'application:view-help',
-    },
-    {
       label: localized('Getting Started Guide') + '...',
       command: 'application:view-getting-started',
     },
