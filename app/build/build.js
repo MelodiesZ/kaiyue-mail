@@ -36,19 +36,7 @@ const tmpdir = path.resolve(os.tmpdir(), 'nylas-build');
 const packageJSON = require(path.join(appDir, 'package.json'));
 const rootPackageJSON = require(path.join(rootDir, 'package.json'));
 const kaiyueConfig = require(path.join(appDir, 'kaiyue-config.json'));
-const internalTrustConfig = require(path.join(appDir, 'internal-trust.json'));
 const { compilerOptions } = require(path.join(appDir, 'tsconfig.json'));
-
-const windowsInternalTrustResources = [
-  path.join(
-    appDir,
-    'build',
-    'windows-installer',
-    'certificates',
-    internalTrustConfig.certificateFileName
-  ),
-  path.join(rootDir, 'scripts', 'windows', internalTrustConfig.installScriptFileName),
-];
 
 function readSourceRevision() {
   if (process.env.KAIYUE_SOURCE_REVISION) {
@@ -410,7 +398,6 @@ function buildPackagerOptions() {
         ].join(',') +
         '}',
     },
-    extraResource: platform === 'win32' ? windowsInternalTrustResources : undefined,
     ignore: [
       // top level dirs we never want
       /^\/build.*/,

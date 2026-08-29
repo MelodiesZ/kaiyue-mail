@@ -67,7 +67,7 @@ npm run release:verify-windows-assets
 4. 将同一份 `kaiyue-update-win32-x64.json` 部署到站点根目录 `/www/wwwroot/kaiyue-mail/kaiyue-update-win32-x64.json`，对外地址必须是 `https://download.kaiyue-ai.com/kaiyue-update-win32-x64.json`。
 5. 确认固定清单的 HTTPS 响应为 `200`，内容与本地生成文件逐字节一致，再将同一份清单上传至 GitHub Release。不要发布指向尚未生效或证书错误的镜像清单。
 
-镜像只改变下载来源，不改变安全边界。客户端仍会验证清单声明的文件大小、SHA-256 和 Authenticode 发布者签名。
+镜像只改变下载来源。客户端会验证清单声明的文件大小和 SHA-256，不依赖 Windows 对 Authenticode 证书链的信任结果。发布流程仍必须使用固定的 `InternalSigning-Rotation-v2` 签名，并在上传前验证签名和发布者。
 
 ## 4. 手工发布
 

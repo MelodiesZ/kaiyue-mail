@@ -1,11 +1,9 @@
 /* eslint global-require: 0 */
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const asar = require('@electron/asar');
 const nodeAbi = require('node-abi');
 const rootPackage = require('../../package.json');
-const internalTrustConfig = require('../internal-trust.json');
 
 const appDir = path.resolve(
   process.argv[2] || path.join(__dirname, '..', 'dist', 'Kaiyue Mail-win32-x64')
@@ -41,14 +39,6 @@ const exePath = path.join(appDir, 'Kaiyue Mail.exe');
 const resourcesDir = path.join(appDir, 'resources');
 const asarPath = path.join(resourcesDir, 'app.asar');
 const unpackedDir = path.join(resourcesDir, 'app.asar.unpacked');
-const internalRootCertificatePath = path.join(
-  resourcesDir,
-  internalTrustConfig.certificateFileName
-);
-const internalRootInstallScriptPath = path.join(
-  resourcesDir,
-  internalTrustConfig.installScriptFileName
-);
 const mailsyncRuntimeDir = path.join(unpackedDir, 'mailspring-runtime');
 const mailsyncPath = path.join(mailsyncRuntimeDir, 'mailsync.exe');
 const sqlitePath = path.join(
@@ -83,13 +73,8 @@ mailsyncRuntimeFiles.forEach((name) => {
 });
 requirePE(sqlitePath, 'better_sqlite3.node');
 requireFile(asarPath, 'app.asar');
-requireFile(internalRootCertificatePath, 'internal root certificate');
-requireFile(internalRootInstallScriptPath, 'internal root install script');
 
 const config = JSON.parse(asar.extractFile(asarPath, 'kaiyue-config.json').toString());
-const packagedInternalTrustConfig = JSON.parse(
-  asar.extractFile(asarPath, 'internal-trust.json').toString()
-);
 const packagedApp = JSON.parse(asar.extractFile(asarPath, 'package.json').toString());
 const electronVersion = packagedApp.resolutions.electron;
 const expectedNativeModuleABI = Number(nodeAbi.getAbi(electronVersion, 'electron'));
@@ -107,11 +92,6 @@ const autoUpdateManager = asar
   .extractFile(asarPath, 'src/browser/autoupdate-manager.js')
   .toString();
 const nsisUpdateEngine = asar.extractFile(asarPath, 'src/browser/nsis-update-engine.js').toString();
-const internalRootInstallScript = fs.readFileSync(internalRootInstallScriptPath, 'utf8');
-const internalRootCertificateSha256 = crypto
-  .createHash('sha256')
-  .update(fs.readFileSync(internalRootCertificatePath))
-  .digest('hex');
 const mainWindowHTML = asar.extractFile(asarPath, 'static/index.html').toString();
 const migrationWindowHTML = asar.extractFile(asarPath, 'static/db-migration.html').toString();
 const vacuumWindowHTML = asar.extractFile(asarPath, 'static/db-vacuum.html').toString();
@@ -174,16 +154,14 @@ const checks = {
     autoUpdateManager.includes('autoupdate-impl-win32') &&
     autoUpdateManager.includes('distribution: process.platform') &&
     autoUpdateManager.includes("? 'nsis'") &&
-    nsisUpdateEngine.includes('Get-AuthenticodeSignature') &&
+    nsisUpdateEngine.includes('ERR_UPDATE_INTEGRITY_MISMATCH') &&
+    nsisUpdateEngine.includes("crypto.createHash('sha256')") &&
     nsisUpdateEngine.includes('/PARENT_PID='),
-  nsisAutomaticInternalTrust:
-    JSON.stringify(packagedInternalTrustConfig) === JSON.stringify(internalTrustConfig) &&
-    internalRootCertificateSha256 === internalTrustConfig.certificateSha256 &&
-    internalRootInstallScript.includes('X509Store') &&
-    internalRootInstallScript.includes('StoreLocation]::CurrentUser') &&
-    nsisUpdateEngine.includes('installInternalRoot') &&
-    nsisUpdateEngine.includes('ExpectedFileSha256') &&
-    nsisUpdateEngine.includes('canBootstrapInternalTrust'),
+  nsisCertificateIndependent:
+    !nsisUpdateEngine.includes('Get-AuthenticodeSignature') &&
+    !nsisUpdateEngine.includes('installInternalRoot') &&
+    !installerScript.includes('Install-KaiyueMailInternalRoot') &&
+    !installerBuildScript.includes('INTERNAL_ROOT_SHA256'),
   protocolRegistry:
     registryTemplate.includes('SOFTWARE\\Classes\\kaiyuemail') &&
     registryTemplate.includes('URL:Kaiyue Mail Protocol') &&

@@ -16,37 +16,19 @@ const certificatePath = path.join(
 );
 const expectedSha256 = '1a242d335668c4a06c912c40e173ca7afc2aeefe861c3167ae03c91f7d7c4d66';
 
-test('Windows installer embeds only the pinned public root certificate', () => {
-  assert.equal(fs.existsSync(certificatePath), true, 'embedded public root certificate is missing');
+test('legacy public root remains unchanged for release signing continuity', () => {
+  assert.equal(fs.existsSync(certificatePath), true, 'pinned public root certificate is missing');
   const actualSha256 = crypto
     .createHash('sha256')
     .update(fs.readFileSync(certificatePath))
     .digest('hex');
   assert.equal(actualSha256, expectedSha256);
-
-  const installerSource = fs.readFileSync(path.join(installerDirectory, 'installer.nsi'), 'utf8');
-  const trustScript = fs.readFileSync(
-    path.join(repositoryRoot, 'scripts', 'windows', 'Install-KaiyueMailInternalRoot.ps1'),
-    'utf8'
-  );
-  assert.match(installerSource, /KaiyueMail-Internal-Root-CA\.cer/);
-  assert.match(installerSource, /Install-KaiyueMailInternalRoot\.ps1/);
-  assert.match(installerSource, /-NonInteractive/);
-  assert.match(trustScript, /X509Store/);
-  assert.match(trustScript, /StoreName\]::Root/);
-  assert.match(trustScript, /StoreLocation\]::CurrentUser/);
-  assert.match(trustScript, /OpenFlags\]::ReadWrite/);
-  assert.match(trustScript, /\.Add\(\$certificate\)/);
-  assert.match(trustScript, /SHA256\]::Create\(\)/);
-  assert.doesNotMatch(trustScript, /Get-FileHash/);
-  assert.doesNotMatch(trustScript, /Import-Certificate/);
-  assert.doesNotMatch(trustScript, /Cert:\\CurrentUser\\Root/);
-  assert.doesNotMatch(installerSource, /LocalMachine/);
-  assert.doesNotMatch(trustScript, /LocalMachine/);
+  assert.equal(internalTrustConfig.certificateSha256, expectedSha256);
 });
 
-test('installer build rejects a replaced internal root certificate', () => {
-  const buildSource = fs.readFileSync(
+test('Windows installation and online update do not require certificate deployment', () => {
+  const installerSource = fs.readFileSync(path.join(installerDirectory, 'installer.nsi'), 'utf8');
+  const installerBuildSource = fs.readFileSync(
     path.join(repositoryRoot, 'app', 'build', 'build-windows-installer.js'),
     'utf8'
   );
@@ -54,13 +36,14 @@ test('installer build rejects a replaced internal root certificate', () => {
     path.join(repositoryRoot, 'app', 'build', 'build.js'),
     'utf8'
   );
-  assert.equal(internalTrustConfig.certificateSha256, expectedSha256);
-  assert.match(buildSource, /internalTrustConfig\.certificateSha256/);
-  assert.match(buildSource, /createHash\('sha256'\)/);
-  assert.match(buildSource, /-DINTERNAL_ROOT_SHA256/);
-  assert.match(buildSource, /internal root certificate/i);
-  assert.match(appBuildSource, /extraResource/);
-  assert.match(appBuildSource, /windowsInternalTrustResources/);
-  assert.match(appBuildSource, /internalTrustConfig\.certificateFileName/);
-  assert.match(appBuildSource, /internalTrustConfig\.installScriptFileName/);
+  const updaterSource = fs.readFileSync(
+    path.join(repositoryRoot, 'app', 'src', 'browser', 'nsis-update-engine.js'),
+    'utf8'
+  );
+  for (const source of [installerSource, installerBuildSource, appBuildSource, updaterSource]) {
+    assert.doesNotMatch(source, /Install-KaiyueMailInternalRoot/);
+    assert.doesNotMatch(source, /INTERNAL_ROOT_/);
+  }
+  assert.doesNotMatch(updaterSource, /Get-AuthenticodeSignature/);
+  assert.doesNotMatch(updaterSource, /ERR_UPDATE_SIGNATURE_NOT_TRUSTED/);
 });

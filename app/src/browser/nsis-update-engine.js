@@ -7,13 +7,8 @@ const os = require('os');
 const path = require('path');
 const { PassThrough, Transform } = require('stream');
 const { pipeline } = require('stream/promises');
-const kaiyueConfig = require('../../kaiyue-config.json');
-const internalTrustConfig = require('../../internal-trust.json');
 
 const STABLE_VERSION = /^(\d+)\.(\d+)\.(\d+)$/;
-const INTERNAL_ROOT_CERTIFICATE = internalTrustConfig.certificateFileName;
-const INTERNAL_ROOT_INSTALL_SCRIPT = internalTrustConfig.installScriptFileName;
-const INTERNAL_ROOT_SHA256 = internalTrustConfig.certificateSha256.toUpperCase();
 
 class NonRetryableUpdateError extends Error {
   constructor(code, message) {
@@ -250,11 +245,6 @@ function createElectronNetRequestStream(electronNet, options = {}) {
   };
 }
 
-const defaultAllowedPublishers = [
-  kaiyueConfig.brand.company,
-  kaiyueConfig.brand.companyEnglish,
-].filter(Boolean);
-
 function normalizeDistinguishedNameValue(value) {
   let normalized = `${value || ''}`.replace(/""/g, '"').trim();
   const outerQuotePairs = [
@@ -292,104 +282,6 @@ function isTrustedAuthenticodeSignature(signature, allowedPublishers) {
   );
 }
 
-function windowsPowerShellPath() {
-  const systemRoot = process.env.SystemRoot || 'C:\\Windows';
-  return path.join(
-    systemRoot,
-    'System32',
-    'WindowsPowerShell',
-    'v1.0',
-    'powershell.exe'
-  );
-}
-
-function inspectAuthenticode(installerPath) {
-  const script = [
-    '$signature = Get-AuthenticodeSignature -LiteralPath $args[0]',
-    '$subject = if ($null -ne $signature.SignerCertificate) { [string]$signature.SignerCertificate.Subject } else { "" }',
-    '$result = [PSCustomObject]@{ status = [string]$signature.Status; statusMessage = [string]$signature.StatusMessage; subject = $subject }',
-    '$result | ConvertTo-Json -Compress',
-  ].join('; ');
-  return new Promise((resolve) => {
-    childProcess.execFile(
-      windowsPowerShellPath(),
-      [
-        '-NoProfile',
-        '-NonInteractive',
-        '-ExecutionPolicy',
-        'RemoteSigned',
-        '-Command',
-        script,
-        installerPath,
-      ],
-      { windowsHide: true, timeout: 30000 },
-      (error, stdout) => {
-        if (error) {
-          resolve(null);
-          return;
-        }
-        try {
-          resolve(JSON.parse(stdout));
-        } catch {
-          resolve(null);
-        }
-      }
-    );
-  });
-}
-
-function installInternalRoot(resourcesPath = process.resourcesPath) {
-  if (!resourcesPath) return Promise.resolve(false);
-  const certificatePath = path.join(resourcesPath, INTERNAL_ROOT_CERTIFICATE);
-  const installScriptPath = path.join(resourcesPath, INTERNAL_ROOT_INSTALL_SCRIPT);
-  if (!fs.existsSync(certificatePath) || !fs.existsSync(installScriptPath)) {
-    return Promise.resolve(false);
-  }
-  return new Promise((resolve) => {
-    childProcess.execFile(
-      windowsPowerShellPath(),
-      [
-        '-NoLogo',
-        '-NoProfile',
-        '-NonInteractive',
-        '-ExecutionPolicy',
-        'Bypass',
-        '-File',
-        installScriptPath,
-        '-CertificatePath',
-        certificatePath,
-        '-ExpectedFileSha256',
-        INTERNAL_ROOT_SHA256,
-        '-NonInteractive',
-      ],
-      { windowsHide: true, timeout: 30000 },
-      (error) => resolve(!error)
-    );
-  });
-}
-
-function canBootstrapInternalTrust(signature, allowedPublishers) {
-  const status = `${signature?.status || ''}`.toLowerCase();
-  return (
-    (status === 'unknownerror' || status === 'nottrusted') &&
-    hasAllowedAuthenticodePublisher(signature, allowedPublishers)
-  );
-}
-
-async function verifyAuthenticode(
-  installerPath,
-  allowedPublishers = defaultAllowedPublishers,
-  dependencies = {}
-) {
-  const inspect = dependencies.inspectAuthenticode || inspectAuthenticode;
-  const installRoot = dependencies.installInternalRoot || installInternalRoot;
-  const signature = await inspect(installerPath);
-  if (isTrustedAuthenticodeSignature(signature, allowedPublishers)) return true;
-  if (!canBootstrapInternalTrust(signature, allowedPublishers)) return false;
-  if (!(await installRoot())) return false;
-  return isTrustedAuthenticodeSignature(await inspect(installerPath), allowedPublishers);
-}
-
 function spawnDetached(executable, args) {
   return new Promise((resolve, reject) => {
     const child = childProcess.spawn(executable, args, {
@@ -425,10 +317,8 @@ class NsisUpdateEngine extends EventEmitter {
   constructor(dependencies = {}) {
     super();
     this.requestStream = dependencies.requestStream || requestHttpsStream;
-    this.verifyAuthenticode = dependencies.verifyAuthenticode || verifyAuthenticode;
     this.tempRoot = dependencies.tempRoot || os.tmpdir();
     this.spawnDetached = dependencies.spawnDetached || spawnDetached;
-    this.allowedPublishers = dependencies.allowedPublishers || defaultAllowedPublishers;
     this.processId = dependencies.processId || process.pid;
   }
 
@@ -570,15 +460,6 @@ class NsisUpdateEngine extends EventEmitter {
         );
       }
       fs.renameSync(partialPath, installerPath);
-      if (
-        !this.verifyAuthenticode ||
-        !(await this.verifyAuthenticode(installerPath, this.allowedPublishers))
-      ) {
-        throw new NonRetryableUpdateError(
-          'ERR_UPDATE_SIGNATURE_NOT_TRUSTED',
-          '更新包已下载并通过完整性校验，但 Windows 无法信任其代码签名。请先安装凯越邮箱内部信任证书，然后重试更新。'
-        );
-      }
       return {
         filePath: installerPath,
         version: manifest.version,
@@ -628,7 +509,6 @@ module.exports = {
   normalizeInstalledVersion,
   normalizeManifest,
   requestHttpsStream,
-  verifyAuthenticode,
   isTrustedAuthenticodeSignature,
   NonRetryableUpdateError,
 };

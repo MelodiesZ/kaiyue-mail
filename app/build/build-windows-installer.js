@@ -1,7 +1,6 @@
 /* eslint global-require: 0 */
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 
 const rootDir = path.resolve(__dirname, '..', '..');
@@ -12,9 +11,6 @@ const installerScript = path.join(installerDir, 'installer.nsi');
 const outputFile = path.join(appDir, 'dist', 'KaiyueMailSetup.exe');
 const packageJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
 const kaiyueConfig = JSON.parse(fs.readFileSync(path.join(appDir, 'kaiyue-config.json'), 'utf8'));
-const internalTrustConfig = JSON.parse(
-  fs.readFileSync(path.join(appDir, 'internal-trust.json'), 'utf8')
-);
 const productVersion = packageJson.version;
 const versionParts = productVersion.split('.');
 if (!/^\d+\.\d+\.\d+$/.test(productVersion)) {
@@ -29,12 +25,6 @@ const canonicalProductIcon = path.join(
   'kaiyue-mail-icon.png'
 );
 const installerProductIcon = path.join(installerDir, 'assets', 'kaiyue-mail-icon.png');
-const internalRootCertificate = path.join(
-  installerDir,
-  'certificates',
-  internalTrustConfig.certificateFileName
-);
-const expectedInternalRootSha256 = internalTrustConfig.certificateSha256.toLowerCase();
 const required = [
   path.join(packageDir, 'Kaiyue Mail.exe'),
   path.join(packageDir, 'resources', 'app.asar'),
@@ -45,8 +35,6 @@ const required = [
   path.join(installerDir, 'assets', 'installer-sidebar-background-v2.prompt.md'),
   path.join(installerDir, 'assets', 'installer-sidebar.bmp'),
   path.join(installerDir, 'assets', 'installer-header.bmp'),
-  internalRootCertificate,
-  path.join(rootDir, 'scripts', 'windows', internalTrustConfig.installScriptFileName),
 ];
 
 for (const file of required) {
@@ -57,16 +45,6 @@ for (const file of required) {
 
 if (!fs.readFileSync(canonicalProductIcon).equals(fs.readFileSync(installerProductIcon))) {
   throw new Error('Windows installer artwork is not using the canonical Kaiyue Mail icon.');
-}
-
-const actualInternalRootSha256 = crypto
-  .createHash('sha256')
-  .update(fs.readFileSync(internalRootCertificate))
-  .digest('hex');
-if (actualInternalRootSha256 !== expectedInternalRootSha256) {
-  throw new Error(
-    `Windows installer internal root certificate does not match the pinned certificate: ${actualInternalRootSha256}`
-  );
 }
 
 execFileSync(process.execPath, [path.join(__dirname, 'verify-windows-package.js'), packageDir], {
@@ -100,7 +78,6 @@ execFileSync(
     `-DPRODUCT_VERSION_QUAD=${productVersionQuad}`,
     `-DPRODUCT_PUBLISHER=${kaiyueConfig.brand.company}`,
     `-DPRODUCT_POSITIONING=${kaiyueConfig.brand.positioning}`,
-    `-DINTERNAL_ROOT_SHA256=${expectedInternalRootSha256.toUpperCase()}`,
     installerScript,
   ],
   { cwd: installerDir, stdio: 'inherit' }

@@ -10,7 +10,6 @@ const {
   NsisUpdateEngine,
   createElectronNetRequestStream,
   isTrustedAuthenticodeSignature,
-  verifyAuthenticode,
 } = require('../app/src/browser/nsis-update-engine');
 
 function jsonStream(value) {
@@ -108,7 +107,6 @@ test('does not download an installer when the published version is not newer', a
         size: 10,
       });
     },
-    verifyAuthenticode: async () => true,
   });
 
   const result = await engine.prepare(
@@ -120,14 +118,14 @@ test('does not download an installer when the published version is not newer', a
   assert.equal(requested.length, 1);
 });
 
-test('prepares a newer installer only after hash, size, and signature validation', async (t) => {
+test('prepares a newer installer after size and SHA-256 validation without requiring certificate trust', async (t) => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
   t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));
   const installer = Buffer.from('signed-kaiyue-installer');
   const installerURL =
     'https://github.com/MelodiesZ/kaiyue-mail/releases/download/v1.0.2/KaiyueMail-win32-x64-1.0.2.exe';
   const requested = [];
-  const signatures = [];
+  let authenticodeChecks = 0;
   const engine = new NsisUpdateEngine({
     tempRoot,
     requestStream: async (requestUrl) => {
@@ -142,9 +140,9 @@ test('prepares a newer installer only after hash, size, and signature validation
         notes: '企业邮箱安全更新',
       });
     },
-    verifyAuthenticode: async (installerPath) => {
-      signatures.push(installerPath);
-      return true;
+    verifyAuthenticode: async () => {
+      authenticodeChecks += 1;
+      return false;
     },
   });
 
@@ -160,7 +158,7 @@ test('prepares a newer installer only after hash, size, and signature validation
     'https://github.com/MelodiesZ/kaiyue-mail/releases/latest/download/kaiyue-update-win32-x64.json',
     installerURL,
   ]);
-  assert.deepEqual(signatures, [result.filePath]);
+  assert.equal(authenticodeChecks, 0);
 });
 
 test('falls back to GitHub when the primary update mirror cannot download the installer', async (t) => {
@@ -186,7 +184,6 @@ test('falls back to GitHub when the primary update mirror cannot download the in
         size: installer.length,
       });
     },
-    verifyAuthenticode: async () => true,
   });
 
   const result = await engine.prepare(
@@ -202,7 +199,7 @@ test('falls back to GitHub when the primary update mirror cannot download the in
   ]);
 });
 
-test('does not redownload a byte-identical fallback after signature validation fails', async (t) => {
+test('does not reject or redownload an intact installer when Windows does not trust its signature', async (t) => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaiyue-update-test-'));
   t.after(() => fs.rmSync(tempRoot, { recursive: true, force: true }));
   const installer = Buffer.from('downloaded-completely-but-signature-is-not-trusted');
@@ -221,24 +218,18 @@ test('does not redownload a byte-identical fallback after signature validation f
   });
   engine.on('download-progress', (detail) => progress.push(detail));
 
-  await assert.rejects(
-    engine.download({
-      version: '1.0.8',
-      url: mirrorURL,
-      fallbackUrls: [githubURL],
-      sha256: crypto.createHash('sha256').update(installer).digest('hex'),
-      size: installer.length,
-      notes: '',
-    }),
-    (error) => {
-      assert.equal(error.code, 'ERR_UPDATE_SIGNATURE_NOT_TRUSTED');
-      assert.match(error.message, /内部信任证书/);
-      return true;
-    }
-  );
+  const result = await engine.download({
+    version: '1.0.8',
+    url: mirrorURL,
+    fallbackUrls: [githubURL],
+    sha256: crypto.createHash('sha256').update(installer).digest('hex'),
+    size: installer.length,
+    notes: '',
+  });
 
   assert.deepEqual(requested, [mirrorURL]);
   assert.equal(progress.filter((detail) => detail.percent === 100).length, 1);
+  assert.deepEqual(fs.readFileSync(result.filePath), installer);
 });
 
 test('does not redownload a byte-complete mirror response when its digest is corrupted', async (t) => {
@@ -257,7 +248,6 @@ test('does not redownload a byte-complete mirror response when its digest is cor
       requested.push(requestUrl);
       return Readable.from([requestUrl === mirrorURL ? corruptedInstaller : expectedInstaller]);
     },
-    verifyAuthenticode: async () => true,
   });
 
   await assert.rejects(
@@ -303,7 +293,6 @@ test('checks for a newer version before downloading and reports download progres
         notes: '企业邮箱安全更新',
       });
     },
-    verifyAuthenticode: async () => true,
   });
   const progress = [];
   engine.on('download-progress', (detail) => progress.push(detail));
@@ -384,7 +373,6 @@ test('reports transferred bytes before a large installer reaches one percent', a
           yield remainingChunk;
         })()
       ),
-    verifyAuthenticode: async () => true,
   });
   const progress = [];
   engine.on('download-progress', (detail) => progress.push(detail));
@@ -419,7 +407,6 @@ test('launches only an unchanged prepared installer as a detached silent update'
     requestStream: async () => {
       throw new Error('not used');
     },
-    verifyAuthenticode: async () => true,
     processId: 4242,
     spawnDetached: async (executable, args) => launches.push({ executable, args }),
   });
@@ -464,7 +451,6 @@ test('stops a download as soon as it exceeds the manifest size', async (t) => {
         size: 10,
       });
     },
-    verifyAuthenticode: async () => true,
   });
 
   await assert.rejects(
@@ -533,79 +519,4 @@ test('trusts only a valid Authenticode signature from an allowed company publish
     ),
     false
   );
-});
-
-test('installs the pinned internal root and retries an untrusted company signature', async () => {
-  const allowed = ['Mengyin Kaiyue Construction Machinery Co., Ltd.'];
-  const companySubject =
-    'CN=Mengyin Kaiyue Construction Machinery Co., Ltd., O=Mengyin Kaiyue Construction Machinery Co., Ltd.';
-  const signatures = [
-    {
-      status: 'UnknownError',
-      statusMessage:
-        'A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider.',
-      subject: companySubject,
-    },
-    { status: 'Valid', statusMessage: 'Signature verified.', subject: companySubject },
-  ];
-  const events = [];
-
-  const trusted = await verifyAuthenticode('KaiyueMailSetup.exe', allowed, {
-    inspectAuthenticode: async () => {
-      events.push('inspect');
-      return signatures.shift();
-    },
-    installInternalRoot: async () => {
-      events.push('install-root');
-      return true;
-    },
-  });
-
-  assert.equal(trusted, true);
-  assert.deepEqual(events, ['inspect', 'install-root', 'inspect']);
-});
-
-test('does not install internal trust for an unrelated publisher', async () => {
-  const events = [];
-  const trusted = await verifyAuthenticode(
-    'UnrelatedSetup.exe',
-    ['Mengyin Kaiyue Construction Machinery Co., Ltd.'],
-    {
-      inspectAuthenticode: async () => ({
-        status: 'NotTrusted',
-        statusMessage: 'The certificate is not trusted.',
-        subject: 'CN=Unrelated Software Vendor, O=Unrelated Software Vendor',
-      }),
-      installInternalRoot: async () => {
-        events.push('install-root');
-        return true;
-      },
-    }
-  );
-
-  assert.equal(trusted, false);
-  assert.deepEqual(events, []);
-});
-
-test('does not install internal trust for a damaged company-signed installer', async () => {
-  const events = [];
-  const trusted = await verifyAuthenticode(
-    'DamagedKaiyueMailSetup.exe',
-    ['Mengyin Kaiyue Construction Machinery Co., Ltd.'],
-    {
-      inspectAuthenticode: async () => ({
-        status: 'HashMismatch',
-        statusMessage: 'The contents of the file do not match its signature.',
-        subject:
-          'CN=Mengyin Kaiyue Construction Machinery Co., Ltd., O=Mengyin Kaiyue Construction Machinery Co., Ltd.',
-      }),
-      installInternalRoot: async () => {
-        events.push('install-root');
-        return true;
-      },
-    }
-  );
-
-  assert.equal(trusted, false);
-  assert.deepEqual(events, []);
 });
