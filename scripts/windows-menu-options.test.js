@@ -35,3 +35,13 @@ test('Windows options menu hides developer options', () => {
     /label: localized\('Toggle Dev Tools'\),\s*visible: false,/
   );
 });
+
+test('Windows options menu omits the community entry', () => {
+  const menuSource = fs.readFileSync(
+    path.join(repositoryRoot, 'app', 'menus', 'win32.js'),
+    'utf8'
+  );
+
+  assert.doesNotMatch(menuSource, /localized\('Mailspring Community'\)/);
+  assert.doesNotMatch(menuSource, /application:view-community/);
+});
